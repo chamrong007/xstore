@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>xstore - Microsoft License Reseller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f3f4f6);
+            --text-color: var(--tg-theme-text-color, #111827);
+            --hint-color: var(--tg-theme-hint-color, #9ca3af);
+            --button-color: var(--tg-theme-button-color, #3b82f6);
+            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #ffffff);
+        }
+        html.dark {
+             --bg-color: #182230;
+             --text-color: #ffffff;
+             --hint-color: #9ca3af;
+             --secondary-bg-color: #212d3f;
+        }
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .card {
+            background-color: var(--secondary-bg-color);
+        }
+        .text-hint {
+            color: var(--hint-color);
+        }
+        .btn-primary {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+        }
+        .input-field {
+             background-color: var(--bg-color);
+             border-color: var(--hint-color);
+        }
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #invoice-print-area, #invoice-print-area * {
+                visibility: visible;
+            }
+            #invoice-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+             <div class="absolute top-4 right-4 flex items-center gap-4">
+                <button id="theme-toggle-btn" class="text-hint hover:text-yellow-500 transition-colors"><i class="fas fa-sun text-2xl"></i></button>
+            </div>
+            <div class="flex justify-center items-center gap-2 pt-8">
+                <!-- SVG Logo -->
+                <svg class="h-10 w-10 sm:h-12 sm:w-12" style="color: var(--tg-theme-button-color, #3b82f6)" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g stroke-width="10" stroke-linecap="butt">
+                      <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
+                      <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
+                      <circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/>
+                      <circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/>
+                      <circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/>
+                      <circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/>
+                    </g>
+                    <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="currentColor">X</text>
+                </svg>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-wider" style="color: var(--tg-theme-button-color, #3b82f6)">xstore</h1>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-bold mt-4">Microsoft License Store</h2>
+            <p class="text-hint mt-2">Your one-stop shop for Microsoft licensing solutions.</p>
+        </header>
+        
+        <div class="bg-red-600 text-white text-center p-4 rounded-lg shadow-lg mb-12 animate-pulse">
+            <h3 class="text-xl sm:text-2xl font-bold"><i class="fas fa-gift mr-2"></i>New Year Promotion! 50% Off All Licenses!</h3>
+        </div>
+
+        <div class="flex flex-col">
+            <main class="w-full">
+                <div id="product-grid" class="grid grid-cols-1 gap-6">
+                    <!-- Product cards will be injected here -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <footer class="mt-16 py-8 border-t" style="border-color: var(--hint-color, #d1d5db); background-color: var(--secondary-bg-color);">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-hint">
+                 <div class="flex items-center gap-2">
+                    <svg class="h-8 w-8" style="color: var(--tg-theme-button-color, #3b82f6)" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g stroke-width="10" stroke-linecap="butt">
+                          <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
+                          <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
+                          <circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/>
+                          <circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/>
+                          <circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/>
+                          <circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/>
+                        </g>
+                        <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="currentColor">X</text>
+                    </svg>
+                    <h3 class="text-lg font-bold tracking-wider" style="color: var(--tg-theme-button-color, #3b82f6)">xstore</h3>
+                </div>
+                <a href="tel:069339369" class="hover:underline"><i class="fas fa-phone-alt mr-1"></i>069339369</a>
+                <a href="mailto:chamrong@outlook.com" class="hover:underline"><i class="fas fa-envelope mr-1"></i>chamrong@outlook.com</a>
+                <span><i class="fas fa-map-marker-alt mr-1"></i>#60E0z, St108, Wat Phnom, Doun Penh, Phnom Penh.</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Floating Cart Button -->
+    <button id="floating-cart-btn" class="fixed bottom-6 right-6 btn-primary rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform hidden">
+        <i class="fas fa-shopping-cart text-2xl"></i>
+        <span id="cart-badge" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center border-2" style="border-color: var(--secondary-bg-color)">0</span>
+    </button>
+    
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-40">
+        <div class="card rounded-lg shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-lg">
+             <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Your Shopping Cart</h2>
+                    <button id="close-cart-modal" class="text-hint hover:text-red-500 text-2xl">&times;</button>
+                </div>
+                <div id="cart-modal-items" class="mb-4"></div>
+                <div class="border-t pt-4" style="border-color: var(--tg-theme-hint-color, #d1d5db)">
+                    <div class="flex justify-between items-center text-xl font-bold">
+                        <span>Total:</span>
+                        <span id="cart-modal-total">$0.00</span>
+                    </div>
+                    <button id="cart-checkout-btn" class="w-full btn-primary py-3 rounded-lg mt-4 hover:opacity-90 transition-opacity disabled:opacity-50">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="card rounded-lg shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-md">
+            <div class="p-8">
+                <h3 class="text-2xl font-bold mb-4 text-center">Checkout</h3>
+            
+                <div id="modal-summary" class="mb-6 border-b pb-4" style="border-color: var(--tg-theme-hint-color, #d1d5db)"></div>
+                
+                <h4 class="text-lg font-semibold mb-3">Customer Information</h4>
+                <div class="space-y-4 mb-6">
+                    <input type="text" id="customer-name" placeholder="Full Name (Required)" class="input-field w-full p-2 border rounded" required>
+                    <input type="email" id="customer-email" placeholder="Email Address" class="input-field w-full p-2 border rounded">
+                    <input type="tel" id="customer-phone" placeholder="Phone: 012 345 678 (Required)" class="input-field w-full p-2 border rounded" required>
+                </div>
+
+                 <div class="flex justify-between items-center text-lg font-bold mb-6">
+                    <span>Total:</span>
+                    <span id="modal-total">$0.00</span>
+                </div>
+
+                <h4 class="text-lg font-semibold mb-3">Payment Method</h4>
+                <div class="text-center p-4 border rounded-lg mb-6" style="border-color: var(--tg-theme-hint-color, #d1d5db)">
+                    <p class="text-sm text-hint mb-4">Click the button below to open the ABA Bank payment page.</p>
+                    <a href="https://pay.ababank.com/7rsCzaBQujud8YmbA" target="_blank" class="inline-block bg-blue-700 text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity">
+                       <i class="fas fa-external-link-alt mr-2"></i> Pay with ABA Bank
+                    </a>
+                </div>
+
+                <div id="payment-message" class="hidden text-center p-3 rounded-lg mb-4"></div>
+
+                <div class="sticky bottom-0 pt-4 pb-8 -mx-8 px-8" style="background-color: var(--secondary-bg-color)">
+                    <button id="pay-btn" class="w-full btn-primary py-2 rounded-lg hover:opacity-90 transition-opacity">
+                        Confirm Payment & Close
+                    </button>
+                     <button id="cancel-payment-btn" class="w-full py-2 rounded-lg hover:opacity-80 transition-opacity mt-2" style="background-color: var(--tg-theme-secondary-bg-color); color: var(--tg-theme-text-color)">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Invoice View -->
+    <div id="invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="card rounded-lg shadow-xl flex flex-col max-h-[90vh] w-full max-w-2xl">
+            <div id="invoice-print-area" class="overflow-y-auto p-8">
+                 <!-- Invoice content will be generated here -->
+            </div>
+            <div class="p-4 border-t flex justify-end gap-2" style="border-color: var(--hint-color, #d1d5db)">
+                <button id="send-invoice-telegram-btn" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:opacity-90 flex items-center gap-2">
+                     <i class="fab fa-telegram-plane"></i> Send to Telegram
+                </button>
+                <button id="print-invoice-btn" class="btn-primary px-4 py-2 rounded-lg hover:opacity-90 flex items-center gap-2">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button id="close-invoice-btn" class="px-4 py-2 rounded-lg hover:opacity-80" style="background-color: var(--secondary-bg-color); color: var(--text-color)">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            
+            // --- Theme Setup ---
+            const applyTheme = (isDark) => {
+                document.documentElement.classList.toggle('dark', isDark);
+                document.getElementById('theme-toggle-btn').innerHTML = isDark ? '<i class="fas fa-moon text-2xl"></i>' : '<i class="fas fa-sun text-2xl"></i>'
+            };
+
+            const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(tg.colorScheme === 'dark' || (tg.colorScheme === 'light' ? false : preferDark));
+            
+            tg.onEvent('themeChanged', () => {
+                 applyTheme(tg.isDark);
+            });
+            
+            document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+                applyTheme(!document.documentElement.classList.contains('dark'));
+            });
+
+            const products = [
+                { id: 1, name: 'Microsoft 365 Business Basic', price: 60.00, category: 'Microsoft 365', description: 'Web and mobile versions of Office apps, plus chat, calling, and meetings.' },
+                { id: 2, name: 'Microsoft 365 Business Standard', price: 99.50, category: 'Microsoft 365', description: 'Everything in Basic, plus desktop versions of Office apps.' },
+                { id: 3, name: 'Microsoft 365 Business Premium', price: 199.00, category: 'Microsoft 365', description: 'Everything in Standard, plus advanced security and device management.' },
+                { id: 4, name: 'Windows 11 Pro', price: 199.99, category: 'Windows', description: 'For professionals and businesses. Includes all the features of Windows 11 Home, plus enterprise-grade security.' },
+                { id: 5, name: 'Windows Server 2022 Standard', price: 1069.00, category: 'Server', description: 'For physically or minimally virtualized environments.' },
+                { id: 6, name: 'SQL Server 2019 Standard', price: 3586.00, category: 'Server', description: 'For mid-tier applications and data marts.' },
+            ];
+            
+            const DISCOUNT_RATE = 0.5;
+
+            const productGrid = document.getElementById('product-grid');
+            
+            const checkoutModal = document.getElementById('checkout-modal');
+            const cartModal = document.getElementById('cart-modal');
+            const invoiceModal = document.getElementById('invoice-modal');
+            const invoicePrintArea = document.getElementById('invoice-print-area');
+
+
+            const floatingCartBtn = document.getElementById('floating-cart-btn');
+            const cartBadge = document.getElementById('cart-badge');
+            const cartModalItems = document.getElementById('cart-modal-items');
+            const cartModalTotal = document.getElementById('cart-modal-total');
+            const closeCartModalBtn = document.getElementById('close-cart-modal');
+            const cartCheckoutBtn = document.getElementById('cart-checkout-btn');
+
+            const customerNameInput = document.getElementById('customer-name');
+            const customerEmailInput = document.getElementById('customer-email');
+            const customerPhoneInput = document.getElementById('customer-phone');
+            const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+            const modalSummary = document.getElementById('modal-summary');
+            const modalTotal = document.getElementById('modal-total');
+            const payBtn = document.getElementById('pay-btn');
+            const paymentMessage = document.getElementById('payment-message');
+            
+            let cart = [];
+
+            function validateEmail(email) {
+                if (email.trim() === '') return true;
+                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            function validateCambodianPhone(phone) {
+                const re = /^(?:\+855|0)[1-9]\d{7,8}$/;
+                return re.test(phone.replace(/[\s-]/g, ''));
+            }
+
+            function renderProducts() {
+                productGrid.innerHTML = '';
+                products.forEach(product => {
+                    const discountedPrice = product.price * DISCOUNT_RATE;
+                    const productCard = `
+                        <div class="card p-6 rounded-lg shadow-md flex flex-col">
+                            <h3 class="text-xl font-semibold mb-2">${product.name}</h3>
+                            <p class="text-hint mb-2">${product.category}</p>
+                            <p class="mb-4 flex-grow">${product.description}</p>
+                            <div class="flex justify-between items-center mt-auto">
+                                <div>
+                                    <span class="text-hint line-through text-lg">$${product.price.toFixed(2)}</span>
+                                    <span class="text-2xl font-bold text-red-600 ml-2">$${discountedPrice.toFixed(2)}</span>
+                                </div>
+                                <button data-id="${product.id}" class="add-to-cart-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>Add
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    productGrid.innerHTML += productCard;
+                });
+            }
+
+            function renderCart() {
+                cartModalItems.innerHTML = '';
+                let total = 0;
+                let itemCount = 0;
+
+                if (cart.length === 0) {
+                    cartModalItems.innerHTML = `<p class="text-hint">Your cart is empty.</p>`;
+                    cartCheckoutBtn.disabled = true;
+                    floatingCartBtn.classList.add('hidden');
+                } else {
+                    floatingCartBtn.classList.remove('hidden');
+                    cartCheckoutBtn.disabled = false;
+                    cart.forEach(item => {
+                        itemCount += item.quantity;
+                        total += item.currentPrice * item.quantity;
+                        const cartItem = `
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex-grow">
+                                    <p class="font-semibold">${item.name}</p>
+                                    <p class="text-sm text-hint">$${item.currentPrice.toFixed(2)}</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="number" min="1" value="${item.quantity}" data-id="${item.id}" class="quantity-input w-16 text-center border rounded-md mx-2 input-field">
+                                </div>
+                                <p class="font-bold w-24 text-right">$${(item.currentPrice * item.quantity).toFixed(2)}</p>
+                            </div>
+                        `;
+                        cartModalItems.innerHTML += cartItem;
+                    });
+                }
+                cartBadge.textContent = itemCount;
+                cartModalTotal.textContent = `$${total.toFixed(2)}`;
+            }
+            
+            function updateCartQuantity(productId, quantity) {
+                 const cartItem = cart.find(item => item.id === productId);
+                 if (cartItem) {
+                    cartItem.quantity = quantity;
+                 }
+                 renderCart();
+            }
+
+            function addToCart(productId) {
+                const product = products.find(p => p.id === productId);
+                const discountedPrice = product.price * DISCOUNT_RATE;
+                const cartItem = cart.find(item => item.id === productId);
+
+                if (cartItem) {
+                    cartItem.quantity++;
+                } else {
+                    cart.push({ ...product, quantity: 1, currentPrice: discountedPrice });
+                }
+                renderCart();
+            }
+            
+            function resetCheckoutView() {
+                paymentMessage.classList.add('hidden');
+                payBtn.textContent = "Confirm Payment & Close";
+                payBtn.disabled = false;
+                if (tg.initDataUnsafe.user) {
+                     customerNameInput.value = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''}`.trim();
+                } else {
+                    customerNameInput.value = '';
+                }
+                customerEmailInput.value = '';
+                customerPhoneInput.value = '';
+                customerNameInput.classList.remove('input-error');
+                customerEmailInput.classList.remove('input-error');
+                customerPhoneInput.classList.remove('input-error');
+            }
+
+            function generateInvoiceText() {
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+                const discountAmount = subtotal - total;
+                const now = new Date();
+                const invoiceNumber = Math.floor(Math.random() * 900000) + 100000;
+                const issueDate = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                
+                 let itemsText = cart.map(item => 
+                    `${item.name} (Qty: ${item.quantity}) - $${(item.currentPrice * item.quantity).toFixed(2)}`
+                ).join('\n');
+
+                return `
+*New Order from xstore*
+=========================
+*Invoice #:* ${invoiceNumber}
+*Date:* ${issueDate}
+
+*Customer:*
+Name: ${customerNameInput.value.trim()}
+Phone: ${customerPhoneInput.value.trim()}
+Email: ${customerEmailInput.value.trim() || 'N/A'}
+Telegram User: @${tg.initDataUnsafe.user?.username || 'N/A'}
+
+*Order Details:*
+${itemsText}
+---------------------------------
+*Subtotal:* $${subtotal.toFixed(2)}
+*Discount (50%):* -$${discountAmount.toFixed(2)}
+*TOTAL: $${total.toFixed(2)}*
+---------------------------------
+Payment confirmed via ABA Bank.
+                `;
+            }
+
+            function showInvoice() {
+                const now = new Date();
+                const invoiceNumber = Math.floor(Math.random() * 900000) + 100000;
+                const issueDate = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                const issueTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
+                
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+                const discountAmount = subtotal - total;
+
+                const customerName = customerNameInput.value;
+                const customerEmail = customerEmailInput.value;
+                const customerPhone = customerPhoneInput.value;
+
+
+                let itemsHtml = '';
+                cart.forEach(item => {
+                    itemsHtml += `
+                        <tr class="border-b" style="border-color: var(--hint-color, #d1d5db)">
+                            <td class="py-2 pr-2">${item.name}</td>
+                            <td class="py-2 text-center">${item.quantity}</td>
+                            <td class="py-2 text-right">$${item.price.toFixed(2)}</td>
+                            <td class="py-2 text-right">$${item.currentPrice.toFixed(2)}</td>
+                            <td class="py-2 text-right pl-2">$${(item.currentPrice * item.quantity).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+                
+                invoicePrintArea.innerHTML = `
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="text-left">
+                            <div class="flex items-center gap-2 mb-2">
+                                 <svg class="h-12 w-12" style="color: var(--tg-theme-button-color, #3b82f6)" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g stroke-width="10" stroke-linecap="butt">
+                                      <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
+                                      <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
+                                      <circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/>
+                                      <circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/>
+                                      <circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/>
+                                      <circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/>
+                                    </g>
+                                    <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="currentColor">X</text>
+                                </svg>
+                                <div>
+                                    <h1 class="text-2xl font-bold tracking-wider" style="color: var(--tg-theme-button-color, #3b82f6)">xstore</h1>
+                                </div>
+                            </div>
+                             <div class="text-xs text-hint space-y-1">
+                                 <p><i class="fas fa-phone-alt mr-1"></i>069339369</p>
+                                 <p><i class="fas fa-envelope mr-1"></i>chamrong@outlook.com</p>
+                                 <p><i class="fas fa-map-marker-alt mr-1"></i>#60E0z, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-2xl font-bold uppercase">Invoice</h2>
+                            <p>#${invoiceNumber}</p>
+                            <p>Date: ${issueDate}</p>
+                            <p>Time: ${issueTime}</p>
+                        </div>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="font-bold mb-1">Bill To:</h3>
+                        <p>${customerName}</p>
+                        <p>${customerEmail || 'N/A'}</p>
+                        <p>${customerPhone}</p>
+                    </div>
+                    <table class="w-full mb-8 text-sm">
+                        <thead>
+                            <tr style="background-color: var(--bg-color)">
+                                <th class="text-left font-bold p-2">Item</th>
+                                <th class="font-bold p-2">Qty</th>
+                                <th class="text-right font-bold p-2">Original Price</th>
+                                <th class="text-right font-bold p-2">Discounted Price</th>
+                                <th class="text-right font-bold p-2">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                    <div class="flex justify-between items-end mb-8">
+                         <div class="text-sm text-hint">
+                            <p><span class="font-bold">Payment Method:</span> ABA/KHQR</p>
+                            <p class="font-bold mt-2">Thank you for your business!</p>
+                        </div>
+                        <div class="w-full md:w-2/5 space-y-2">
+                             <div class="flex justify-between"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
+                             <div class="flex justify-between text-red-600"><span>New Year Discount (50%):</span><span>-$${discountAmount.toFixed(2)}</span></div>
+                             <div class="flex justify-between font-bold text-xl p-3 rounded-lg" style="background-color: var(--bg-color)">
+                                <span>TOTAL:</span>
+                                <span>$${total.toFixed(2)}</span>
+                            </div>
+                         </div>
+                    </div>
+                    <div class="mt-24 grid grid-cols-2 gap-16 pt-8 border-t" style="border-color: var(--tg-theme-hint-color, #d1d5db)">
+                        <div class="text-center">
+                            <div class="border-b-2 mb-2 h-12" style="border-color: var(--text-color)"></div>
+                            <p class="text-sm font-semibold">Seller's Signature</p>
+                            <p class="text-sm text-hint">xstore</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="border-b-2 mb-2 h-12" style="border-color: var(--text-color)"></div>
+                            <p class="text-sm font-semibold">Customer's Signature</p>
+                        </div>
+                    </div>
+                `;
+                
+                checkoutModal.classList.add('hidden');
+                invoiceModal.classList.remove('hidden');
+                invoiceModal.classList.add('flex');
+            }
+            
+            // --- Event Listeners ---
+            floatingCartBtn.addEventListener('click', () => {
+                cartModal.classList.remove('hidden');
+                cartModal.classList.add('flex');
+            });
+
+            closeCartModalBtn.addEventListener('click', () => {
+                cartModal.classList.add('hidden');
+                cartModal.classList.remove('flex');
+            });
+            
+            cartCheckoutBtn.addEventListener('click', () => {
+                cartModal.classList.add('hidden');
+                cartModal.classList.remove('flex');
+                
+                modalSummary.innerHTML = '';
+                let total = 0;
+                cart.forEach(item => {
+                    const summaryItem = `<div class="py-1 flex justify-between"><p>${item.name} (x${item.quantity})</p> <p class="font-semibold">$${(item.currentPrice * item.quantity).toFixed(2)}</p></div>`;
+                    modalSummary.innerHTML += summaryItem;
+                    total += item.currentPrice * item.quantity;
+                });
+                modalTotal.textContent = `$${total.toFixed(2)}`;
+                resetCheckoutView();
+                checkoutModal.classList.remove('hidden');
+                checkoutModal.classList.add('flex');
+            });
+
+            cartModalItems.addEventListener('change', e => {
+                if (e.target.classList.contains('quantity-input')) {
+                     const productId = parseInt(e.target.dataset.id);
+                     const quantity = parseInt(e.target.value);
+                     if (quantity > 0) {
+                        updateCartQuantity(productId, quantity);
+                     } else {
+                        renderCart();
+                     }
+                }
+            });
+
+            productGrid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.add-to-cart-btn');
+                if (btn) {
+                    const productId = parseInt(btn.dataset.id);
+                    addToCart(productId);
+                }
+            });
+            
+            cancelPaymentBtn.addEventListener('click', () => {
+                checkoutModal.classList.add('hidden');
+                checkoutModal.classList.remove('flex');
+            });
+
+            payBtn.addEventListener('click', async () => {
+                paymentMessage.classList.add('hidden');
+                customerNameInput.classList.remove('input-error');
+                customerEmailInput.classList.remove('input-error');
+                customerPhoneInput.classList.remove('input-error');
+
+                const customerName = customerNameInput.value.trim();
+                const customerEmail = customerEmailInput.value.trim();
+                const customerPhone = customerPhoneInput.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+
+                if (!customerName) {
+                    isValid = false;
+                    customerNameInput.classList.add('input-error');
+                    errorMessage = "Please enter your name.";
+                } else if (!customerPhone) {
+                    isValid = false;
+                    customerPhoneInput.classList.add('input-error');
+                    errorMessage = "Phone number is required.";
+                } else if (!validateCambodianPhone(customerPhone)) {
+                     isValid = false;
+                    customerPhoneInput.classList.add('input-error');
+                    errorMessage = 'Please enter a valid Cambodian phone number.';
+                } else if (!validateEmail(customerEmail)) {
+                     isValid = false;
+                    customerEmailInput.classList.add('input-error');
+                    errorMessage = 'Please enter a valid email address.';
+                }
+
+                if (!isValid) {
+                    paymentMessage.textContent = errorMessage;
+                    paymentMessage.classList.remove('hidden');
+                    return;
+                }
+                
+                payBtn.disabled = true;
+                payBtn.textContent = 'Processing...';
+                
+                showInvoice();
+            });
+            
+            document.getElementById('send-invoice-telegram-btn').addEventListener('click', () => {
+                const invoiceText = generateInvoiceText();
+                tg.sendData(invoiceText);
+            });
+            
+            document.getElementById('print-invoice-btn').addEventListener('click', () => window.print());
+            document.getElementById('close-invoice-btn').addEventListener('click', () => {
+                invoiceModal.classList.add('hidden');
+                invoiceModal.classList.remove('flex');
+                cart = [];
+                renderCart();
+            });
+
+
+            // Initial Render
+            renderProducts();
+            renderCart();
+        });
+    </script>
+
+</body>
+</html>
