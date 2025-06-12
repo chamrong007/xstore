@@ -99,15 +99,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white p-6 mt-12 no-print">
-        <div class="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-y-4 gap-x-8 text-center lg:text-left">
-            <!-- Logo -->
-            <div class="flex items-center gap-3 shrink-0">
-                <svg class="h-10 w-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g stroke-width="10" stroke-linecap="butt"><circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/><circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/></g>
-                    <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text>
-                </svg>
-                <h3 class="text-2xl font-bold text-blue-400 tracking-wider">xstore</h3>
-            </div>
+        <div class="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-y-4 gap-x-8 text-center lg:text-left">
             <!-- Contact Info -->
             <div class="flex flex-col md:flex-row items-center gap-x-6 gap-y-2 text-gray-400 text-sm flex-wrap justify-center">
                 <span class="inline-flex items-center gap-2"><i class="fas fa-map-marker-alt"></i>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</span>
@@ -414,13 +406,13 @@ ${itemsText}
 *Payment Method:* KHQR
 *Status:* PAID
 
-Thank you for your business!
+Thank you for your puchased!
                 `;
             }
             
             // Send invoice to Telegram bot
             async function sendToTelegram(text) {
-                const botToken = "7810843856:AAGr5XJRd3pn7m_RXDBmhLsbk6fbIFqSFRc";
+                const botToken = "7942383966:AAFAEu1r8DonofdRWzB2t5d4ZaO8xgcAURY";
                 const chatId = "-1002491153395";
                 const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
