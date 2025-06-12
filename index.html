@@ -95,7 +95,7 @@
         <!-- Flash Sale Banner -->
         <div id="flash-sale-banner" class="glass-effect text-white text-center p-6 mb-12">
             <h3 class="text-3xl font-bold tracking-wider text-gray-900"><i class="fas fa-bolt mr-2 text-yellow-400"></i>Flash Time Promotion!</h3>
-            <p class="text-xl mt-2 text-gray-800">Get an amazing <span class="font-bold text-yellow-400">65% OFF</span> on all licenses!</p>
+            <p class="text-xl mt-2 text-gray-800">Get an amazing <span class="font-bold text-yellow-400">50% OFF</span> on all licenses!</p>
             <div id="countdown-timer" class="mt-4 text-2xl font-mono flex justify-center items-center gap-2 md:gap-4 text-gray-900">
                 <div><span id="days" class="font-bold text-4xl">00</span><div class="text-xs">Days</div></div>
                 <div class="text-4xl font-light">:</div>
@@ -109,9 +109,9 @@
 
 
         <!-- Products Section -->
-        <main class="w-full max-w-3xl mx-auto">
-            <div id="product-grid" class="grid grid-cols-1 gap-6">
-                <!-- Product cards will be injected here -->
+        <main class="w-full max-w-4xl mx-auto">
+            <div id="product-grid" class="space-y-12">
+                <!-- Product categories and cards will be injected here -->
             </div>
         </main>
     </div>
@@ -229,15 +229,38 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- Product Data ---
             const products = [
-                { id: 1, name: 'Microsoft 365 Business Basic', price: 60.00, category: 'Microsoft 365', description: 'Web and mobile versions of Office apps, plus chat, calling, and meetings.' },
-                { id: 2, name: 'Microsoft 365 Business Standard', price: 99.50, category: 'Microsoft 365', description: 'Everything in Basic, plus desktop versions of Office apps.' },
-                { id: 3, name: 'Microsoft 365 Business Premium', price: 199.00, category: 'Microsoft 365', description: 'Everything in Standard, plus advanced security and device management.' },
-                { id: 4, name: 'Windows 11 Pro', price: 199.99, category: 'Windows', description: 'For professionals and businesses. Includes all the features of Windows 11 Home, plus enterprise-grade security.' },
-                { id: 5, name: 'Windows Server 2022 Standard', price: 1069.00, category: 'Server', description: 'For physically or minimally virtualized environments.' },
-                { id: 6, name: 'SQL Server 2019 Standard', price: 3586.00, category: 'Server', description: 'For mid-tier applications and data marts.' },
+                // Windows
+                { id: 101, name: 'Windows 11 Home', price: 139.00, category: 'Windows', parent: 'Windows 11', description: 'The best Windows ever for gaming and creativity.' },
+                { id: 102, name: 'Windows 11 Pro', price: 199.99, category: 'Windows', parent: 'Windows 11', description: 'All the features of Home, plus enterprise-grade security.' },
+                { id: 103, name: 'Windows 10 Home', price: 129.00, category: 'Windows', parent: 'Windows 10', description: 'The reliable, familiar Windows, enhanced with new features.' },
+                { id: 104, name: 'Windows 10 Pro', price: 189.00, category: 'Windows', parent: 'Windows 10', description: 'Powerful features for professionals and businesses.' },
+                
+                // Office
+                { id: 201, name: 'Microsoft 365 Business Basic', price: 60.00, category: 'Office', parent: 'Microsoft 365', description: 'Web and mobile versions of Office apps.' },
+                { id: 202, name: 'Microsoft 365 Business Standard', price: 150.00, category: 'Office', parent: 'Microsoft 365', description: 'Everything in Basic, plus desktop apps.' },
+                { id: 203, name: 'Microsoft 365 Business Premium', price: 264.00, category: 'Office', parent: 'Microsoft 365', description: 'Everything in Standard, plus advanced security.' },
+                { id: 204, name: 'Office Professional Plus 2021', price: 439.99, category: 'Office', parent: 'Office 2021', description: 'One-time purchase for classic Office apps.' },
+                { id: 205, name: 'Outlook 2024', price: 159.99, category: 'Office', parent: 'Standalone Apps', description: 'The latest version of the professional email client.' },
+                { id: 206, name: 'Project Professional 2024', price: 1029.99, category: 'Office', parent: 'Standalone Apps', description: 'Advanced project management tool.' },
+                { id: 207, name: 'Visio Professional 2024', price: 529.99, category: 'Office', parent: 'Standalone Apps', description: 'Create professional diagrams and flowcharts.' },
+
+                // Server
+                { id: 301, name: 'Windows Server 2025 Standard', price: 1200.00, category: 'Server', parent: 'Windows Server 2025', description: 'The next generation of Windows Server.' },
+                { id: 302, name: 'Windows Server 2022 Standard', price: 1069.00, category: 'Server', parent: 'Windows Server 2022', description: 'For physically or minimally virtualized environments.' },
+                { id: 303, name: 'Windows Server 2022 Datacenter', price: 6155.00, category: 'Server', parent: 'Windows Server 2022', description: 'For highly virtualized datacenters and clouds.' },
+                { id: 304, name: 'SQL Server 2022 Standard', price: 3586.00, category: 'Server', parent: 'SQL Server 2022', description: 'Relational database for mid-tier applications.' },
+                { id: 305, name: 'SQL Server 2019 Standard', price: 3250.00, category: 'Server', parent: 'SQL Server 2019', description: 'Proven performance for mid-tier data marts.' },
+                { id: 306, name: 'System Center 2022', price: 1323.00, category: 'Server', parent: 'System Center', description: 'Datacenter management solution.' },
+                
+                // Developer Tools
+                { id: 401, name: 'Visual Studio 2022 Professional', price: 1199.00, category: 'Developer Tools', parent: 'Visual Studio 2022', description: 'Professional developer tools for building any application.' },
+                { id: 402, name: 'Visual Studio 2022 Enterprise', price: 5999.00, category: 'Developer Tools', parent: 'Visual Studio 2022', description: 'End-to-end solution for teams of any size.' },
+                { id: 403, name: 'Azure DevOps Server 2022.2', price: 539.00, category: 'Developer Tools', parent: 'Azure DevOps', description: 'On-premises collaboration tools for software development.' },
+                { id: 404, name: 'Visual Studio Subscription (Monthly)', price: 45.00, category: 'Developer Tools', parent: 'VS Subscriptions', description: 'Monthly access to tools, cloud services, and training.' }
+
             ];
-            const FLASH_SALE_DISCOUNT_PERCENTAGE = 65;
-            const PRICE_MULTIPLIER = 1 - (FLASH_SALE_DISCOUNT_PERCENTAGE / 100); // 0.35
+            const FLASH_SALE_DISCOUNT_PERCENTAGE = 50;
+            const PRICE_MULTIPLIER = 1 - (FLASH_SALE_DISCOUNT_PERCENTAGE / 100);
             let cart = [];
 
             // --- DOM Elements ---
@@ -287,27 +310,72 @@
             // Render Products on the main page
             function renderProducts() {
                 productGrid.innerHTML = '';
-                products.forEach(product => {
-                    const discountedPrice = product.price * PRICE_MULTIPLIER;
-                    const productCard = `
-                        <div class="glass-effect p-6 flex flex-col hover:shadow-lg hover:-translate-y-1">
-                            <h3 class="text-xl font-semibold mb-2 text-gray-900">${product.name}</h3>
-                            <p class="text-gray-700 mb-2">${product.category}</p>
-                            <p class="text-gray-800 mb-4 flex-grow">${product.description}</p>
-                            <div class="flex justify-between items-center mt-auto">
-                                <div>
-                                    <span class="text-gray-600 line-through text-lg">$${product.price.toFixed(2)}</span>
-                                    <span class="text-2xl font-bold text-red-600 ml-2">$${discountedPrice.toFixed(2)}</span>
+                const categories = ['Windows', 'Office', 'Server', 'Developer Tools'];
+                const productsByCategory = categories.map(category => ({
+                    name: category,
+                    products: products.filter(p => p.category === category)
+                }));
+
+                productsByCategory.forEach(category => {
+                    if (category.products.length === 0) return;
+
+                    // Add category header
+                    const categoryHeader = `<h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400 border-opacity-30">${category.name}</h2>`;
+                    productGrid.innerHTML += categoryHeader;
+                    
+                    const categoryContainer = document.createElement('div');
+                    categoryContainer.className = "space-y-6";
+                    
+                    // Group products by parent
+                    const productsByParent = category.products.reduce((acc, product) => {
+                        const parent = product.parent || product.name;
+                        if (!acc[parent]) {
+                            acc[parent] = [];
+                        }
+                        acc[parent].push(product);
+                        return acc;
+                    }, {});
+
+                    for (const parentName in productsByParent) {
+                        const productGroup = productsByParent[parentName];
+                        
+                        const groupContainer = document.createElement('div');
+                        groupContainer.className = 'glass-effect p-6';
+                        
+                        // Add parent product name as a header for the group
+                        groupContainer.innerHTML += `<h3 class="text-2xl font-semibold text-gray-800 mb-4">${parentName}</h3>`;
+                        
+                        const versionsContainer = document.createElement('div');
+                        versionsContainer.className = "space-y-4";
+                        
+                        productGroup.forEach(product => {
+                            const discountedPrice = product.price * PRICE_MULTIPLIER;
+                            const productCard = `
+                                <div class="bg-white bg-opacity-40 p-4 rounded-lg flex flex-col md:flex-row justify-between items-center transition hover:bg-opacity-60">
+                                    <div class="flex-grow mb-4 md:mb-0">
+                                        <h4 class="text-lg font-semibold text-gray-900">${product.name}</h4>
+                                        <p class="text-gray-700 text-sm">${product.description}</p>
+                                    </div>
+                                    <div class="flex items-center gap-4 shrink-0 md:pl-6">
+                                        <div class="text-right">
+                                            <span class="text-gray-600 line-through text-md">$${product.price.toFixed(2)}</span>
+                                            <span class="text-xl font-bold text-red-600 ml-2">$${discountedPrice.toFixed(2)}</span>
+                                        </div>
+                                        <button data-id="${product.id}" class="add-to-cart-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
+                                            <i class="fas fa-shopping-cart"></i>Add
+                                        </button>
+                                    </div>
                                 </div>
-                                <button data-id="${product.id}" class="add-to-cart-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
-                                    <i class="fas fa-shopping-cart"></i>Add
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    productGrid.innerHTML += productCard;
+                            `;
+                            versionsContainer.innerHTML += productCard;
+                        });
+                        groupContainer.appendChild(versionsContainer);
+                        categoryContainer.appendChild(groupContainer);
+                    }
+                    productGrid.appendChild(categoryContainer);
                 });
             }
+
 
             // Render Cart content in the popup
             function renderCart() {
@@ -425,7 +493,7 @@ ${itemsText}
 *Payment Method:* KHQR
 *Status:* PAID
 
-Thank you for your puchased!
+Thank you for your business!
                 `;
             }
             
