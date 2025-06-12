@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xstore - Microsoft License Reseller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+        }
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #invoice-view-content, #invoice-view-content * {
+                visibility: visible;
+            }
+            #invoice-view-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <div class="flex-grow container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <div class="flex justify-center items-center gap-3">
+                <!-- SVG Logo -->
+                <svg class="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g stroke-width="10" stroke-linecap="butt">
+                        <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/>
+                    </g>
+                    <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text>
+                </svg>
+                <h1 class="text-3xl font-bold text-blue-600 tracking-wider">xstore</h1>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-800 mt-4">Microsoft License Store</h2>
+            <p class="text-gray-600 mt-2">Your one-stop shop for Microsoft licensing solutions.</p>
+        </header>
+        
+        <div class="bg-red-600 text-white text-center p-4 rounded-lg shadow-lg mb-12 animate-pulse">
+            <h3 class="text-2xl font-bold"><i class="fas fa-gift mr-2"></i>New Year Promotion! 50% Off All Licenses!</h3>
+        </div>
+
+        <!-- Products Section -->
+        <main class="w-full max-w-3xl mx-auto">
+            <div id="product-grid" class="grid grid-cols-1 gap-6">
+                <!-- Product cards will be injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-8 mt-12 no-print">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
+            <div>
+                 <div class="flex justify-center md:justify-start items-center gap-3">
+                    <svg class="h-10 w-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                         <g stroke-width="10" stroke-linecap="butt">
+                        <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/>
+                        <circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/>
+                    </g>
+                    <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text>
+                    </svg>
+                    <h3 class="text-2xl font-bold text-blue-400 tracking-wider">xstore</h3>
+                </div>
+                 <p class="text-gray-400 mt-2">Your trusted Microsoft License Reseller.</p>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-2">Contact Us</h4>
+                <p class="text-gray-400">#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
+                <p class="text-gray-400">Email: chamrong@outlook.com</p>
+                <p class="text-gray-400">Phone: +855 69 339 369</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Floating Cart Button -->
+    <button id="open-cart-btn" class="fixed bottom-8 right-8 bg-blue-600 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-2xl z-40 hover:bg-blue-700 transition-transform transform hover:scale-110 no-print">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-item-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">0</span>
+    </button>
+
+    <!-- Modal Container -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        
+        <!-- Cart View -->
+        <div id="cart-view" class="bg-white rounded-lg shadow-xl max-h-[90vh] w-full max-w-md hidden">
+             <div class="p-6 relative">
+                 <h3 class="text-2xl font-bold mb-4 text-center">Your Cart</h3>
+                 <div id="cart-items-popup" class="mb-4 max-h-[50vh] overflow-y-auto pr-2">
+                     <!-- Cart items will be injected here -->
+                 </div>
+                 <div class="border-t pt-4">
+                     <div class="flex justify-between items-center text-xl font-bold mb-4">
+                         <span>Total:</span>
+                         <span id="cart-total-popup">$0.00</span>
+                     </div>
+                     <div class="flex flex-col gap-2">
+                        <button id="proceed-to-checkout-btn" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400">
+                             Proceed to Checkout
+                         </button>
+                         <button id="close-cart-btn" class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                             Continue Shopping
+                         </button>
+                     </div>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Checkout View -->
+        <div id="checkout-view" class="bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-md hidden">
+            <div class="p-8">
+                <h3 class="text-2xl font-bold mb-4 text-center">Checkout</h3>
+            
+                <div id="modal-summary" class="text-gray-600 mb-6 border-b pb-4"></div>
+                
+                <h4 class="text-lg font-semibold mb-3">Customer Information</h4>
+                <div class="space-y-4 mb-6">
+                    <input type="text" id="customer-name" placeholder="Full Name (Required)" class="w-full p-2 border rounded" required>
+                    <input type="email" id="customer-email" placeholder="Email Address (Optional)" class="w-full p-2 border rounded">
+                    <input type="tel" id="customer-phone" placeholder="Phone: 012 345 678 (Required)" class="w-full p-2 border rounded" required>
+                </div>
+
+                 <div class="flex justify-between items-center text-lg font-bold mb-6 border-t pt-4">
+                    <span>Total:</span>
+                    <span id="modal-total">$0.00</span>
+                </div>
+
+                <h4 class="text-lg font-semibold mb-3">Payment Method</h4>
+                <div id="khqr-view" class="text-center p-4 border rounded-lg mb-6">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://pay.ababank.com/7rsCzaBQujud8YmbA" alt="ABA Bank KHQR Code" class="mx-auto my-2 rounded-lg w-48 h-auto">
+                    <p class="font-bold text-lg">SOK SAM RONG VANN</p>
+                    <p class="text-sm text-gray-600 mt-2">Please scan the KHQR code with your banking app to complete the payment.</p>
+                </div>
+
+                <div id="payment-message" class="hidden text-center p-3 rounded-lg mb-4"></div>
+
+                <div class="sticky bottom-0 bg-white pt-4 pb-8 -mx-8 px-8">
+                    <button id="pay-btn" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Confirm Payment & Generate Invoice
+                    </button>
+                     <button id="cancel-payment-btn" class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors mt-2">
+                         Back to Cart
+                     </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Invoice View -->
+        <div id="invoice-view" class="bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-2xl hidden">
+            <div id="invoice-view-content" class="p-8">
+                 <!-- Invoice content will be generated here -->
+            </div>
+            <div class="sticky bottom-0 bg-white p-4 border-t flex justify-end gap-2 no-print">
+                <button id="print-invoice-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                    <i class="fas fa-print"></i>
+                    Print Invoice
+                </button>
+                <button id="close-invoice-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Close</button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Product Data ---
+            const products = [
+                { id: 1, name: 'Microsoft 365 Business Basic', price: 60.00, category: 'Microsoft 365', description: 'Web and mobile versions of Office apps, plus chat, calling, and meetings.' },
+                { id: 2, name: 'Microsoft 365 Business Standard', price: 99.50, category: 'Microsoft 365', description: 'Everything in Basic, plus desktop versions of Office apps.' },
+                { id: 3, name: 'Microsoft 365 Business Premium', price: 199.00, category: 'Microsoft 365', description: 'Everything in Standard, plus advanced security and device management.' },
+                { id: 4, name: 'Windows 11 Pro', price: 199.99, category: 'Windows', description: 'For professionals and businesses. Includes all the features of Windows 11 Home, plus enterprise-grade security.' },
+                { id: 5, name: 'Windows Server 2022 Standard', price: 1069.00, category: 'Server', description: 'For physically or minimally virtualized environments.' },
+                { id: 6, name: 'SQL Server 2019 Standard', price: 3586.00, category: 'Server', description: 'For mid-tier applications and data marts.' },
+            ];
+            const DISCOUNT_RATE = 0.5; // 50% discount
+            let cart = [];
+
+            // --- DOM Elements ---
+            const productGrid = document.getElementById('product-grid');
+            const openCartBtn = document.getElementById('open-cart-btn');
+            const cartItemCount = document.getElementById('cart-item-count');
+            
+            // Modal and Views
+            const modal = document.getElementById('modal');
+            const cartView = document.getElementById('cart-view');
+            const checkoutView = document.getElementById('checkout-view');
+            const invoiceView = document.getElementById('invoice-view');
+
+            // Cart View Elements
+            const cartItemsPopup = document.getElementById('cart-items-popup');
+            const cartTotalPopup = document.getElementById('cart-total-popup');
+            const proceedToCheckoutBtn = document.getElementById('proceed-to-checkout-btn');
+            const closeCartBtn = document.getElementById('close-cart-btn');
+
+            // Checkout View Elements
+            const customerNameInput = document.getElementById('customer-name');
+            const customerEmailInput = document.getElementById('customer-email');
+            const customerPhoneInput = document.getElementById('customer-phone');
+            const modalSummary = document.getElementById('modal-summary');
+            const modalTotal = document.getElementById('modal-total');
+            const payBtn = document.getElementById('pay-btn');
+            const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+            const paymentMessage = document.getElementById('payment-message');
+            
+            // --- Validation Functions ---
+            function validateEmail(email) {
+                if (email.trim() === '') return true; // Optional field is valid if empty
+                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            function validateCambodianPhone(phone) {
+                const re = /^(?:\+855|0)[1-9]\d{7,8}$/;
+                return re.test(phone.replace(/[\s-]/g, ''));
+            }
+
+            // --- Core Functions ---
+
+            // Render Products on the main page
+            function renderProducts() {
+                productGrid.innerHTML = '';
+                products.forEach(product => {
+                    const discountedPrice = product.price * DISCOUNT_RATE;
+                    const productCard = `
+                        <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                            <h3 class="text-xl font-semibold mb-2">${product.name}</h3>
+                            <p class="text-gray-500 mb-2">${product.category}</p>
+                            <p class="text-gray-600 mb-4 flex-grow">${product.description}</p>
+                            <div class="flex justify-between items-center mt-auto">
+                                <div>
+                                    <span class="text-gray-500 line-through text-lg">$${product.price.toFixed(2)}</span>
+                                    <span class="text-2xl font-bold text-red-600 ml-2">$${discountedPrice.toFixed(2)}</span>
+                                </div>
+                                <button data-id="${product.id}" class="add-to-cart-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
+                                    <i class="fas fa-shopping-cart"></i>Add
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    productGrid.innerHTML += productCard;
+                });
+            }
+
+            // Render Cart content in the popup
+            function renderCart() {
+                cartItemsPopup.innerHTML = '';
+                if (cart.length === 0) {
+                    cartItemsPopup.innerHTML = '<p class="text-gray-500 text-center">Your cart is empty.</p>';
+                    proceedToCheckoutBtn.disabled = true;
+                } else {
+                    proceedToCheckoutBtn.disabled = false;
+                    cart.forEach(item => {
+                        const cartItem = `
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex-grow pr-2">
+                                    <p class="font-semibold">${item.name}</p>
+                                    <p class="text-sm text-gray-500">$${item.currentPrice.toFixed(2)} ea.</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="number" min="1" value="${item.quantity}" data-id="${item.id}" class="quantity-input w-16 text-center border rounded-md mx-2">
+                                </div>
+                                <p class="font-bold w-24 text-right">$${(item.currentPrice * item.quantity).toFixed(2)}</p>
+                            </div>
+                        `;
+                        cartItemsPopup.innerHTML += cartItem;
+                    });
+                }
+                updateCartTotal();
+            }
+            
+            // Update quantity from input in cart popup
+            function updateCartQuantity(productId, quantity) {
+                const cartItem = cart.find(item => item.id === productId);
+                if (cartItem) {
+                    if (quantity > 0) {
+                       cartItem.quantity = quantity;
+                    } else {
+                       // Remove item if quantity is 0 or less
+                       cart = cart.filter(item => item.id !== productId);
+                    }
+                }
+                renderCart();
+            }
+
+            // Update total price and badge count
+            function updateCartTotal() {
+                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                
+                cartTotalPopup.textContent = `$${total.toFixed(2)}`;
+                cartItemCount.textContent = totalItems;
+                return total;
+            }
+
+            // Add product to cart
+            function addToCart(productId) {
+                const product = products.find(p => p.id === productId);
+                const discountedPrice = product.price * DISCOUNT_RATE;
+                const cartItem = cart.find(item => item.id === productId);
+
+                if (cartItem) {
+                    cartItem.quantity++;
+                } else {
+                    cart.push({ ...product, quantity: 1, currentPrice: discountedPrice });
+                }
+                renderCart();
+            }
+            
+            // Reset checkout form state
+            function resetCheckoutView() {
+                paymentMessage.classList.add('hidden');
+                payBtn.textContent = 'Confirm Payment & Generate Invoice';
+                payBtn.disabled = false;
+                customerNameInput.value = '';
+                customerEmailInput.value = '';
+                customerPhoneInput.value = '';
+                [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
+            }
+
+            // Generate plain text invoice for Telegram
+            function generateInvoiceText(invoiceData) {
+                let itemsText = cart.map(item => 
+                    `${item.name} (Qty: ${item.quantity}) @ $${item.currentPrice.toFixed(2)} ea.`
+                ).join('\n');
+
+                return `
+*INVOICE FROM xstore*
+---------------------------------
+*Invoice #: * ${invoiceData.invoiceNumber}
+*Date:* ${invoiceData.issueDate}
+*Time:* ${invoiceData.issueTime}
+
+*Bill To:*
+${invoiceData.customerName}
+${invoiceData.customerEmail || 'N/A'}
+${invoiceData.customerPhone}
+---------------------------------
+*Items:*
+${itemsText}
+---------------------------------
+*Subtotal:* $${invoiceData.subtotal.toFixed(2)}
+*New Year Discount (50%):* -$${invoiceData.discountAmount.toFixed(2)}
+*TOTAL: $${invoiceData.total.toFixed(2)}*
+
+*Payment Method:* KHQR
+*Status:* PAID
+
+Thank you for your business!
+                `;
+            }
+            
+            // Send invoice to Telegram bot
+            async function sendToTelegram(text) {
+                const botToken = "7942383966:AAFAEu1r8DonofdRWzB2t5d4ZaO8xgcAURY";
+                const chatId = "-1002491153395";
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: text,
+                            parse_mode: 'Markdown'
+                        }),
+                    });
+                    const result = await response.json();
+                    if (!result.ok) {
+                        throw new Error(result.description || 'Failed to send message to Telegram.');
+                    }
+                    return { success: true };
+                } catch (error) {
+                    console.error('Telegram API Error:', error);
+                    return { success: false, message: error.message };
+                }
+            }
+
+            // Generate and display the HTML invoice
+            function showInvoice() {
+                const now = new Date();
+                const invoiceNumber = Math.floor(Math.random() * 900000) + 100000;
+                const issueDate = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                const issueTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+                
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+                const discountAmount = subtotal - total;
+
+                const customerName = customerNameInput.value;
+                const customerEmail = customerEmailInput.value;
+                const customerPhone = customerPhoneInput.value;
+
+                let itemsHtml = cart.map(item => `
+                    <tr class="border-b">
+                        <td class="py-2 pr-2">${item.name}</td>
+                        <td class="py-2 text-center">${item.quantity}</td>
+                        <td class="py-2 text-right">$${item.price.toFixed(2)}</td>
+                        <td class="py-2 text-right">$${item.currentPrice.toFixed(2)}</td>
+                        <td class="py-2 text-right pl-2">$${(item.currentPrice * item.quantity).toFixed(2)}</td>
+                    </tr>
+                `).join('');
+
+                const invoiceHTML = `
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                             <div class="flex items-center gap-3">
+                                 <svg class="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="10" stroke-linecap="butt"><circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/><circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/></g><text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text></svg>
+                                 <div>
+                                     <h1 class="text-2xl font-bold text-blue-600 tracking-wider">xstore</h1>
+                                     <p>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
+                                     <p>chamrong@outlook.com</p>
+                                     <p>+855 69 339 369</p>
+                                 </div>
+                             </div>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-2xl font-bold uppercase">Invoice</h2>
+                            <p>#${invoiceNumber}</p>
+                            <p>Date: ${issueDate}</p>
+                            <p>Time: ${issueTime}</p>
+                        </div>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="font-bold mb-1">Bill To:</h3>
+                        <p>${customerName}</p>
+                        <p>${customerEmail || 'N/A'}</p>
+                        <p>${customerPhone}</p>
+                    </div>
+                    <table class="w-full mb-8 text-sm">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="text-left font-bold p-2">Item</th>
+                                <th class="font-bold p-2">Qty</th>
+                                <th class="text-right font-bold p-2">Original Price</th>
+                                <th class="text-right font-bold p-2">Discounted Price</th>
+                                <th class="text-right font-bold p-2">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                    <div class="flex justify-between items-end pt-8 border-t border-gray-300">
+                         <div class="text-sm text-gray-600">
+                            <p><span class="font-bold">Payment Method:</span> KHQR</p>
+                            <p class="font-bold mt-4">Thank you for your business!</p>
+                        </div>
+                         <div class="w-full md:w-2/5 space-y-2 text-right">
+                             <div class="flex justify-between"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
+                             <div class="flex justify-between text-red-600"><span>New Year Discount (50%):</span><span>-$${discountAmount.toFixed(2)}</span></div>
+                             <div class="flex justify-between font-bold text-xl bg-gray-200 p-3 rounded-lg mt-2">
+                                 <span>TOTAL:</span>
+                                 <span>$${total.toFixed(2)}</span>
+                             </div>
+                         </div>
+                    </div>
+                `;
+
+                // Switch views
+                checkoutView.classList.add('hidden');
+                document.getElementById('invoice-view-content').innerHTML = invoiceHTML;
+                invoiceView.classList.remove('hidden');
+
+                // Add event listeners for new buttons
+                document.getElementById('print-invoice-btn').onclick = () => window.print();
+                document.getElementById('close-invoice-btn').onclick = () => {
+                    modal.classList.add('hidden');
+                    invoiceView.classList.add('hidden');
+                    // Reset everything for the next customer
+                    cart = [];
+                    renderCart(); 
+                };
+            }
+            
+            // --- Event Listeners ---
+
+            // Add to cart button on product cards
+            productGrid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.add-to-cart-btn');
+                if (btn) {
+                    const productId = parseInt(btn.dataset.id);
+                    addToCart(productId);
+                }
+            });
+
+            // Quantity input inside cart popup
+            cartItemsPopup.addEventListener('change', e => {
+                if (e.target.classList.contains('quantity-input')) {
+                    const productId = parseInt(e.target.dataset.id);
+                    const quantity = parseInt(e.target.value);
+                    updateCartQuantity(productId, quantity);
+                }
+            });
+
+            // Floating cart button to open cart view
+            openCartBtn.addEventListener('click', () => {
+                renderCart(); // Ensure cart is up to date
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                cartView.classList.remove('hidden');
+                checkoutView.classList.add('hidden');
+                invoiceView.classList.add('hidden');
+            });
+            
+            // Close cart view button
+            closeCartBtn.addEventListener('click', () => {
+                 modal.classList.add('hidden');
+                 modal.classList.remove('flex');
+            });
+
+            // "Proceed to Checkout" button in cart view
+            proceedToCheckoutBtn.addEventListener('click', () => {
+                // Populate checkout summary
+                modalSummary.innerHTML = '';
+                let total = 0;
+                cart.forEach(item => {
+                    const summaryItem = `<div class="flex justify-between py-1"><p>${item.name} (x${item.quantity})</p> <p class="font-semibold">$${(item.currentPrice * item.quantity).toFixed(2)}</p></div>`;
+                    modalSummary.innerHTML += summaryItem;
+                    total += item.currentPrice * item.quantity;
+                });
+                modalTotal.textContent = `$${total.toFixed(2)}`;
+                
+                resetCheckoutView();
+                
+                // Switch views
+                cartView.classList.add('hidden');
+                checkoutView.classList.remove('hidden');
+            });
+            
+            // "Back to Cart" button in checkout view
+            cancelPaymentBtn.addEventListener('click', () => {
+                checkoutView.classList.add('hidden');
+                cartView.classList.remove('hidden');
+            });
+
+            // Final "Pay" button in checkout view
+            payBtn.addEventListener('click', async () => {
+                // Reset previous errors
+                [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
+
+                const customerName = customerNameInput.value.trim();
+                const customerEmail = customerEmailInput.value.trim();
+                const customerPhone = customerPhoneInput.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+
+                if (!customerName) {
+                    isValid = false;
+                    customerNameInput.classList.add('input-error');
+                    errorMessage = 'Please enter your full name.';
+                } else if (!customerPhone) {
+                    isValid = false;
+                    customerPhoneInput.classList.add('input-error');
+                    errorMessage = 'A valid phone number is required.';
+                } else if (!validateCambodianPhone(customerPhone)) {
+                     isValid = false;
+                    customerPhoneInput.classList.add('input-error');
+                    errorMessage = 'Please enter a valid Cambodian phone number (e.g., 012345678).';
+                } else if (customerEmail && !validateEmail(customerEmail)) {
+                     isValid = false;
+                    customerEmailInput.classList.add('input-error');
+                    errorMessage = 'Please enter a valid email address.';
+                }
+
+                if (!isValid) {
+                    paymentMessage.textContent = errorMessage;
+                    paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-red-100 text-red-700';
+                    return;
+                }
+                
+                payBtn.disabled = true;
+                payBtn.textContent = 'Processing...';
+
+                // --- Automatic Telegram Sending ---
+                const now = new Date();
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+                const invoiceData = {
+                    invoiceNumber: Math.floor(Math.random() * 900000) + 100000,
+                    issueDate: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    issueTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    subtotal: subtotal,
+                    discountAmount: subtotal - total,
+                    total: total,
+                    customerName: customerName,
+                    customerEmail: customerEmail,
+                    customerPhone: customerPhone,
+                }
+                const invoiceText = generateInvoiceText(invoiceData);
+                const telegramResult = await sendToTelegram(invoiceText);
+                
+                if (!telegramResult.success) {
+                    paymentMessage.textContent = `Payment processed, but failed to send invoice: ${telegramResult.message}`;
+                    paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-yellow-100 text-yellow-700';
+                } else {
+                    paymentMessage.textContent = 'Your purchase has been sent to xstore! They will contact you soon.';
+                    paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-green-100 text-green-700';
+                }
+
+                setTimeout(showInvoice, 2500);
+            });
+
+
+            // --- Initial Render on Page Load ---
+            renderProducts();
+            renderCart();
+        });
+    </script>
+
+</body>
+</html>
