@@ -17,21 +17,35 @@
             border-color: #ef4444 !important;
         }
         @media print {
-            body * {
-                visibility: hidden;
+            /* Hide everything in the body by default */
+            body > * {
+                display: none !important;
             }
-            #invoice-view-content, #invoice-view-content * {
-                visibility: visible;
+            /* Make the modal container visible, but remove positioning and background */
+            #modal {
+                display: block !important;
+                position: static !important;
+                background-color: transparent !important;
+                overflow: visible !important;
             }
-            #invoice-view-content {
-                position: absolute;
-                left: 0;
+            /* Make the invoice view itself visible and take up the full page */
+            #invoice-view {
+                display: block !important;
+                position: absolute !important;
                 top: 0;
+                left: 0;
                 width: 100%;
-                padding: 1rem;
+                max-height: none !important;
+                box-shadow: none !important;
+                border: none !important;
             }
+            /* Ensure the content within has no shadow */
+            #invoice-view-content {
+                box-shadow: none !important;
+            }
+             /* Explicitly hide elements marked as no-print */
             .no-print {
-                display: none;
+                display: none !important;
             }
         }
     </style>
@@ -380,6 +394,8 @@ Thank you for your business!
             
             // Send invoice to Telegram bot
             async function sendToTelegram(text) {
+                // IMPORTANT: It's highly recommended to handle the bot token securely on a server-side environment.
+                // Exposing it in client-side code is a security risk.
                 const botToken = "7942383966:AAFAEu1r8DonofdRWzB2t5d4ZaO8xgcAURY";
                 const chatId = "-1002491153395";
                 const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
