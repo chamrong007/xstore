@@ -73,9 +73,21 @@
             <p class="text-gray-600 mt-2">Your one-stop shop for Microsoft licensing solutions.</p>
         </header>
         
-        <div class="bg-red-600 text-white text-center p-4 rounded-lg shadow-lg mb-12 animate-pulse">
-            <h3 class="text-2xl font-bold"><i class="fas fa-gift mr-2"></i>New Year Promotion! 50% Off All Licenses!</h3>
+        <!-- Flash Sale Banner -->
+        <div id="flash-sale-banner" class="bg-gradient-to-r from-purple-600 to-indigo-700 text-white text-center p-6 rounded-lg shadow-2xl mb-12">
+            <h3 class="text-3xl font-bold tracking-wider"><i class="fas fa-bolt mr-2"></i>Flash Time Promotion!</h3>
+            <p class="text-xl mt-2">Get an amazing <span class="font-bold text-yellow-300">65% OFF</span> on all licenses!</p>
+            <div id="countdown-timer" class="mt-4 text-2xl font-mono flex justify-center items-center gap-2 md:gap-4">
+                <div><span id="days" class="font-bold text-4xl">00</span><div class="text-xs">Days</div></div>
+                <div class="text-4xl font-light">:</div>
+                <div><span id="hours" class="font-bold text-4xl">00</span><div class="text-xs">Hours</div></div>
+                <div class="text-4xl font-light">:</div>
+                <div><span id="minutes" class="font-bold text-4xl">00</span><div class="text-xs">Minutes</div></div>
+                <div class="text-4xl font-light">:</div>
+                <div><span id="seconds" class="font-bold text-4xl">00</span><div class="text-xs">Seconds</div></div>
+            </div>
         </div>
+
 
         <!-- Products Section -->
         <main class="w-full max-w-3xl mx-auto">
@@ -86,30 +98,22 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white p-8 mt-12 no-print">
-        <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
-            <div>
-                 <div class="flex justify-center md:justify-start items-center gap-3">
-                    <svg class="h-10 w-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                         <g stroke-width="10" stroke-linecap="butt">
-                        <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
-                        <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
-                        <circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/>
-                        <circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/>
-                        <circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/>
-                        <circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/>
-                    </g>
+    <footer class="bg-gray-800 text-white p-6 mt-12 no-print">
+        <div class="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-y-4 gap-x-8 text-center lg:text-left">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 shrink-0">
+                <svg class="h-10 w-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g stroke-width="10" stroke-linecap="butt"><circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/><circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/></g>
                     <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text>
-                    </svg>
-                    <h3 class="text-2xl font-bold text-blue-400 tracking-wider">xstore</h3>
-                </div>
-                 <p class="text-gray-400 mt-2">Your trusted Microsoft License Reseller.</p>
+                </svg>
+                <h3 class="text-2xl font-bold text-blue-400 tracking-wider">xstore</h3>
             </div>
-            <div>
-                <h4 class="text-lg font-semibold mb-2">Contact Us</h4>
-                <p class="text-gray-400">#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
-                <p class="text-gray-400">Email: chamrong@outlook.com</p>
-                <p class="text-gray-400">Phone: +855 69 339 369</p>
+            <!-- Contact Info -->
+            <div class="flex flex-col md:flex-row items-center gap-x-6 gap-y-2 text-gray-400 text-sm flex-wrap justify-center">
+                <span class="inline-flex items-center gap-2"><i class="fas fa-map-marker-alt"></i>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</span>
+                <a href="mailto:chamrong@outlook.com" class="hover:text-white inline-flex items-center gap-2"><i class="fas fa-envelope"></i>chamrong@outlook.com</a>
+                <a href="tel:+85569339369" class="hover:text-white inline-flex items-center gap-2"><i class="fas fa-phone"></i>+855 69 339 369</a>
+                <a href="https://t.me/chamrong_vann" target="_blank" rel="noopener noreferrer" class="hover:text-white inline-flex items-center gap-2"><i class="fab fa-telegram"></i>@chamrong_vann</a>
             </div>
         </div>
     </footer>
@@ -127,6 +131,7 @@
         <!-- Cart View -->
         <div id="cart-view" class="bg-white rounded-lg shadow-xl max-h-[90vh] w-full max-w-md hidden">
              <div class="p-6 relative">
+                 <button id="close-cart-popup-btn" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
                  <h3 class="text-2xl font-bold mb-4 text-center">Your Cart</h3>
                  <div id="cart-items-popup" class="mb-4 max-h-[50vh] overflow-y-auto pr-2">
                      <!-- Cart items will be injected here -->
@@ -174,15 +179,20 @@
                     <p class="text-sm text-gray-600 mt-2">Please scan the KHQR code with your banking app to complete the payment.</p>
                 </div>
 
-                <div id="payment-message" class="hidden text-center p-3 rounded-lg mb-4"></div>
+                <div id="payment-message" class="hidden text-center p-3 rounded-lg my-4"></div>
 
                 <div class="sticky bottom-0 bg-white pt-4 pb-8 -mx-8 px-8">
-                    <button id="pay-btn" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-                        Confirm Payment & Generate Invoice
-                    </button>
-                     <button id="cancel-payment-btn" class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors mt-2">
-                         Back to Cart
-                     </button>
+                    <div id="checkout-buttons">
+                        <button id="pay-btn" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            Confirm Payment & Generate Invoice
+                        </button>
+                         <button id="cancel-payment-btn" class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors mt-2">
+                             Back to Cart
+                         </button>
+                    </div>
+                    <div id="checkout-success-message" class="hidden">
+                        <!-- Dynamic success message goes here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -215,7 +225,8 @@
                 { id: 5, name: 'Windows Server 2022 Standard', price: 1069.00, category: 'Server', description: 'For physically or minimally virtualized environments.' },
                 { id: 6, name: 'SQL Server 2019 Standard', price: 3586.00, category: 'Server', description: 'For mid-tier applications and data marts.' },
             ];
-            const DISCOUNT_RATE = 0.5; // 50% discount
+            const FLASH_SALE_DISCOUNT_PERCENTAGE = 65;
+            const PRICE_MULTIPLIER = 1 - (FLASH_SALE_DISCOUNT_PERCENTAGE / 100); // 0.35
             let cart = [];
 
             // --- DOM Elements ---
@@ -234,6 +245,7 @@
             const cartTotalPopup = document.getElementById('cart-total-popup');
             const proceedToCheckoutBtn = document.getElementById('proceed-to-checkout-btn');
             const closeCartBtn = document.getElementById('close-cart-btn');
+            const closeCartPopupBtn = document.getElementById('close-cart-popup-btn');
 
             // Checkout View Elements
             const customerNameInput = document.getElementById('customer-name');
@@ -244,6 +256,8 @@
             const payBtn = document.getElementById('pay-btn');
             const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
             const paymentMessage = document.getElementById('payment-message');
+            const checkoutButtons = document.getElementById('checkout-buttons');
+            const checkoutSuccessMessage = document.getElementById('checkout-success-message');
             
             // --- Validation Functions ---
             function validateEmail(email) {
@@ -263,7 +277,7 @@
             function renderProducts() {
                 productGrid.innerHTML = '';
                 products.forEach(product => {
-                    const discountedPrice = product.price * DISCOUNT_RATE;
+                    const discountedPrice = product.price * PRICE_MULTIPLIER;
                     const productCard = `
                         <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
                             <h3 class="text-xl font-semibold mb-2">${product.name}</h3>
@@ -302,7 +316,10 @@
                                 <div class="flex items-center">
                                     <input type="number" min="1" value="${item.quantity}" data-id="${item.id}" class="quantity-input w-16 text-center border rounded-md mx-2">
                                 </div>
-                                <p class="font-bold w-24 text-right">$${(item.currentPrice * item.quantity).toFixed(2)}</p>
+                                <p class="font-bold w-20 text-right">$${(item.currentPrice * item.quantity).toFixed(2)}</p>
+                                <button class="remove-from-cart-btn text-red-500 hover:text-red-700 ml-4 text-lg" data-id="${item.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </div>
                         `;
                         cartItemsPopup.innerHTML += cartItem;
@@ -318,10 +335,15 @@
                     if (quantity > 0) {
                        cartItem.quantity = quantity;
                     } else {
-                       // Remove item if quantity is 0 or less
-                       cart = cart.filter(item => item.id !== productId);
+                       // If quantity is 0 or less, treat as removal
+                       removeFromCart(productId);
                     }
                 }
+                renderCart();
+            }
+
+            function removeFromCart(productId) {
+                cart = cart.filter(item => item.id !== productId);
                 renderCart();
             }
 
@@ -338,7 +360,7 @@
             // Add product to cart
             function addToCart(productId) {
                 const product = products.find(p => p.id === productId);
-                const discountedPrice = product.price * DISCOUNT_RATE;
+                const discountedPrice = product.price * PRICE_MULTIPLIER;
                 const cartItem = cart.find(item => item.id === productId);
 
                 if (cartItem) {
@@ -352,8 +374,12 @@
             // Reset checkout form state
             function resetCheckoutView() {
                 paymentMessage.classList.add('hidden');
-                payBtn.textContent = 'Confirm Payment & Generate Invoice';
+                checkoutSuccessMessage.classList.add('hidden'); // Hide success message
+                checkoutButtons.classList.remove('hidden');    // Show buttons again
+
                 payBtn.disabled = false;
+                payBtn.textContent = 'Confirm Payment & Generate Invoice';
+
                 customerNameInput.value = '';
                 customerEmailInput.value = '';
                 customerPhoneInput.value = '';
@@ -382,7 +408,7 @@ ${invoiceData.customerPhone}
 ${itemsText}
 ---------------------------------
 *Subtotal:* $${invoiceData.subtotal.toFixed(2)}
-*New Year Discount (50%):* -$${invoiceData.discountAmount.toFixed(2)}
+*Flash Time Discount (${FLASH_SALE_DISCOUNT_PERCENTAGE}%):* -$${invoiceData.discountAmount.toFixed(2)}
 *TOTAL: $${invoiceData.total.toFixed(2)}*
 
 *Payment Method:* KHQR
@@ -394,8 +420,6 @@ Thank you for your business!
             
             // Send invoice to Telegram bot
             async function sendToTelegram(text) {
-                // IMPORTANT: It's highly recommended to handle the bot token securely on a server-side environment.
-                // Exposing it in client-side code is a security risk.
                 const botToken = "7942383966:AAFAEu1r8DonofdRWzB2t5d4ZaO8xgcAURY";
                 const chatId = "-1002491153395";
                 const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -422,27 +446,16 @@ Thank you for your business!
             }
 
             // Generate and display the HTML invoice
-            function showInvoice() {
-                const now = new Date();
-                const invoiceNumber = Math.floor(Math.random() * 900000) + 100000;
-                const issueDate = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                const issueTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-                
-                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
-                const discountAmount = subtotal - total;
-
-                const customerName = customerNameInput.value;
-                const customerEmail = customerEmailInput.value;
-                const customerPhone = customerPhoneInput.value;
+            function showInvoice(invoiceData) {
+                const { invoiceNumber, issueDate, issueTime, subtotal, discountAmount, total, customerName, customerEmail, customerPhone } = invoiceData;
 
                 let itemsHtml = cart.map(item => `
                     <tr class="border-b">
                         <td class="py-2 pr-2">${item.name}</td>
                         <td class="py-2 text-center">${item.quantity}</td>
                         <td class="py-2 text-right">$${item.price.toFixed(2)}</td>
-                        <td class="py-2 text-right">$${item.currentPrice.toFixed(2)}</td>
-                        <td class="py-2 text-right pl-2">$${(item.currentPrice * item.quantity).toFixed(2)}</td>
+                        <td class="py-2 text-right">$${(item.price * PRICE_MULTIPLIER).toFixed(2)}</td>
+                        <td class="py-2 text-right pl-2">$${(item.price * PRICE_MULTIPLIER * item.quantity).toFixed(2)}</td>
                     </tr>
                 `).join('');
 
@@ -456,6 +469,7 @@ Thank you for your business!
                                      <p>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
                                      <p>chamrong@outlook.com</p>
                                      <p>+855 69 339 369</p>
+                                     <p>Telegram: @chamrong_vann</p>
                                  </div>
                              </div>
                         </div>
@@ -491,7 +505,7 @@ Thank you for your business!
                         </div>
                          <div class="w-full md:w-2/5 space-y-2 text-right">
                              <div class="flex justify-between"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
-                             <div class="flex justify-between text-red-600"><span>New Year Discount (50%):</span><span>-$${discountAmount.toFixed(2)}</span></div>
+                             <div class="flex justify-between text-red-600"><span>Flash Time Discount (${FLASH_SALE_DISCOUNT_PERCENTAGE}%):</span><span>-$${discountAmount.toFixed(2)}</span></div>
                              <div class="flex justify-between font-bold text-xl bg-gray-200 p-3 rounded-lg mt-2">
                                  <span>TOTAL:</span>
                                  <span>$${total.toFixed(2)}</span>
@@ -516,6 +530,41 @@ Thank you for your business!
                 };
             }
             
+            // --- Countdown Timer Logic ---
+            function startCountdown() {
+                let flashSaleEndDate = localStorage.getItem('flashSaleEndDate');
+
+                // If no end date or if it has passed, set a new one 3 days from now
+                if (!flashSaleEndDate || new Date().getTime() > flashSaleEndDate) {
+                    flashSaleEndDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
+                    localStorage.setItem('flashSaleEndDate', flashSaleEndDate);
+                }
+
+                const countdownInterval = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = flashSaleEndDate - now;
+
+                    if (distance < 0) {
+                        clearInterval(countdownInterval);
+                        // Restart the countdown for the next cycle
+                        startCountdown();
+                        return;
+                    }
+
+                    // Time calculations for days, hours, minutes and seconds
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    // Display the result in the elements, ensuring two digits
+                    document.getElementById('days').textContent = String(days).padStart(2, '0');
+                    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+                    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+                    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+                }, 1000);
+            }
+
             // --- Event Listeners ---
 
             // Add to cart button on product cards
@@ -526,12 +575,20 @@ Thank you for your business!
                     addToCart(productId);
                 }
             });
+            
+            // Listen for clicks on remove button and changes on quantity input
+            cartItemsPopup.addEventListener('click', e => {
+                const removeBtn = e.target.closest('.remove-from-cart-btn');
+                if (removeBtn) {
+                    const productId = parseInt(removeBtn.dataset.id, 10);
+                    removeFromCart(productId);
+                }
+            });
 
-            // Quantity input inside cart popup
             cartItemsPopup.addEventListener('change', e => {
                 if (e.target.classList.contains('quantity-input')) {
-                    const productId = parseInt(e.target.dataset.id);
-                    const quantity = parseInt(e.target.value);
+                    const productId = parseInt(e.target.dataset.id, 10);
+                    const quantity = parseInt(e.target.value, 10);
                     updateCartQuantity(productId, quantity);
                 }
             });
@@ -546,11 +603,14 @@ Thank you for your business!
                 invoiceView.classList.add('hidden');
             });
             
-            // Close cart view button
-            closeCartBtn.addEventListener('click', () => {
-                 modal.classList.add('hidden');
-                 modal.classList.remove('flex');
+            // Close cart view with bottom button or top 'X'
+            [closeCartBtn, closeCartPopupBtn].forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                });
             });
+
 
             // "Proceed to Checkout" button in cart view
             proceedToCheckoutBtn.addEventListener('click', () => {
@@ -609,13 +669,14 @@ Thank you for your business!
                 if (!isValid) {
                     paymentMessage.textContent = errorMessage;
                     paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-red-100 text-red-700';
+                    paymentMessage.classList.remove('hidden');
                     return;
                 }
                 
                 payBtn.disabled = true;
                 payBtn.textContent = 'Processing...';
 
-                // --- Automatic Telegram Sending ---
+                // --- Generate Invoice Data ---
                 const now = new Date();
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
@@ -629,25 +690,35 @@ Thank you for your business!
                     customerName: customerName,
                     customerEmail: customerEmail,
                     customerPhone: customerPhone,
-                }
+                };
                 const invoiceText = generateInvoiceText(invoiceData);
                 const telegramResult = await sendToTelegram(invoiceText);
                 
-                if (!telegramResult.success) {
-                    paymentMessage.textContent = `Payment processed, but failed to send invoice: ${telegramResult.message}`;
-                    paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-yellow-100 text-yellow-700';
-                } else {
-                    paymentMessage.textContent = 'Your purchase has been sent to xstore! They will contact you soon.';
-                    paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-green-100 text-green-700';
-                }
+                paymentMessage.classList.add('hidden'); // Hide validation messages
+                checkoutButtons.classList.add('hidden'); // Hide the payment buttons
 
-                setTimeout(showInvoice, 2500);
+                // Show the detailed success notification
+                checkoutSuccessMessage.innerHTML = `
+                    <div class="text-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
+                        <div class="flex justify-center items-center mb-2">
+                            <i class="fas fa-check-circle text-2xl mr-3"></i>
+                            <h3 class="text-xl font-bold">Payment Successful!</h3>
+                        </div>
+                        <p class="text-sm">Your order (Ref: #${invoiceData.invoiceNumber}) has been sent to xstore.</p>
+                        <p class="text-sm mt-1">We will contact you shortly to finalize the license delivery.</p>
+                    </div>
+                `;
+                checkoutSuccessMessage.classList.remove('hidden');
+
+                // Pass the generated data to showInvoice to avoid recreating it
+                setTimeout(() => showInvoice(invoiceData), 3000);
             });
 
 
             // --- Initial Render on Page Load ---
             renderProducts();
             renderCart();
+            startCountdown();
         });
     </script>
 
