@@ -534,9 +534,9 @@ Thank you for your business!
             function startCountdown() {
                 let flashSaleEndDate = localStorage.getItem('flashSaleEndDate');
 
-                // If no end date or if it has passed, set a new one 3 days from now
+                // If no end date or if it has passed, set a new one 1 day from now
                 if (!flashSaleEndDate || new Date().getTime() > flashSaleEndDate) {
-                    flashSaleEndDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
+                    flashSaleEndDate = new Date().getTime() + 1 * 24 * 60 * 60 * 1000;
                     localStorage.setItem('flashSaleEndDate', flashSaleEndDate);
                 }
 
