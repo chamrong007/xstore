@@ -35,18 +35,6 @@
         .glass-input::placeholder {
             color: #6b7280; /* medium gray placeholder */
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner {
-            display: inline-block;
-            width: 2rem;
-            height: 2rem;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #3b82f6;
-            animation: spin 1s ease-in-out infinite;
-        }
         @media print {
             /* Hide everything in the body by default */
             body > * {
@@ -188,7 +176,6 @@
                     <input type="text" id="customer-name" placeholder="Full Name (Required)" class="w-full p-2 rounded glass-input" required>
                     <input type="email" id="customer-email" placeholder="Email Address (Optional)" class="w-full p-2 rounded glass-input">
                     <input type="tel" id="customer-phone" placeholder="Phone: 012 345 678 (Required)" class="w-full p-2 rounded glass-input" required>
-                    <input type="text" id="customer-telegram" placeholder="Telegram Username: @username (Optional)" class="w-full p-2 rounded glass-input">
                 </div>
 
                 <div class="flex justify-between items-center text-lg font-bold mb-6 border-t border-gray-200 border-opacity-50 pt-4 text-gray-900">
@@ -207,8 +194,8 @@
                              Back to Cart
                          </button>
                     </div>
-                    <div id="checkout-flow-message" class="hidden">
-                        <!-- Dynamic checkout flow messages go here -->
+                    <div id="checkout-success-message" class="hidden">
+                        <!-- Dynamic success message goes here -->
                     </div>
                 </div>
             </div>
@@ -292,14 +279,13 @@
             const customerNameInput = document.getElementById('customer-name');
             const customerEmailInput = document.getElementById('customer-email');
             const customerPhoneInput = document.getElementById('customer-phone');
-            const customerTelegramInput = document.getElementById('customer-telegram');
             const modalSummary = document.getElementById('modal-summary');
             const modalTotal = document.getElementById('modal-total');
             const payBtn = document.getElementById('pay-btn');
             const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
             const paymentMessage = document.getElementById('payment-message');
             const checkoutButtons = document.getElementById('checkout-buttons');
-            const checkoutFlowMessage = document.getElementById('checkout-flow-message');
+            const checkoutSuccessMessage = document.getElementById('checkout-success-message');
             
             // --- Validation Functions ---
             function validateEmail(email) {
@@ -311,12 +297,6 @@
             function validateCambodianPhone(phone) {
                 const re = /^(?:\+855|0)[1-9]\d{7,8}$/;
                 return re.test(phone.replace(/[\s-]/g, ''));
-            }
-
-            function validateTelegramUsername(username) {
-                if (username.trim() === '') return true; // Optional field is valid if empty
-                const re = /^@[a-zA-Z0-9_]{5,32}$/;
-                return re.test(username);
             }
 
             // --- Core Functions ---
@@ -467,7 +447,7 @@
             // Reset checkout form state
             function resetCheckoutView() {
                 paymentMessage.classList.add('hidden');
-                checkoutFlowMessage.classList.add('hidden'); // Hide flow message
+                checkoutSuccessMessage.classList.add('hidden'); // Hide success message
                 checkoutButtons.classList.remove('hidden');    // Show buttons again
 
                 payBtn.disabled = false;
@@ -476,8 +456,7 @@
                 customerNameInput.value = '';
                 customerEmailInput.value = '';
                 customerPhoneInput.value = '';
-                customerTelegramInput.value = '';
-                [customerNameInput, customerEmailInput, customerPhoneInput, customerTelegramInput].forEach(el => el.classList.remove('input-error'));
+                [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
             }
 
             // Generate plain text invoice for Telegram
@@ -497,7 +476,6 @@
 ${invoiceData.customerName}
 ${invoiceData.customerEmail || 'N/A'}
 ${invoiceData.customerPhone}
-${invoiceData.customerTelegram || ''}
 ---------------------------------
 *Items:*
 ${itemsText}
@@ -514,8 +492,9 @@ Thank you for your puchased!
             }
             
             // Send invoice to Telegram bot
-            async function sendToTelegram(text, chatId) {
+            async function sendToTelegram(text) {
                 const botToken = "7810843856:AAGr5XJRd3pn7m_RXDBmhLsbk6fbIFqSFRc";
+                const chatId = "-1002491153395";
                 const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
                 try {
@@ -530,19 +509,18 @@ Thank you for your puchased!
                     });
                     const result = await response.json();
                     if (!result.ok) {
-                        // Don't throw an error for user DMs, just log it.
-                        console.error(`Failed to send message to ${chatId}:`, result.description);
+                        throw new Error(result.description || 'Failed to send message to Telegram.');
                     }
-                    return { success: result.ok };
+                    return { success: true };
                 } catch (error) {
-                    console.error(`Telegram API Error for ${chatId}:`, error);
+                    console.error('Telegram API Error:', error);
                     return { success: false, message: error.message };
                 }
             }
 
             // Generate and display the HTML invoice
             function showInvoice(invoiceData) {
-                const { invoiceNumber, issueDate, issueTime, subtotal, discountAmount, total, customerName, customerEmail, customerPhone, customerTelegram } = invoiceData;
+                const { invoiceNumber, issueDate, issueTime, subtotal, discountAmount, total, customerName, customerEmail, customerPhone } = invoiceData;
 
                 let itemsHtml = cart.map(item => `
                     <tr class="border-b border-gray-400">
@@ -580,7 +558,6 @@ Thank you for your puchased!
                         <p>${customerName}</p>
                         <p>${customerEmail || 'N/A'}</p>
                         <p>${customerPhone}</p>
-                        <p>${customerTelegram || ''}</p>
                     </div>
                     <table class="w-full mb-8 text-sm">
                         <thead>
@@ -626,51 +603,82 @@ Thank you for your puchased!
                 };
             }
 
-            // SIMULATE polling for payment status
-            async function pollForPaymentStatus() {
-                console.log('Simulating polling for payment status...');
-                // This simulates waiting for the user to complete payment.
-                // In a real app, this would be a backend process.
-                await new Promise(resolve => setTimeout(resolve, 15000)); // 15-second delay
+            // SIMULATE payment verification
+            async function verifyPayWayPayment(transactionId) {
+                console.log(`Simulating payment verification for transaction ID: ${transactionId}`);
+                // In a real-world scenario, this would be a server-side call to the PayWay API.
+                // It's not possible to securely call the real PayWay API from the frontend.
+                // This function simulates that process.
 
-                // Simulate a successful response
+                // Simulate network delay for the API call
+                await new Promise(resolve => setTimeout(resolve, 2500));
+
+                // Simulate a successful response. In a real app, you would check the API response.
                 const isSuccess = true; 
                 if (isSuccess) {
-                    console.log('Payment confirmation received (simulated).');
-                    return { success: true };
+                    console.log('Payment verification successful (simulated).');
+                    return { success: true, message: 'Payment confirmed.' };
                 } else {
-                    console.log('Payment timed out (simulated).');
-                    return { success: false };
+                    console.log('Payment verification failed (simulated).');
+                    return { success: false, message: 'Payment not found or still pending.' };
                 }
             }
 
 
-            // This function is called to finalize the order after successful payment
-            async function finalizeOrder() {
-                if (!pendingInvoiceData) return;
-                const groupChatId = "-1002491153395";
-                const invoiceText = generateInvoiceText(pendingInvoiceData);
+            // This function is called when the user confirms they have paid
+            async function handlePaymentConfirmation() {
+                const confirmBtn = document.getElementById('confirm-payment-success-btn');
+                if (!confirmBtn || !pendingInvoiceData) return;
 
-                // Send notification to group and user
-                await sendToTelegram(invoiceText, groupChatId);
-                if (pendingInvoiceData.customerTelegram) {
-                    await sendToTelegram(invoiceText, pendingInvoiceData.customerTelegram);
-                }
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Verifying Payment...';
+                
+                // Update the message shown to the user while verifying
+                const messageContainer = checkoutSuccessMessage.querySelector('div');
+                messageContainer.querySelector('h3').textContent = 'Verifying Payment';
+                messageContainer.querySelectorAll('p').forEach(p => p.classList.add('hidden'));
 
-                // Update UI to final success message
-                checkoutFlowMessage.innerHTML = `
-                    <div class="text-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
-                        <div class="flex justify-center items-center mb-2">
-                            <i class="fas fa-check-circle text-2xl mr-3"></i>
-                            <h3 class="text-xl font-bold">Payment Confirmed!</h3>
+
+                // Call the simulated verification function
+                const verificationResult = await verifyPayWayPayment(pendingInvoiceData.invoiceNumber);
+
+                if (verificationResult.success) {
+                    // Send notification to Telegram
+                    const invoiceText = generateInvoiceText(pendingInvoiceData);
+                    await sendToTelegram(invoiceText);
+
+                    // Update UI to final success message
+                    checkoutSuccessMessage.innerHTML = `
+                        <div class="text-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
+                            <div class="flex justify-center items-center mb-2">
+                                <i class="fas fa-check-circle text-2xl mr-3"></i>
+                                <h3 class="text-xl font-bold">Payment Confirmed!</h3>
+                            </div>
+                            <p class="text-sm">Your invoice is being generated. Thank you!</p>
+                            <p class="text-sm mt-1">We will contact you shortly to finalize the license delivery.</p>
                         </div>
-                        <p class="text-sm">Your invoice is being generated. Thank you!</p>
-                        <p class="text-sm mt-1">We will contact you shortly to finalize the license delivery.</p>
-                    </div>
-                `;
+                    `;
 
-                // Show the invoice after a short delay
-                setTimeout(() => showInvoice(pendingInvoiceData), 2000);
+                    // Show the invoice after a short delay
+                    setTimeout(() => showInvoice(pendingInvoiceData), 2000);
+                } else {
+                    // Handle failed verification
+                    checkoutSuccessMessage.innerHTML = `
+                        <div class="text-center p-4 rounded-lg bg-red-100 text-red-700 border border-red-200">
+                            <div class="flex justify-center items-center mb-2">
+                                <i class="fas fa-times-circle text-2xl mr-3"></i>
+                                <h3 class="text-xl font-bold">Payment Verification Failed</h3>
+                            </div>
+                            <p class="text-sm">${verificationResult.message}</p>
+                            <p class="text-sm mt-1">Please try again in a few moments or contact support.</p>
+                            <button id="retry-verification-btn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Retry Verification
+                            </button>
+                        </div>
+                    `;
+                    // Allow the user to try again
+                    document.getElementById('retry-verification-btn').addEventListener('click', handlePaymentConfirmation);
+                }
             }
             
             // --- Countdown Timer Logic ---
@@ -783,12 +791,11 @@ Thank you for your puchased!
             // Final "Pay" button in checkout view
             payBtn.addEventListener('click', async () => {
                 // Reset previous errors
-                [customerNameInput, customerEmailInput, customerPhoneInput, customerTelegramInput].forEach(el => el.classList.remove('input-error'));
+                [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
 
                 const customerName = customerNameInput.value.trim();
                 const customerEmail = customerEmailInput.value.trim();
                 const customerPhone = customerPhoneInput.value.trim();
-                const customerTelegram = customerTelegramInput.value.trim();
                 let isValid = true;
                 let errorMessage = '';
 
@@ -808,10 +815,6 @@ Thank you for your puchased!
                      isValid = false;
                     customerEmailInput.classList.add('input-error');
                     errorMessage = 'Please enter a valid email address.';
-                } else if (customerTelegram && !validateTelegramUsername(customerTelegram)) {
-                    isValid = false;
-                    customerTelegramInput.classList.add('input-error');
-                    errorMessage = 'Please enter a valid Telegram username (e.g., @username).';
                 }
 
                 if (!isValid) {
@@ -838,7 +841,6 @@ Thank you for your puchased!
                     customerName: customerName,
                     customerEmail: customerEmail,
                     customerPhone: customerPhone,
-                    customerTelegram: customerTelegram
                 };
                 
                 // Open payment link in a new tab
@@ -847,44 +849,24 @@ Thank you for your puchased!
                 paymentMessage.classList.add('hidden'); 
                 checkoutButtons.classList.add('hidden'); 
 
-                // Show the "Waiting for confirmation" message
-                checkoutFlowMessage.innerHTML = `
-                    <div class="text-center p-4 rounded-lg bg-blue-100 text-blue-800 border border-blue-200">
-                         <div class="flex flex-col justify-center items-center gap-4">
-                            <div class="spinner"></div>
-                            <h3 class="text-xl font-bold">Awaiting Payment Confirmation...</h3>
-                            <p class="text-sm">Please complete the payment in the new tab.</p>
-                            <p class="text-sm">This page will update automatically once payment is confirmed.</p>
+                // Show the pending payment message with confirmation button
+                checkoutSuccessMessage.innerHTML = `
+                    <div class="text-center p-4 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-200">
+                         <div class="flex justify-center items-center mb-2">
+                            <i class="fas fa-hourglass-half text-2xl mr-3"></i>
+                            <h3 class="text-xl font-bold">Payment Pending</h3>
                         </div>
+                        <p class="text-sm">Please complete the payment in the new tab.</p>
+                        <p class="text-sm mt-1">Once finished, click the button below to verify your transaction.</p>
+                        <button id="confirm-payment-success-btn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                           Verify My Payment
+                        </button>
                     </div>
                 `;
-                checkoutFlowMessage.classList.remove('hidden');
+                checkoutSuccessMessage.classList.remove('hidden');
                 
-                // Start polling for payment status
-                const paymentResult = await pollForPaymentStatus();
-
-                if (paymentResult.success) {
-                    finalizeOrder();
-                } else {
-                     checkoutFlowMessage.innerHTML = `
-                        <div class="text-center p-4 rounded-lg bg-red-100 text-red-700 border border-red-200">
-                            <div class="flex flex-col justify-center items-center gap-3">
-                                <i class="fas fa-times-circle text-2xl"></i>
-                                <h3 class="text-xl font-bold">Payment Timed Out</h3>
-                                <p class="text-sm">We did not receive payment confirmation.</p>
-                                <p class="text-sm mt-1">If you have paid, please contact support with invoice #${pendingInvoiceData.invoiceNumber}.</p>
-                                 <button id="back-to-cart-after-fail" class="mt-4 w-full bg-gray-600 bg-opacity-20 text-gray-800 py-2 rounded-lg hover:bg-opacity-30 transition-colors">
-                                     Back to Cart
-                                 </button>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('back-to-cart-after-fail').addEventListener('click', () => {
-                        resetCheckoutView();
-                        checkoutView.classList.add('hidden');
-                        cartView.classList.remove('hidden');
-                    });
-                }
+                // Add event listener for the new confirmation button
+                document.getElementById('confirm-payment-success-btn').addEventListener('click', handlePaymentConfirmation);
             });
 
 
