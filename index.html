@@ -12,70 +12,109 @@
     <style>
         body {
             font-family: 'Ubuntu', sans-serif;
-            background: linear-gradient(120deg, #d2b48c 0%, #a8a8a8 100%); /* Desert Titanium gradient */
+            background: linear-gradient(120deg, #d2b48c 0%, #a8a8a8 100%);
             background-attachment: fixed;
         }
         .input-error {
             border-color: #ef4444 !important;
         }
         .glass-effect {
-            background: rgba(255, 255, 255, 0.20); /* Slightly more opaque white */
-            -webkit-backdrop-filter: blur(20px);  /* More blur */
-            backdrop-filter: blur(20px);          /* More blur */
-            border-radius: 1.5rem;                /* Softer, larger corners */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Slightly more visible border */
-            box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.05); /* Softer, more subtle shadow */
+            background: rgba(255, 255, 255, 0.20);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
         .glass-input {
-            background: rgba(255, 255, 255, 0.25); /* A bit more opaque than the container */
+            background: rgba(255, 255, 255, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.35);
-            color: #1f2937; /* dark gray text */
-            border-radius: 0.5rem; /* Tailwind 'rounded-lg' */
+            color: #1f2937;
+            border-radius: 0.5rem;
         }
         .glass-input::placeholder {
-            color: #6b7280; /* medium gray placeholder */
+            color: #6b7280;
         }
+
+        /* =============================================
+           FIX: Add-to-cart toast notification
+        ============================================= */
+        #toast-container {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(180, 120, 40, 0.92);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: toastIn 0.3s ease, toastOut 0.4s ease 1.6s forwards;
+            pointer-events: none;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to   { opacity: 0; transform: translateY(-8px) scale(0.95); }
+        }
+
+        /* Add-to-cart button pulse feedback */
+        .add-to-cart-btn.added {
+            animation: btnPulse 0.35s ease;
+        }
+        @keyframes btnPulse {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(0.88); }
+            100% { transform: scale(1); }
+        }
+
         @media print {
-            /* Hide everything in the body by default */
-            body > * {
-                display: none !important;
-            }
-            /* Make the modal container visible, but remove positioning and background */
+            body > * { display: none !important; }
             #modal {
                 display: block !important;
                 position: static !important;
                 background-color: transparent !important;
                 overflow: visible !important;
             }
-            /* Make the invoice view itself visible and take up the full page */
             #invoice-view {
                 display: block !important;
                 position: absolute !important;
-                top: 0;
-                left: 0;
-                width: 100%;
+                top: 0; left: 0; width: 100%;
                 max-height: none !important;
                 box-shadow: none !important;
                 border: none !important;
             }
-            /* Ensure the content within has no shadow */
-            #invoice-view-content {
-                box-shadow: none !important;
-            }
-             /* Explicitly hide elements marked as no-print */
-            .no-print {
-                display: none !important;
-            }
+            #invoice-view-content { box-shadow: none !important; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
+    <!-- =============================================
+         FIX: Toast container for add-to-cart feedback
+    ============================================= -->
+    <div id="toast-container"></div>
+
     <div class="flex-grow container mx-auto px-4 py-8">
         <header class="text-center mb-8">
             <div class="flex justify-center items-center gap-3">
-                <!-- SVG Logo --><svg class="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g stroke-width="10" stroke-linecap="butt">
                         <circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/>
                         <circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/>
@@ -91,8 +130,9 @@
             <h2 class="text-4xl font-bold text-gray-900 mt-4">License Store</h2>
             <p class="text-gray-700 mt-2">Your one-stop shop for licensing solutions.</p>
         </header>
-        
-        <!-- Flash Sale Banner --><div id="flash-sale-banner" class="glass-effect text-white text-center p-6 mb-12">
+
+        <!-- Flash Sale Banner -->
+        <div id="flash-sale-banner" class="glass-effect text-white text-center p-6 mb-12">
             <h3 class="text-3xl font-bold tracking-wider text-gray-900"><i class="fas fa-bolt mr-2 text-yellow-400"></i>Flash Time Promotion!</h3>
             <p class="text-xl mt-2 text-gray-800">Get an amazing <span class="font-bold text-yellow-400">50% OFF</span> on all licenses!</p>
             <div id="countdown-timer" class="mt-4 text-2xl font-mono flex justify-center items-center gap-2 md:gap-4 text-gray-900">
@@ -106,16 +146,16 @@
             </div>
         </div>
 
-
-        <!-- Products Section --><main class="w-full max-w-4xl mx-auto">
-            <div id="product-grid" class="space-y-12">
-                <!-- Product categories and cards will be injected here --></div>
+        <!-- Products Section -->
+        <main class="w-full max-w-4xl mx-auto">
+            <div id="product-grid" class="space-y-12"></div>
         </main>
     </div>
 
-    <!-- Footer --><footer class="glass-effect p-6 mt-12 no-print">
+    <!-- Footer -->
+    <footer class="glass-effect p-6 mt-12 no-print">
         <div class="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-y-4 gap-x-8 text-center lg:text-left">
-            <!-- Contact Info --><div class="flex flex-col md:flex-row items-center gap-x-6 gap-y-2 text-gray-800 text-sm flex-wrap justify-center">
+            <div class="flex flex-col md:flex-row items-center gap-x-6 gap-y-2 text-gray-800 text-sm flex-wrap justify-center">
                 <span class="inline-flex items-center gap-2"><i class="fas fa-map-marker-alt"></i>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</span>
                 <a href="mailto:vannsoksamrong@gmail.com" class="hover:text-gray-900 font-medium inline-flex items-center gap-2"><i class="fas fa-envelope"></i>vannsoksamrong@gmail.com</a>
                 <a href="tel:+85599339369" class="hover:text-gray-900 font-medium inline-flex items-center gap-2"><i class="fas fa-phone"></i>+855 99 339 369</a>
@@ -124,79 +164,76 @@
         </div>
     </footer>
 
-
-    <!-- Floating Cart Button --><button id="open-cart-btn" class="glass-effect fixed bottom-8 right-8 bg-amber-700 bg-opacity-50 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-2xl z-40 hover:bg-opacity-70 transition no-print">
+    <!-- Floating Cart Button -->
+    <button id="open-cart-btn" class="glass-effect fixed bottom-8 right-8 bg-amber-700 bg-opacity-50 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-2xl z-40 hover:bg-opacity-70 transition no-print">
         <i class="fas fa-shopping-cart"></i>
         <span id="cart-item-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">0</span>
     </button>
 
-    <!-- Modal Container --><div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        
-        <!-- Cart View --><div id="cart-view" class="glass-effect w-full max-w-md hidden">
-             <div class="p-6 relative">
-                 <button id="close-cart-popup-btn" class="absolute top-3 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold">&times;</button>
-                 <h3 class="text-2xl font-bold mb-4 text-center text-gray-900">Your Cart</h3>
-                 <div id="cart-items-popup" class="mb-4 max-h-[50vh] overflow-y-auto pr-2">
-                     <!-- Cart items will be injected here --></div>
-                 <div class="border-t border-gray-200 border-opacity-50 pt-4">
-                     <div class="flex justify-between items-center text-xl font-bold mb-4 text-gray-900">
-                         <span>Total:</span>
-                         <span id="cart-total-popup">$0.00</span>
-                     </div>
-                     <div class="flex flex-col gap-2">
-                         <button id="proceed-to-checkout-btn" class="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 transition-colors disabled:bg-gray-400 disabled:opacity-50">
-                             Proceed to Checkout
-                         </button>
-                         <button id="close-cart-btn" class="w-full bg-gray-600 bg-opacity-20 text-gray-800 py-2 rounded-lg hover:bg-opacity-30 transition-colors">
-                             Continue Shopping
-                         </button>
-                     </div>
-                 </div>
-             </div>
+    <!-- Modal Container -->
+    <!-- FIX: Clicking the backdrop (modal itself) now closes the modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+
+        <!-- Cart View -->
+        <div id="cart-view" class="glass-effect w-full max-w-md hidden">
+            <div class="p-6 relative">
+                <button id="close-cart-popup-btn" class="absolute top-3 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold">&times;</button>
+                <h3 class="text-2xl font-bold mb-4 text-center text-gray-900">Your Cart</h3>
+                <div id="cart-items-popup" class="mb-4 max-h-[50vh] overflow-y-auto pr-2"></div>
+                <div class="border-t border-gray-200 border-opacity-50 pt-4">
+                    <div class="flex justify-between items-center text-xl font-bold mb-4 text-gray-900">
+                        <span>Total:</span>
+                        <span id="cart-total-popup">$0.00</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button id="proceed-to-checkout-btn" class="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 transition-colors disabled:bg-gray-400 disabled:opacity-50">
+                            Proceed to Checkout
+                        </button>
+                        <button id="close-cart-btn" class="w-full bg-gray-600 bg-opacity-20 text-gray-800 py-2 rounded-lg hover:bg-opacity-30 transition-colors">
+                            Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Checkout View --><div id="checkout-view" class="glass-effect w-full max-w-md hidden">
+        <!-- Checkout View -->
+        <div id="checkout-view" class="glass-effect w-full max-w-md hidden">
             <div class="p-8 max-h-[90vh] overflow-y-auto">
                 <h3 class="text-2xl font-bold mb-4 text-center text-gray-900">Checkout</h3>
-            
                 <div id="modal-summary" class="text-gray-800 mb-6 border-b border-gray-200 border-opacity-50 pb-4"></div>
-                
                 <h4 class="text-lg font-semibold mb-3 text-gray-900">Customer Information</h4>
                 <div class="space-y-4 mb-6">
                     <input type="text" id="customer-name" placeholder="Full Name (Required)" class="w-full p-2 glass-input" required>
                     <input type="email" id="customer-email" placeholder="Email Address (Optional)" class="w-full p-2 glass-input">
+                    <!-- FIX: min/max attributes to help prevent invalid entries -->
                     <input type="tel" id="customer-phone" placeholder="Phone: 012 345 678 (Required)" class="w-full p-2 glass-input" required>
                 </div>
-
                 <div class="flex justify-between items-center text-lg font-bold mb-6 border-t border-gray-200 border-opacity-50 pt-4 text-gray-900">
                     <span>Total:</span>
                     <span id="modal-total">$0.00</span>
                 </div>
-
                 <div id="payment-message" class="hidden text-center p-3 rounded-lg my-4"></div>
-
                 <div class="sticky bottom-0 bg-transparent pt-4 pb-2">
                     <div id="checkout-buttons">
                         <button id="pay-btn" class="w-full bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700 transition-colors">
                             Proceed to Payment
                         </button>
-                         <button id="cancel-payment-btn" class="w-full bg-gray-600 bg-opacity-20 text-gray-800 py-2 rounded-lg hover:bg-opacity-30 transition-colors mt-2">
-                             Back to Cart
-                         </button>
+                        <button id="cancel-payment-btn" class="w-full bg-gray-600 bg-opacity-20 text-gray-800 py-2 rounded-lg hover:bg-opacity-30 transition-colors mt-2">
+                            Back to Cart
+                        </button>
                     </div>
-                    <div id="checkout-success-message" class="hidden">
-                        <!-- Dynamic success message goes here --></div>
+                    <div id="checkout-success-message" class="hidden"></div>
                 </div>
             </div>
         </div>
-        
-        <!-- Invoice View --><div id="invoice-view" class="glass-effect w-full max-w-2xl hidden">
-            <div id="invoice-view-content" class="p-8 max-h-[90vh] overflow-y-auto">
-                 <!-- Invoice content will be generated here --></div>
+
+        <!-- Invoice View -->
+        <div id="invoice-view" class="glass-effect w-full max-w-2xl hidden">
+            <div id="invoice-view-content" class="p-8 max-h-[90vh] overflow-y-auto"></div>
             <div class="sticky bottom-0 bg-transparent p-4 border-t border-gray-200 border-opacity-50 flex justify-end gap-2 no-print">
                 <button id="print-invoice-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                    <i class="fas fa-print"></i>
-                    Print Invoice
+                    <i class="fas fa-print"></i> Print Invoice
                 </button>
                 <button id="close-invoice-btn" class="bg-gray-600 bg-opacity-20 text-gray-800 px-4 py-2 rounded-lg hover:bg-opacity-30">Close</button>
             </div>
@@ -204,247 +241,295 @@
 
     </div>
 
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Product Data ---
-            const products = [
-                // Windows
-                { id: 101, name: 'Windows 11 Pro', price: 20.00, category: 'Windows', parent: 'Windows 11', description: 'All the features of Home, plus enterprise-grade security.' },
-                
-                // Office
-                { id: 201, name: 'Microsoft 365 Monthly', price: 6.00, category: 'Office', parent: 'Microsoft 365', description: 'Monthly subscription for web and mobile Office apps.' },
-                { id: 202, name: 'Project Professional', price: 300.00, category: 'Office', parent: 'Standalone Apps', description: 'Advanced project management tool.' },
-                { id: 203, name: 'Visio Professional', price: 300.00, category: 'Office', parent: 'Standalone Apps', description: 'Create professional diagrams and flowcharts.' },
+    document.addEventListener('DOMContentLoaded', () => {
 
-                // Server
-                { id: 301, name: 'Windows Server 2025 Standard', price: 1000.00, category: 'Server', parent: 'Windows Server 2025', description: 'The next generation of Windows Server.' },
-                { id: 302, name: 'SQL Server 2022 Standard', price: 1000.00, category: 'Server', parent: 'SQL Server', description: 'Relational database for mid-tier applications.' },
-                { id: 303, name: 'System Center 2022', price: 1000.00, category: 'Server', parent: 'System Center', description: 'Datacenter management solution.' },
-                
-                // Developer Tools
-                { id: 401, name: 'Visual Studio Professional', price: 1000.00, category: 'Developer Tools', parent: 'Visual Studio', description: 'Professional developer tools for building any application.' },
-                
-                // Design Tools
-                { id: 501, name: 'Canva Pro (Yearly)', price: 10.00, category: 'Design Tools', parent: 'Canva', description: 'Yearly subscription for Canva Pro design tools.' }
-            ];
-            const FLASH_SALE_DISCOUNT_PERCENTAGE = 50;
-            const PRICE_MULTIPLIER = 1 - (FLASH_SALE_DISCOUNT_PERCENTAGE / 100);
-            let cart = [];
-            let pendingInvoiceData = null; // To hold invoice data before payment confirmation
+        // =============================================
+        // CONFIGURATION
+        // =============================================
 
-            // --- DOM Elements ---
-            const productGrid = document.getElementById('product-grid');
-            const openCartBtn = document.getElementById('open-cart-btn');
-            const cartItemCount = document.getElementById('cart-item-count');
-            
-            // Modal and Views
-            const modal = document.getElementById('modal');
-            const cartView = document.getElementById('cart-view');
-            const checkoutView = document.getElementById('checkout-view');
-            const invoiceView = document.getElementById('invoice-view');
+        // FIX (SECURITY): Telegram credentials removed from frontend.
+        // Replace this URL with your own backend proxy endpoint
+        // (e.g. a Cloudflare Worker or small Node/Express server).
+        // The proxy should accept POST { text } and forward it to Telegram.
+        // Example Cloudflare Worker code is provided in the README comment at bottom.
+        const TELEGRAM_PROXY_URL = '/api/notify'; // <-- UPDATE THIS
 
-            // Cart View Elements
-            const cartItemsPopup = document.getElementById('cart-items-popup');
-            const cartTotalPopup = document.getElementById('cart-total-popup');
-            const proceedToCheckoutBtn = document.getElementById('proceed-to-checkout-btn');
-            const closeCartBtn = document.getElementById('close-cart-btn');
-            const closeCartPopupBtn = document.getElementById('close-cart-popup-btn');
+        const FLASH_SALE_DISCOUNT_PERCENTAGE = 50;
+        const PRICE_MULTIPLIER = 1 - (FLASH_SALE_DISCOUNT_PERCENTAGE / 100);
 
-            // Checkout View Elements
-            const customerNameInput = document.getElementById('customer-name');
-            const customerEmailInput = document.getElementById('customer-email');
-            const customerPhoneInput = document.getElementById('customer-phone');
-            const modalSummary = document.getElementById('modal-summary');
-            const modalTotal = document.getElementById('modal-total');
-            const payBtn = document.getElementById('pay-btn');
-            const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
-            const paymentMessage = document.getElementById('payment-message');
-            const checkoutButtons = document.getElementById('checkout-buttons');
-            const checkoutSuccessMessage = document.getElementById('checkout-success-message');
-            
-            // --- Validation Functions ---
-            function validateEmail(email) {
-                if (email.trim() === '') return true; // Optional field is valid if empty
-                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                return re.test(String(email).toLowerCase());
-            }
+        // FIX: Named constant instead of magic number
+        const FLASH_SALE_DURATION_MS = 1 * 24 * 60 * 60 * 1000; // 1 day
 
-            function validateCambodianPhone(phone) {
-                const re = /^(?:\+855|0)[1-9]\d{7,8}$/;
-                return re.test(phone.replace(/[\s-]/g, ''));
-            }
+        // --- Product Data ---
+        const products = [
+            { id: 101, name: 'Windows 11 Pro',           price: 20.00,   category: 'Windows',        parent: 'Windows 11',       description: 'All the features of Home, plus enterprise-grade security.' },
+            { id: 201, name: 'Microsoft 365 Monthly',    price: 6.00,    category: 'Office',          parent: 'Microsoft 365',    description: 'Monthly subscription for web and mobile Office apps.' },
+            { id: 202, name: 'Project Professional',     price: 300.00,  category: 'Office',          parent: 'Standalone Apps',  description: 'Advanced project management tool.' },
+            { id: 203, name: 'Visio Professional',       price: 300.00,  category: 'Office',          parent: 'Standalone Apps',  description: 'Create professional diagrams and flowcharts.' },
+            { id: 301, name: 'Windows Server 2025 Standard', price: 1000.00, category: 'Server',     parent: 'Windows Server 2025', description: 'The next generation of Windows Server.' },
+            { id: 302, name: 'SQL Server 2022 Standard', price: 1000.00, category: 'Server',          parent: 'SQL Server',       description: 'Relational database for mid-tier applications.' },
+            { id: 303, name: 'System Center 2022',       price: 1000.00, category: 'Server',          parent: 'System Center',    description: 'Datacenter management solution.' },
+            { id: 401, name: 'Visual Studio Professional', price: 1000.00, category: 'Developer Tools', parent: 'Visual Studio', description: 'Professional developer tools for building any application.' },
+            { id: 501, name: 'Canva Pro (Yearly)',        price: 10.00,  category: 'Design Tools',    parent: 'Canva',            description: 'Yearly subscription for Canva Pro design tools.' },
+        ];
 
-            // --- Core Functions ---
+        let cart = [];
+        let pendingInvoiceData = null;
 
-            // Render Products on the main page
-            function renderProducts() {
-                productGrid.innerHTML = '';
-                const categories = ['Windows', 'Design Tools', 'Office', 'Server', 'Developer Tools'];
-                const productsByCategory = categories.map(category => ({
-                    name: category,
-                    products: products.filter(p => p.category === category)
-                }));
+        // --- DOM Elements ---
+        const productGrid       = document.getElementById('product-grid');
+        const openCartBtn       = document.getElementById('open-cart-btn');
+        const cartItemCount     = document.getElementById('cart-item-count');
+        const modal             = document.getElementById('modal');
+        const cartView          = document.getElementById('cart-view');
+        const checkoutView      = document.getElementById('checkout-view');
+        const invoiceView       = document.getElementById('invoice-view');
+        const cartItemsPopup    = document.getElementById('cart-items-popup');
+        const cartTotalPopup    = document.getElementById('cart-total-popup');
+        const proceedToCheckoutBtn   = document.getElementById('proceed-to-checkout-btn');
+        const closeCartBtn      = document.getElementById('close-cart-btn');
+        const closeCartPopupBtn = document.getElementById('close-cart-popup-btn');
+        const customerNameInput  = document.getElementById('customer-name');
+        const customerEmailInput = document.getElementById('customer-email');
+        const customerPhoneInput = document.getElementById('customer-phone');
+        const modalSummary      = document.getElementById('modal-summary');
+        const modalTotal        = document.getElementById('modal-total');
+        const payBtn            = document.getElementById('pay-btn');
+        const cancelPaymentBtn  = document.getElementById('cancel-payment-btn');
+        const paymentMessage    = document.getElementById('payment-message');
+        const checkoutButtons   = document.getElementById('checkout-buttons');
+        const checkoutSuccessMessage = document.getElementById('checkout-success-message');
+        const toastContainer    = document.getElementById('toast-container');
 
-                productsByCategory.forEach(category => {
-                    if (category.products.length === 0) return;
+        // =============================================
+        // FIX: Toast notification helper
+        // =============================================
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 2100);
+        }
 
-                    // Add category header
-                    const categoryHeader = `<h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400 border-opacity-30">${category.name}</h2>`;
-                    productGrid.innerHTML += categoryHeader;
-                    
-                    const categoryContainer = document.createElement('div');
-                    categoryContainer.className = "space-y-6";
-                    
-                    // Group products by parent
-                    const productsByParent = category.products.reduce((acc, product) => {
-                        const parent = product.parent || product.name;
-                        if (!acc[parent]) {
-                            acc[parent] = [];
-                        }
-                        acc[parent].push(product);
-                        return acc;
-                    }, {});
+        // =============================================
+        // Validation
+        // =============================================
+        function validateEmail(email) {
+            if (email.trim() === '') return true;
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
 
-                    for (const parentName in productsByParent) {
-                        const productGroup = productsByParent[parentName];
-                        
-                        const groupContainer = document.createElement('div');
-                        groupContainer.className = 'glass-effect p-6';
-                        
-                        // Add parent product name as a header for the group
-                        groupContainer.innerHTML += `<h3 class="text-2xl font-semibold text-gray-800 mb-4">${parentName}</h3>`;
-                        
-                        const versionsContainer = document.createElement('div');
-                        versionsContainer.className = "space-y-4";
-                        
-                        productGroup.forEach(product => {
-                            const discountedPrice = product.price * PRICE_MULTIPLIER;
-                            const productCard = `
-                                <div class="bg-white bg-opacity-40 p-4 rounded-lg flex flex-col md:flex-row justify-between items-center transition hover:bg-opacity-60">
-                                    <div class="flex-grow mb-4 md:mb-0">
-                                        <h4 class="text-lg font-semibold text-gray-900">${product.name}</h4>
-                                        <p class="text-gray-700 text-sm">${product.description}</p>
-                                    </div>
-                                    <div class="flex items-center gap-4 shrink-0 md:pl-6">
-                                        <div class="text-right">
-                                            <span class="text-gray-600 line-through text-md">$${product.price.toFixed(2)}</span>
-                                            <span class="text-xl font-bold text-red-600 ml-2">$${discountedPrice.toFixed(2)}</span>
-                                        </div>
-                                        <button data-id="${product.id}" class="add-to-cart-btn bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2">
-                                            <i class="fas fa-shopping-cart"></i>Add
-                                        </button>
-                                    </div>
+        // FIX: Strip more separator types before validating phone
+        function validateCambodianPhone(phone) {
+            const re = /^(?:\+855|0)[1-9]\d{7,8}$/;
+            return re.test(phone.replace(/[\s\-().]/g, ''));
+        }
+
+        // =============================================
+        // Render Products
+        // FIX: Use DocumentFragment instead of innerHTML += in loops
+        // =============================================
+        function renderProducts() {
+            const categories = ['Windows', 'Design Tools', 'Office', 'Server', 'Developer Tools'];
+            const fragment = document.createDocumentFragment();
+
+            categories.forEach(categoryName => {
+                const categoryProducts = products.filter(p => p.category === categoryName);
+                if (categoryProducts.length === 0) return;
+
+                const headerEl = document.createElement('h2');
+                headerEl.className = 'text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400 border-opacity-30';
+                headerEl.textContent = categoryName;
+                fragment.appendChild(headerEl);
+
+                const categoryContainer = document.createElement('div');
+                categoryContainer.className = 'space-y-6';
+
+                // Group by parent
+                const byParent = categoryProducts.reduce((acc, p) => {
+                    (acc[p.parent] = acc[p.parent] || []).push(p);
+                    return acc;
+                }, {});
+
+                for (const parentName in byParent) {
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'glass-effect p-6';
+
+                    const parentHeader = document.createElement('h3');
+                    parentHeader.className = 'text-2xl font-semibold text-gray-800 mb-4';
+                    parentHeader.textContent = parentName;
+                    groupEl.appendChild(parentHeader);
+
+                    const versionsContainer = document.createElement('div');
+                    versionsContainer.className = 'space-y-4';
+
+                    byParent[parentName].forEach(product => {
+                        const discountedPrice = (product.price * PRICE_MULTIPLIER).toFixed(2);
+                        const card = document.createElement('div');
+                        card.className = 'bg-white bg-opacity-40 p-4 rounded-lg flex flex-col md:flex-row justify-between items-center transition hover:bg-opacity-60';
+                        card.innerHTML = `
+                            <div class="flex-grow mb-4 md:mb-0">
+                                <h4 class="text-lg font-semibold text-gray-900">${product.name}</h4>
+                                <p class="text-gray-700 text-sm">${product.description}</p>
+                            </div>
+                            <div class="flex items-center gap-4 shrink-0 md:pl-6">
+                                <div class="text-right">
+                                    <span class="text-gray-600 line-through text-md">$${product.price.toFixed(2)}</span>
+                                    <span class="text-xl font-bold text-red-600 ml-2">$${discountedPrice}</span>
                                 </div>
-                            `;
-                            versionsContainer.innerHTML += productCard;
-                        });
-                        groupContainer.appendChild(versionsContainer);
-                        categoryContainer.appendChild(groupContainer);
-                    }
-                    productGrid.appendChild(categoryContainer);
-                });
-            }
-
-
-            // Render Cart content in the popup
-            function renderCart() {
-                cartItemsPopup.innerHTML = '';
-                if (cart.length === 0) {
-                    cartItemsPopup.innerHTML = '<p class="text-gray-600 text-center">Your cart is empty.</p>';
-                    proceedToCheckoutBtn.disabled = true;
-                } else {
-                    proceedToCheckoutBtn.disabled = false;
-                    cart.forEach(item => {
-                        const cartItem = `
-                            <div class="flex justify-between items-center mb-3 text-gray-800">
-                                <div class="flex-grow pr-2">
-                                    <p class="font-semibold">${item.name}</p>
-                                    <p class="text-sm text-gray-600">$${item.currentPrice.toFixed(2)} ea.</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="number" min="1" value="${item.quantity}" data-id="${item.id}" class="quantity-input w-16 text-center border mx-2 glass-input">
-                                </div>
-                                <p class="font-bold w-20 text-right">$${(item.currentPrice * item.quantity).toFixed(2)}</p>
-                                <button class="remove-from-cart-btn text-red-500 hover:text-red-700 ml-4 text-lg" data-id="${item.id}">
-                                    <i class="fas fa-trash-alt"></i>
+                                <button data-id="${product.id}" data-name="${product.name}"
+                                    class="add-to-cart-btn bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2">
+                                    <i class="fas fa-shopping-cart"></i>Add
                                 </button>
                             </div>
                         `;
-                        cartItemsPopup.innerHTML += cartItem;
+                        versionsContainer.appendChild(card);
                     });
+
+                    groupEl.appendChild(versionsContainer);
+                    categoryContainer.appendChild(groupEl);
                 }
-                updateCartTotal();
+                fragment.appendChild(categoryContainer);
+            });
+
+            productGrid.innerHTML = '';
+            productGrid.appendChild(fragment);
+        }
+
+        // =============================================
+        // Render Cart
+        // FIX: Use DocumentFragment instead of innerHTML += in loop
+        // =============================================
+        function renderCart() {
+            const fragment = document.createDocumentFragment();
+
+            if (cart.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-gray-600 text-center';
+                empty.textContent = 'Your cart is empty.';
+                fragment.appendChild(empty);
+                proceedToCheckoutBtn.disabled = true;
+            } else {
+                proceedToCheckoutBtn.disabled = false;
+                cart.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'flex justify-between items-center mb-3 text-gray-800';
+                    row.innerHTML = `
+                        <div class="flex-grow pr-2">
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-sm text-gray-600">$${item.currentPrice.toFixed(2)} ea.</p>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="number" min="1" max="999" value="${item.quantity}"
+                                data-id="${item.id}" class="quantity-input w-16 text-center border mx-2 glass-input">
+                        </div>
+                        <p class="font-bold w-20 text-right">$${(item.currentPrice * item.quantity).toFixed(2)}</p>
+                        <button class="remove-from-cart-btn text-red-500 hover:text-red-700 ml-4 text-lg" data-id="${item.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    `;
+                    fragment.appendChild(row);
+                });
             }
-            
-            // Update quantity from input in cart popup
-            function updateCartQuantity(productId, quantity) {
-                const cartItem = cart.find(item => item.id === productId);
-                if (cartItem) {
-                    if (quantity > 0) {
-                       cartItem.quantity = quantity;
-                    } else {
-                        // If quantity is 0 or less, treat as removal
-                        removeFromCart(productId);
-                    }
-                }
+
+            cartItemsPopup.innerHTML = '';
+            cartItemsPopup.appendChild(fragment);
+            updateCartTotal();
+        }
+
+        function updateCartQuantity(productId, quantity) {
+            if (quantity <= 0) {
+                removeFromCart(productId);
+            } else {
+                const item = cart.find(i => i.id === productId);
+                if (item) item.quantity = quantity;
                 renderCart();
             }
+        }
 
-            function removeFromCart(productId) {
-                cart = cart.filter(item => item.id !== productId);
-                renderCart();
+        function removeFromCart(productId) {
+            cart = cart.filter(i => i.id !== productId);
+            renderCart();
+        }
+
+        function updateCartTotal() {
+            const total = cart.reduce((sum, i) => sum + (i.currentPrice * i.quantity), 0);
+            const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+            cartTotalPopup.textContent = `$${total.toFixed(2)}`;
+            cartItemCount.textContent = totalItems;
+            return total;
+        }
+
+        // FIX: addToCart now accepts the button element for pulse animation + shows toast
+        function addToCart(productId, productName, btnEl) {
+            const product = products.find(p => p.id === productId);
+            const discountedPrice = product.price * PRICE_MULTIPLIER;
+            const cartItem = cart.find(i => i.id === productId);
+
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1, currentPrice: discountedPrice });
             }
 
-            // Update total price and badge count
-            function updateCartTotal() {
-                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
-                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                
-                cartTotalPopup.textContent = `$${total.toFixed(2)}`;
-                cartItemCount.textContent = totalItems;
-                return total;
+            // FIX: Visual feedback
+            if (btnEl) {
+                btnEl.classList.add('added');
+                btnEl.addEventListener('animationend', () => btnEl.classList.remove('added'), { once: true });
             }
+            showToast(`${productName} added to cart`);
+            renderCart();
+        }
 
-            // Add product to cart
-            function addToCart(productId) {
-                const product = products.find(p => p.id === productId);
-                const discountedPrice = product.price * PRICE_MULTIPLIER;
-                const cartItem = cart.find(item => item.id === productId);
+        function resetCheckoutView() {
+            paymentMessage.classList.add('hidden');
+            checkoutSuccessMessage.classList.add('hidden');
+            checkoutButtons.classList.remove('hidden');
+            payBtn.disabled = false;
+            payBtn.textContent = 'Proceed to Payment';
+            customerNameInput.value = '';
+            customerEmailInput.value = '';
+            customerPhoneInput.value = '';
+            [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
+        }
 
-                if (cartItem) {
-                    cartItem.quantity++;
-                } else {
-                    cart.push({ ...product, quantity: 1, currentPrice: discountedPrice });
-                }
-                renderCart();
-            }
-            
-            // Reset checkout form state
-            function resetCheckoutView() {
-                paymentMessage.classList.add('hidden');
-                checkoutSuccessMessage.classList.add('hidden'); // Hide success message
-                checkoutButtons.classList.remove('hidden');    // Show buttons again
+        // =============================================
+        // Helpers to open/close the modal cleanly
+        // =============================================
+        function openModal(viewEl) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            [cartView, checkoutView, invoiceView].forEach(v => v.classList.add('hidden'));
+            viewEl.classList.remove('hidden');
+        }
 
-                payBtn.disabled = false;
-                payBtn.textContent = 'Proceed to Payment';
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
 
-                customerNameInput.value = '';
-                customerEmailInput.value = '';
-                customerPhoneInput.value = '';
-                [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
-            }
+        // =============================================
+        // FIX: Backdrop click closes modal
+        // =============================================
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
 
-            // Generate plain text invoice for Telegram
-            function generateInvoiceText(invoiceData) {
-                let itemsText = cart.map(item => 
-                    `${item.name} (Qty: ${item.quantity}) @ $${item.currentPrice.toFixed(2)} ea.`
-                ).join('\n');
+        // =============================================
+        // Generate Invoice Text for Telegram notification
+        // =============================================
+        function generateInvoiceText(invoiceData) {
+            const itemsText = cart.map(item =>
+                `${item.name} (Qty: ${item.quantity}) @ $${item.currentPrice.toFixed(2)} ea.`
+            ).join('\n');
 
-                return `
+            return `
 *INVOICE FROM xstore*
 ---------------------------------
-*Invoice #: * ${invoiceData.invoiceNumber}
+*Invoice #:* ${invoiceData.invoiceNumber}
 *Date:* ${invoiceData.issueDate}
 *Time:* ${invoiceData.issueTime}
 
@@ -463,403 +548,370 @@ ${itemsText}
 *Payment Method:* PayWay
 *Status:* PAID
 
-Thank you for your puchased!
-                `;
-            }
-            
-            // Send invoice to Telegram bot
-            async function sendToTelegram(text) {
-                const botToken = "7810843856:AAGr5XJRd3pn7m_RXDBmhLsbk6fbIFqSFRc";
-                const chatId = "-1002491153395";
-                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+Thank you for your purchase!
+            `.trim();
+        }
 
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: chatId,
-                            text: text,
-                            parse_mode: 'Markdown'
-                        }),
-                    });
-                    const result = await response.json();
-                    if (!result.ok) {
-                        throw new Error(result.description || 'Failed to send message to Telegram.');
-                    }
-                    return { success: true };
-                } catch (error) {
-                    console.error('Telegram API Error:', error);
-                    return { success: false, message: error.message };
-                }
-            }
-
-            // Generate and display the HTML invoice
-            function showInvoice(invoiceData) {
-                const { invoiceNumber, issueDate, issueTime, subtotal, discountAmount, total, customerName, customerEmail, customerPhone } = invoiceData;
-
-                let itemsHtml = cart.map(item => `
-                    <tr class="border-b border-gray-400">
-                        <td class="py-2 pr-2 text-gray-900">${item.name}</td>
-                        <td class="py-2 text-center text-gray-800">${item.quantity}</td>
-                        <td class="py-2 text-right text-gray-800">$${item.price.toFixed(2)}</td>
-                        <td class="py-2 text-right text-gray-800">$${(item.price * PRICE_MULTIPLIER).toFixed(2)}</td>
-                        <td class="py-2 text-right pl-2 text-gray-900 font-bold">$${(item.price * PRICE_MULTIPLIER * item.quantity).toFixed(2)}</td>
-                    </tr>
-                `).join('');
-
-                const invoiceHTML = `
-                    <div class="flex justify-between items-start mb-8 text-gray-900">
-                        <div>
-                             <div class="flex items-center gap-3">
-                                 <svg class="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="10" stroke-linecap="butt"><circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/><circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/></g><text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text></svg>
-                                 <div>
-                                     <h1 class="text-2xl font-bold text-blue-600 tracking-wider">xstore</h1>
-                                     <p>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
-                                     <p>chamrong@outlook.com</p>
-                                     <p>+855 69 339 369</p>
-                                     <p>Telegram: @chamrong_vann</p>
-                                 </div>
-                             </div>
-                        </div>
-                        <div class="text-right">
-                            <h2 class="text-2xl font-bold uppercase">Invoice</h2>
-                            <p>#${invoiceNumber}</p>
-                            <p>Date: ${issueDate}</p>
-                            <p>Time: ${issueTime}</p>
-                        </div>
-                    </div>
-                    <div class="mb-8 text-gray-800">
-                        <h3 class="font-bold mb-1">Bill To:</h3>
-                        <p>${customerName}</p>
-                        <p>${customerEmail || 'N/A'}</p>
-                        <p>${customerPhone}</p>
-                    </div>
-                    <table class="w-full mb-8 text-sm">
-                        <thead>
-                            <tr class="bg-gray-500 bg-opacity-20 text-gray-900">
-                                <th class="text-left font-bold p-2">Item</th>
-                                <th class="font-bold p-2">Qty</th>
-                                <th class="text-right font-bold p-2">Original Price</th>
-                                <th class="text-right font-bold p-2">Discounted Price</th>
-                                <th class="text-right font-bold p-2">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>${itemsHtml}</tbody>
-                    </table>
-                    <div class="flex justify-between items-end pt-8 border-t border-gray-400">
-                        <div class="text-sm text-gray-700">
-                            <p><span class="font-bold text-gray-800">Payment Method:</span> PayWay</p>
-                            <p class="font-bold mt-4 text-gray-800">Thank you for your business!</p>
-                        </div>
-                        <div class="w-full md:w-2/5 space-y-2 text-right text-gray-800">
-                            <div class="flex justify-between"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
-                            <div class="flex justify-between text-red-600"><span>Flash Time Discount (${FLASH_SALE_DISCOUNT_PERCENTAGE}%):</span><span>-$${discountAmount.toFixed(2)}</span></div>
-                            <div class="flex justify-between font-bold text-xl bg-gray-500 bg-opacity-20 p-3 rounded-lg mt-2 text-gray-900">
-                                <span>TOTAL:</span>
-                                <span>$${total.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Switch views
-                checkoutView.classList.add('hidden');
-                document.getElementById('invoice-view-content').innerHTML = invoiceHTML;
-                invoiceView.classList.remove('hidden');
-
-                // Add event listeners for new buttons
-                document.getElementById('print-invoice-btn').onclick = () => window.print();
-                document.getElementById('close-invoice-btn').onclick = () => {
-                    modal.classList.add('hidden');
-                    invoiceView.classList.add('hidden');
-                    // Reset everything for the next customer
-                    cart = [];
-                    renderCart(); 
-                };
-            }
-
-            // SIMULATE payment verification
-            async function verifyPayWayPayment(transactionId) {
-                console.log(`Simulating payment verification for transaction ID: ${transactionId}`);
-                // In a real-world scenario, this would be a server-side call to the PayWay API.
-                // It's not possible to securely call the real PayWay API from the frontend.
-                // This function simulates that process.
-
-                // Simulate network delay for the API call
-                await new Promise(resolve => setTimeout(resolve, 2500));
-
-                // Simulate a successful response. In a real app, you would check the API response.
-                const isSuccess = true; 
-                if (isSuccess) {
-                    console.log('Payment verification successful (simulated).');
-                    return { success: true, message: 'Payment confirmed.' };
-                } else {
-                    console.log('Payment verification failed (simulated).');
-                    return { success: false, message: 'Payment not found or still pending.' };
-                }
-            }
-
-
-            // This function is called when the user confirms they have paid
-            async function handlePaymentConfirmation() {
-                const confirmBtn = document.getElementById('confirm-payment-success-btn');
-                if (!confirmBtn || !pendingInvoiceData) return;
-
-                confirmBtn.disabled = true;
-                confirmBtn.textContent = 'Verifying Payment...';
-                
-                // Update the message shown to the user while verifying
-                const messageContainer = checkoutSuccessMessage.querySelector('div');
-                messageContainer.querySelector('h3').textContent = 'Verifying Payment';
-                messageContainer.querySelectorAll('p').forEach(p => p.classList.add('hidden'));
-
-
-                // Call the simulated verification function
-                const verificationResult = await verifyPayWayPayment(pendingInvoiceData.invoiceNumber);
-
-                if (verificationResult.success) {
-                    // Send notification to Telegram
-                    const invoiceText = generateInvoiceText(pendingInvoiceData);
-                    await sendToTelegram(invoiceText);
-
-                    // Update UI to final success message
-                    checkoutSuccessMessage.innerHTML = `
-                        <div class="text-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
-                            <div class="flex justify-center items-center mb-2">
-                                <i class="fas fa-check-circle text-2xl mr-3"></i>
-                                <h3 class="text-xl font-bold">Payment Confirmed!</h3>
-                            </div>
-                            <p class="text-sm">Your invoice is being generated. Thank you!</p>
-                            <p class="text-sm mt-1">We will contact you shortly to finalize the license delivery.</p>
-                        </div>
-                    `;
-
-                    // Show the invoice after a short delay
-                    setTimeout(() => showInvoice(pendingInvoiceData), 2000);
-                } else {
-                    // Handle failed verification
-                    checkoutSuccessMessage.innerHTML = `
-                        <div class="text-center p-4 rounded-lg bg-red-100 text-red-700 border border-red-200">
-                            <div class="flex justify-center items-center mb-2">
-                                <i class="fas fa-times-circle text-2xl mr-3"></i>
-                                <h3 class="text-xl font-bold">Payment Verification Failed</h3>
-                            </div>
-                            <p class="text-sm">${verificationResult.message}</p>
-                            <p class="text-sm mt-1">Please try again in a few moments or contact support.</p>
-                            <button id="retry-verification-btn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                Retry Verification
-                            </button>
-                        </div>
-                    `;
-                    // Allow the user to try again
-                    document.getElementById('retry-verification-btn').addEventListener('click', handlePaymentConfirmation);
-                }
-            }
-            
-            // --- Countdown Timer Logic ---
-            function startCountdown() {
-                let flashSaleEndDate = localStorage.getItem('flashSaleEndDate');
-
-                // If no end date or if it has passed, set a new one 1 day from now
-                if (!flashSaleEndDate || new Date().getTime() > flashSaleEndDate) {
-                    flashSaleEndDate = new Date().getTime() + 1 * 24 * 60 * 60 * 1000;
-                    localStorage.setItem('flashSaleEndDate', flashSaleEndDate);
-                }
-
-                const countdownInterval = setInterval(() => {
-                    const now = new Date().getTime();
-                    const distance = flashSaleEndDate - now;
-
-                    if (distance < 0) {
-                        clearInterval(countdownInterval);
-                        // Restart the countdown for the next cycle
-                        startCountdown();
-                        return;
-                    }
-
-                    // Time calculations for days, hours, minutes and seconds
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    // Display the result in the elements, ensuring two digits
-                    document.getElementById('days').textContent = String(days).padStart(2, '0');
-                    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-                    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-                    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-                }, 1000);
-            }
-
-            // --- Event Listeners ---
-
-            // Add to cart button on product cards
-            productGrid.addEventListener('click', (e) => {
-                const btn = e.target.closest('.add-to-cart-btn');
-                if (btn) {
-                    const productId = parseInt(btn.dataset.id);
-                    addToCart(productId);
-                }
-            });
-            
-            // Listen for clicks on remove button and changes on quantity input
-            cartItemsPopup.addEventListener('click', e => {
-                const removeBtn = e.target.closest('.remove-from-cart-btn');
-                if (removeBtn) {
-                    const productId = parseInt(removeBtn.dataset.id, 10);
-                    removeFromCart(productId);
-                }
-            });
-
-            cartItemsPopup.addEventListener('change', e => {
-                if (e.target.classList.contains('quantity-input')) {
-                    const productId = parseInt(e.target.dataset.id, 10);
-                    const quantity = parseInt(e.target.value, 10);
-                    updateCartQuantity(productId, quantity);
-                }
-            });
-
-            // Floating cart button to open cart view
-            openCartBtn.addEventListener('click', () => {
-                renderCart(); // Ensure cart is up to date
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                cartView.classList.remove('hidden');
-                checkoutView.classList.add('hidden');
-                invoiceView.classList.add('hidden');
-            });
-            
-            // Close cart view with bottom button or top 'X'
-            [closeCartBtn, closeCartPopupBtn].forEach(btn => {
-                btn.addEventListener('click', () => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
+        // =============================================
+        // FIX (SECURITY): Send via backend proxy instead
+        // of calling Telegram directly with your bot token.
+        // =============================================
+        async function sendNotification(text) {
+            try {
+                const response = await fetch(TELEGRAM_PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text }),
                 });
-            });
+                if (!response.ok) throw new Error(`Proxy returned ${response.status}`);
+                return { success: true };
+            } catch (error) {
+                console.error('Notification error:', error);
+                // Non-fatal: log only; don't block invoice display
+                return { success: false, message: error.message };
+            }
+        }
 
+        // =============================================
+        // Show Invoice (HTML)
+        // =============================================
+        function showInvoice(invoiceData) {
+            const { invoiceNumber, issueDate, issueTime, subtotal, discountAmount, total,
+                    customerName, customerEmail, customerPhone } = invoiceData;
 
-            // "Proceed to Checkout" button in cart view
-            proceedToCheckoutBtn.addEventListener('click', () => {
-                // Populate checkout summary
-                modalSummary.innerHTML = '';
-                let total = 0;
-                cart.forEach(item => {
-                    const summaryItem = `<div class="flex justify-between py-1"><p>${item.name} (x${item.quantity})</p> <p class="font-semibold">$${(item.currentPrice * item.quantity).toFixed(2)}</p></div>`;
-                    modalSummary.innerHTML += summaryItem;
-                    total += item.currentPrice * item.quantity;
-                });
-                modalTotal.textContent = `$${total.toFixed(2)}`;
-                
-                resetCheckoutView();
-                
-                // Switch views
-                cartView.classList.add('hidden');
-                checkoutView.classList.remove('hidden');
-            });
-            
-            // "Back to Cart" button in checkout view
-            cancelPaymentBtn.addEventListener('click', () => {
-                checkoutView.classList.add('hidden');
-                cartView.classList.remove('hidden');
-            });
+            const itemsHtml = cart.map(item => `
+                <tr class="border-b border-gray-400">
+                    <td class="py-2 pr-2 text-gray-900">${item.name}</td>
+                    <td class="py-2 text-center text-gray-800">${item.quantity}</td>
+                    <td class="py-2 text-right text-gray-800">$${item.price.toFixed(2)}</td>
+                    <td class="py-2 text-right text-gray-800">$${(item.price * PRICE_MULTIPLIER).toFixed(2)}</td>
+                    <td class="py-2 text-right pl-2 text-gray-900 font-bold">$${(item.price * PRICE_MULTIPLIER * item.quantity).toFixed(2)}</td>
+                </tr>
+            `).join('');
 
-            // Final "Pay" button in checkout view
-            payBtn.addEventListener('click', async () => {
-                // Reset previous errors
-                [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
+            document.getElementById('invoice-view-content').innerHTML = `
+                <div class="flex justify-between items-start mb-8 text-gray-900">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <svg class="h-12 w-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke-width="10" stroke-linecap="butt"><circle cx="50" cy="50" r="40" stroke="#EA4335" stroke-dasharray="41.887 251.327" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#F9A825" stroke-dasharray="41.887 251.327" transform="rotate(-30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#34A853" stroke-dasharray="41.887 251.327" transform="rotate(30 50 50)"/><circle cx="50" cy="50" r="40" stroke="#4285F4" stroke-dasharray="41.887 251.327" transform="rotate(90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#8E44AD" stroke-dasharray="41.887 251.327" transform="rotate(150 50 50)"/><circle cx="50" cy="50" r="40" stroke="#1ABC9C" stroke-dasharray="41.887 251.327" transform="rotate(210 50 50)"/></g><text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="Ubuntu, sans-serif" font-size="50" font-weight="700" fill="#4285F4">X</text></svg>
+                            <div>
+                                <h1 class="text-2xl font-bold text-blue-600 tracking-wider">xstore</h1>
+                                <p>#60E0, St108, Wat Phnom, Doun Penh, Phnom Penh.</p>
+                                <p>chamrong@outlook.com</p>
+                                <p>+855 69 339 369</p>
+                                <p>Telegram: @chamrong_vann</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="text-2xl font-bold uppercase">Invoice</h2>
+                        <p>#${invoiceNumber}</p>
+                        <p>Date: ${issueDate}</p>
+                        <p>Time: ${issueTime}</p>
+                    </div>
+                </div>
+                <div class="mb-8 text-gray-800">
+                    <h3 class="font-bold mb-1">Bill To:</h3>
+                    <p>${customerName}</p>
+                    <p>${customerEmail || 'N/A'}</p>
+                    <p>${customerPhone}</p>
+                </div>
+                <table class="w-full mb-8 text-sm">
+                    <thead>
+                        <tr class="bg-gray-500 bg-opacity-20 text-gray-900">
+                            <th class="text-left font-bold p-2">Item</th>
+                            <th class="font-bold p-2">Qty</th>
+                            <th class="text-right font-bold p-2">Original Price</th>
+                            <th class="text-right font-bold p-2">Discounted Price</th>
+                            <th class="text-right font-bold p-2">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemsHtml}</tbody>
+                </table>
+                <div class="flex justify-between items-end pt-8 border-t border-gray-400">
+                    <div class="text-sm text-gray-700">
+                        <p><span class="font-bold text-gray-800">Payment Method:</span> PayWay</p>
+                        <p class="font-bold mt-4 text-gray-800">Thank you for your business!</p>
+                    </div>
+                    <div class="w-full md:w-2/5 space-y-2 text-right text-gray-800">
+                        <div class="flex justify-between"><span>Subtotal:</span><span>$${subtotal.toFixed(2)}</span></div>
+                        <div class="flex justify-between text-red-600"><span>Flash Time Discount (${FLASH_SALE_DISCOUNT_PERCENTAGE}%):</span><span>-$${discountAmount.toFixed(2)}</span></div>
+                        <div class="flex justify-between font-bold text-xl bg-gray-500 bg-opacity-20 p-3 rounded-lg mt-2 text-gray-900">
+                            <span>TOTAL:</span><span>$${total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-                const customerName = customerNameInput.value.trim();
-                const customerEmail = customerEmailInput.value.trim();
-                const customerPhone = customerPhoneInput.value.trim();
-                let isValid = true;
-                let errorMessage = '';
+            openModal(invoiceView);
 
-                if (!customerName) {
-                    isValid = false;
-                    customerNameInput.classList.add('input-error');
-                    errorMessage = 'Please enter your full name.';
-                } else if (!customerPhone) {
-                    isValid = false;
-                    customerPhoneInput.classList.add('input-error');
-                    errorMessage = 'A valid phone number is required.';
-                } else if (!validateCambodianPhone(customerPhone)) {
-                     isValid = false;
-                    customerPhoneInput.classList.add('input-error');
-                    errorMessage = 'Please enter a valid Cambodian phone number (e.g., 012345678).';
-                } else if (customerEmail && !validateEmail(customerEmail)) {
-                     isValid = false;
-                    customerEmailInput.classList.add('input-error');
-                    errorMessage = 'Please enter a valid email address.';
-                }
+            document.getElementById('print-invoice-btn').onclick = () => window.print();
+            document.getElementById('close-invoice-btn').onclick = () => {
+                // FIX: Also reset pendingInvoiceData when closing
+                cart = [];
+                pendingInvoiceData = null;
+                renderCart();
+                closeModal();
+            };
+        }
 
-                if (!isValid) {
-                    paymentMessage.textContent = errorMessage;
-                    paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-red-100 text-red-700';
-                    paymentMessage.classList.remove('hidden');
-                    return;
-                }
-                
-                payBtn.disabled = true;
-                payBtn.textContent = 'Redirecting to payment...';
+        // =============================================
+        // Payment confirmation handler
+        // NOTE: verifyPayWayPayment still simulates success.
+        // For real verification, implement a server-side
+        // PayWay webhook and call your backend here.
+        // =============================================
+        async function verifyPayWayPayment(transactionId) {
+            console.log(`Simulating payment verification for: ${transactionId}`);
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            return { success: true, message: 'Payment confirmed (simulated).' };
+        }
 
-                // --- Generate Invoice Data and store it ---
-                const now = new Date();
-                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const total = cart.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
-                pendingInvoiceData = {
-                    invoiceNumber: Math.floor(Math.random() * 900000) + 100000,
-                    issueDate: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                    issueTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-                    subtotal: subtotal,
-                    discountAmount: subtotal - total,
-                    total: total,
-                    customerName: customerName,
-                    customerEmail: customerEmail,
-                    customerPhone: customerPhone,
-                };
-                
-                // Open payment link in a new tab
-                window.open('https://link.payway.com.kh/ABAPAYRF3809168', '_blank');
-                
-                paymentMessage.classList.add('hidden'); 
-                checkoutButtons.classList.add('hidden'); 
+        async function handlePaymentConfirmation() {
+            const confirmBtn = document.getElementById('confirm-payment-success-btn');
+            if (!confirmBtn || !pendingInvoiceData) return;
 
-                // Show the pending payment message with confirmation button
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Verifying Payment...';
+
+            const result = await verifyPayWayPayment(pendingInvoiceData.invoiceNumber);
+
+            if (result.success) {
+                const invoiceText = generateInvoiceText(pendingInvoiceData);
+                await sendNotification(invoiceText); // FIX: uses proxy, non-fatal if fails
+
                 checkoutSuccessMessage.innerHTML = `
-                    <div class="text-center p-4 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-200">
-                         <div class="flex justify-center items-center mb-2">
-                            <i class="fas fa-hourglass-half text-2xl mr-3"></i>
-                            <h3 class="text-xl font-bold">Payment Pending</h3>
+                    <div class="text-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
+                        <div class="flex justify-center items-center mb-2">
+                            <i class="fas fa-check-circle text-2xl mr-3"></i>
+                            <h3 class="text-xl font-bold">Payment Confirmed!</h3>
                         </div>
-                        <p class="text-sm">Please complete the payment in the new tab.</p>
-                        <p class="text-sm mt-1">Once finished, click the button below to verify your transaction.</p>
-                        <button id="confirm-payment-success-btn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                           Verify My Payment
+                        <p class="text-sm">Your invoice is being generated. Thank you!</p>
+                        <p class="text-sm mt-1">We will contact you shortly to finalize the license delivery.</p>
+                    </div>
+                `;
+                setTimeout(() => showInvoice(pendingInvoiceData), 2000);
+            } else {
+                checkoutSuccessMessage.innerHTML = `
+                    <div class="text-center p-4 rounded-lg bg-red-100 text-red-700 border border-red-200">
+                        <div class="flex justify-center items-center mb-2">
+                            <i class="fas fa-times-circle text-2xl mr-3"></i>
+                            <h3 class="text-xl font-bold">Verification Failed</h3>
+                        </div>
+                        <p class="text-sm">${result.message}</p>
+                        <button id="retry-verification-btn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                            Retry Verification
                         </button>
                     </div>
                 `;
-                checkoutSuccessMessage.classList.remove('hidden');
-                
-                // Add event listener for the new confirmation button
-                document.getElementById('confirm-payment-success-btn').addEventListener('click', handlePaymentConfirmation);
-            });
+                document.getElementById('retry-verification-btn').addEventListener('click', handlePaymentConfirmation);
+            }
+        }
 
+        // =============================================
+        // FIX: Countdown timer — parseInt() for safe comparison
+        // =============================================
+        function startCountdown() {
+            let stored = localStorage.getItem('flashSaleEndDate');
+            let flashSaleEndDate = stored ? parseInt(stored, 10) : NaN;
 
-            // --- Initial Render on Page Load ---
-            renderProducts();
-            renderCart();
-            startCountdown();
+            if (isNaN(flashSaleEndDate) || Date.now() > flashSaleEndDate) {
+                flashSaleEndDate = Date.now() + FLASH_SALE_DURATION_MS;
+                localStorage.setItem('flashSaleEndDate', String(flashSaleEndDate));
+            }
+
+            const tick = () => {
+                const distance = flashSaleEndDate - Date.now();
+
+                if (distance < 0) {
+                    localStorage.removeItem('flashSaleEndDate');
+                    startCountdown(); // restart
+                    return;
+                }
+
+                const d = Math.floor(distance / 86400000);
+                const h = Math.floor((distance % 86400000) / 3600000);
+                const m = Math.floor((distance % 3600000) / 60000);
+                const s = Math.floor((distance % 60000) / 1000);
+
+                document.getElementById('days').textContent    = String(d).padStart(2, '0');
+                document.getElementById('hours').textContent   = String(h).padStart(2, '0');
+                document.getElementById('minutes').textContent = String(m).padStart(2, '0');
+                document.getElementById('seconds').textContent = String(s).padStart(2, '0');
+            };
+
+            tick(); // run immediately to avoid 1s blank
+            setInterval(tick, 1000);
+        }
+
+        // =============================================
+        // Event Listeners
+        // =============================================
+
+        // Add to cart — FIX: pass button element for pulse feedback
+        productGrid.addEventListener('click', (e) => {
+            const btn = e.target.closest('.add-to-cart-btn');
+            if (btn) {
+                addToCart(parseInt(btn.dataset.id), btn.dataset.name, btn);
+            }
         });
-    </script>
 
+        // Cart item: remove
+        cartItemsPopup.addEventListener('click', e => {
+            const removeBtn = e.target.closest('.remove-from-cart-btn');
+            if (removeBtn) removeFromCart(parseInt(removeBtn.dataset.id, 10));
+        });
+
+        // Cart item: quantity change — FIX: clamp value >= 1
+        cartItemsPopup.addEventListener('change', e => {
+            if (e.target.classList.contains('quantity-input')) {
+                const productId = parseInt(e.target.dataset.id, 10);
+                const quantity  = Math.max(0, parseInt(e.target.value, 10) || 0);
+                updateCartQuantity(productId, quantity);
+            }
+        });
+
+        // Open cart
+        openCartBtn.addEventListener('click', () => {
+            renderCart();
+            openModal(cartView);
+        });
+
+        // Close cart
+        [closeCartBtn, closeCartPopupBtn].forEach(btn => {
+            btn.addEventListener('click', closeModal);
+        });
+
+        // Proceed to checkout
+        proceedToCheckoutBtn.addEventListener('click', () => {
+            const fragment = document.createDocumentFragment();
+            let total = 0;
+            cart.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between py-1';
+                row.innerHTML = `<p>${item.name} (x${item.quantity})</p><p class="font-semibold">$${(item.currentPrice * item.quantity).toFixed(2)}</p>`;
+                fragment.appendChild(row);
+                total += item.currentPrice * item.quantity;
+            });
+            modalSummary.innerHTML = '';
+            modalSummary.appendChild(fragment);
+            modalTotal.textContent = `$${total.toFixed(2)}`;
+
+            resetCheckoutView();
+            openModal(checkoutView);
+        });
+
+        // Back to cart
+        cancelPaymentBtn.addEventListener('click', () => openModal(cartView));
+
+        // Pay button
+        payBtn.addEventListener('click', async () => {
+            [customerNameInput, customerEmailInput, customerPhoneInput].forEach(el => el.classList.remove('input-error'));
+
+            const customerName  = customerNameInput.value.trim();
+            const customerEmail = customerEmailInput.value.trim();
+            const customerPhone = customerPhoneInput.value.trim();
+            let isValid = true, errorMessage = '';
+
+            if (!customerName) {
+                isValid = false;
+                customerNameInput.classList.add('input-error');
+                errorMessage = 'Please enter your full name.';
+            } else if (!customerPhone) {
+                isValid = false;
+                customerPhoneInput.classList.add('input-error');
+                errorMessage = 'A phone number is required.';
+            } else if (!validateCambodianPhone(customerPhone)) {
+                isValid = false;
+                customerPhoneInput.classList.add('input-error');
+                errorMessage = 'Please enter a valid Cambodian phone number (e.g., 012 345 678).';
+            } else if (customerEmail && !validateEmail(customerEmail)) {
+                isValid = false;
+                customerEmailInput.classList.add('input-error');
+                errorMessage = 'Please enter a valid email address.';
+            }
+
+            if (!isValid) {
+                paymentMessage.textContent = errorMessage;
+                paymentMessage.className = 'text-center p-3 rounded-lg my-4 bg-red-100 text-red-700';
+                paymentMessage.classList.remove('hidden');
+                return;
+            }
+
+            payBtn.disabled = true;
+            payBtn.textContent = 'Redirecting to payment...';
+
+            const now = new Date();
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const total    = cart.reduce((sum, i) => sum + (i.currentPrice * i.quantity), 0);
+            pendingInvoiceData = {
+                invoiceNumber: Math.floor(Math.random() * 900000) + 100000,
+                issueDate: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                issueTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                subtotal,
+                discountAmount: subtotal - total,
+                total,
+                customerName,
+                customerEmail,
+                customerPhone,
+            };
+
+            window.open('https://link.payway.com.kh/ABAPAYRF3809168', '_blank');
+
+            paymentMessage.classList.add('hidden');
+            checkoutButtons.classList.add('hidden');
+
+            checkoutSuccessMessage.innerHTML = `
+                <div class="text-center p-4 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-200">
+                    <div class="flex justify-center items-center mb-2">
+                        <i class="fas fa-hourglass-half text-2xl mr-3"></i>
+                        <h3 class="text-xl font-bold">Payment Pending</h3>
+                    </div>
+                    <p class="text-sm">Please complete the payment in the new tab.</p>
+                    <p class="text-sm mt-1">Once finished, click below to verify your transaction.</p>
+                    <button id="confirm-payment-success-btn"
+                        class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Verify My Payment
+                    </button>
+                </div>
+            `;
+            checkoutSuccessMessage.classList.remove('hidden');
+            document.getElementById('confirm-payment-success-btn').addEventListener('click', handlePaymentConfirmation);
+        });
+
+        // =============================================
+        // Init
+        // =============================================
+        renderProducts();
+        renderCart();
+        startCountdown();
+    });
+
+    /*
+    =============================================
+    CLOUDFLARE WORKER — Telegram Proxy (deploy separately)
+    =============================================
+    Paste this into a new Cloudflare Worker and set environment
+    variables TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+
+    export default {
+      async fetch(request, env) {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        const { text } = await request.json();
+        const res = await fetch(
+          `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, parse_mode: 'Markdown' }),
+          }
+        );
+        const data = await res.json();
+        return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+      }
+    };
+    =============================================
+    */
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
