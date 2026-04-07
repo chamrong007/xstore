@@ -868,14 +868,29 @@ function renderQRScreen(total) {
       <div class="step"><span class="snum">1</span>Open <strong>ABA Mobile</strong> app</div>
       <div class="step"><span class="snum">2</span>Tap <strong>Scan QR</strong> &#x2192; scan code above</div>
       <div class="step"><span class="snum">3</span>Enter <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace">$${total.toFixed(2)}</strong> and confirm</div>
-      <div class="step"><span class="snum">4</span>Return here &#x2192; tap <strong>I've Paid</strong></div>
+      <div class="step"><span class="snum">4</span>Invoice &amp; license key appear <strong>automatically</strong></div>
     </div>
     <div class="warn-box">
       <i class="fas fa-triangle-exclamation"></i>
       Enter <strong style="color:var(--text)">exactly $${total.toFixed(2)}</strong> &#x2014; wrong amount fails verification.
     </div>`;
-  $('payFoot').innerHTML = `<button class="btn-primary" id="iPaidBtn"><i class="fas fa-shield-halved"></i>I've Paid &#x2014; Verify Now</button>`;
-  $('iPaidBtn').onclick = () => startPolling(total);
+  /* Auto-detect status strip */
+  $('payBody').innerHTML += `
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(91,156,246,.08);border:1px solid rgba(91,156,246,.18);border-radius:var(--r2);padding:12px 14px;margin-top:4px">
+      <i class="fas fa-circle-notch spin" style="color:var(--blue);font-size:16px;flex-shrink:0"></i>
+      <div>
+        <div style="font-size:13px;font-weight:600">Waiting for payment<span id="autodots">.</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Checking automatically every 4 seconds</div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted)" id="pollCountEl">0s</div>
+    </div>`;
+
+  /* Cancel is the only button — no manual verify needed */
+  $('payFoot').innerHTML = `<button class="btn-ghost" id="cancelPayBtn">Cancel Payment</button>`;
+  $('cancelPayBtn').onclick = () => { stopPolling(); closeSheet('sheetPay'); };
+
+  /* Auto-start polling immediately */
+  startPolling(total);
 }
 
 /* ──────────────────────────────────────────────
@@ -885,38 +900,54 @@ const POLL_MAX = 10 * 60 * 1000;
 let pollStart = 0;
 
 function startPolling(total) {
+  stopPolling(); // clear any previous timer
   pollStart = Date.now();
-  let dots = 0;
-  $('payBody').innerHTML = `
-    <div class="amt-block">
-      <div class="amt-lbl">Verifying payment</div>
-      <div class="amt-val">$${(total||order?.total||0).toFixed(2)}</div>
-    </div>
-    <div class="status wait">
-      <div class="st-ico"><i class="fas fa-circle-notch spin"></i></div>
-      <div class="st-title">Checking Payment</div>
-      <div class="st-msg">Waiting for ABA to confirm<span id="dots">.</span><br><span style="font-size:11px;opacity:.6">Polls every 4 seconds</span></div>
-      <div class="prog"><div class="prog-fill" id="pb"></div></div>
-    </div>`;
-  $('payFoot').innerHTML = `<button class="btn-ghost" id="cancelPoll">Cancel</button>`;
-  $('cancelPoll').onclick = () => { stopPolling(); renderQRScreen(order?.total||0); };
+  let dots = 0, secs = 0;
 
-  const dt = setInterval(() => { const el = $('dots'); if(el) el.textContent = '.'.repeat((dots++%3)+1); }, 500);
+  // Animate dots in the auto-detect strip
+  const dotsTimer = setInterval(() => {
+    const el = $('autodots');
+    if (el) el.textContent = '.'.repeat((dots++%3)+1);
+  }, 500);
+
+  // Elapsed seconds counter
+  const secsTimer = setInterval(() => {
+    const el = $('pollCountEl');
+    if (el) el.textContent = (++secs) + 's';
+  }, 1000);
+
   pollTimer = setInterval(async () => {
     const elapsed = Date.now() - pollStart;
-    const pb = $('pb'); if (pb) pb.style.width = Math.min(100, elapsed/POLL_MAX*100) + '%';
+
     if (elapsed >= POLL_MAX) {
-      stopPolling(); clearInterval(dt);
-      $('payBody').innerHTML = `<div class="status fail"><div class="st-ico"><i class="fas fa-clock"></i></div><div class="st-title">Timed Out</div><div class="st-msg">10 minutes passed. If you paid, please contact support at @chamrong_vann</div></div>`;
-      $('payFoot').innerHTML = `<button class="btn-primary" id="retryBtn"><i class="fas fa-rotate-right"></i>Try Again</button>`;
+      stopPolling(); clearInterval(dotsTimer); clearInterval(secsTimer);
+      // Replace body with timeout message (keep amount visible)
+      $('payBody').innerHTML = `
+        <div class="amt-block">
+          <div class="amt-lbl">Payment not detected</div>
+          <div class="amt-val">$${(total||order?.total||0).toFixed(2)}</div>
+        </div>
+        <div class="status fail">
+          <div class="st-ico"><i class="fas fa-clock"></i></div>
+          <div class="st-title">Timed Out (10 min)</div>
+          <div class="st-msg">No payment detected. If you did pay, contact <strong>@chamrong_vann</strong> with your transaction ID.</div>
+        </div>`;
+      $('payFoot').innerHTML = `
+        <button class="btn-primary" id="retryBtn"><i class="fas fa-rotate-right"></i>Show QR Again</button>`;
       $('retryBtn').onclick = () => renderQRScreen(order?.total||0);
       return;
     }
+
     try {
-      const res = await fetch(`${WORKER}/verify?invoice=${order.invoiceNumber}&amount=${order.total.toFixed(2)}`);
+      const res = await fetch(
+        `${WORKER}/verify?invoice=${order.invoiceNumber}&amount=${order.total.toFixed(2)}`
+      );
       const data = await res.json();
-      if (data.verified) { stopPolling(); clearInterval(dt); await onVerified(data); }
-    } catch(e) { /* retry silently */ }
+      if (data.verified) {
+        stopPolling(); clearInterval(dotsTimer); clearInterval(secsTimer);
+        await onVerified(data);
+      }
+    } catch(e) { /* network error — retry next tick */ }
   }, 4000);
 }
 
@@ -926,23 +957,39 @@ function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
    PAYMENT VERIFIED
 ────────────────────────────────────────────── */
 async function onVerified(vData) {
+  /* Show success state over the QR screen */
   $('payBody').innerHTML = `
+    <div class="amt-block">
+      <div class="amt-lbl">Payment received</div>
+      <div class="amt-val" style="color:var(--green)">$${order.total.toFixed(2)}</div>
+      <div class="amt-usd">USD</div>
+    </div>
     <div class="status ok">
       <div class="st-ico"><i class="fas fa-circle-check"></i></div>
       <div class="st-title">Payment Confirmed!</div>
-      <div class="st-msg">Transaction: ${vData.transaction_id}<br>Method: ${vData.payment_type}<br><br>Generating invoice &amp; delivering your license&hellip;</div>
+      <div class="st-msg">
+        <strong style="color:var(--text)">${vData.payment_type}</strong><br>
+        Tx: <span style="font-family:'JetBrains Mono',monospace;font-size:11px">${vData.transaction_id}</span><br><br>
+        <span class="pulse">Generating invoice &amp; releasing license key&hellip;</span>
+      </div>
     </div>`;
   $('payFoot').innerHTML = '';
+
+  /* Send to backend — notifies admin + buyer + auto-delivers license */
   try {
     await fetch(`${WORKER}/notify`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: buildAdminMsg(order, vData), order, verifyData: vData })
     });
   } catch(e) {}
+
+  /* Short pause so user sees the confirmation, then show invoice */
   setTimeout(() => {
-    closeSheet('sheetPay'); showInvoice(order, vData);
+    closeSheet('sheetPay');
+    showInvoice(order, vData);
     cart = []; syncCartUI(); order = null;
-  }, 2200);
+  }, 2000);
 }
 
 /* ──────────────────────────────────────────────
