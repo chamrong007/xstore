@@ -3,1073 +3,1101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>xstore — License Store</title>
+<title>xstore</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-  /* ── TOKENS ─────────────────────────────────────────── */
-  :root {
-    --bg:        #0d0d0f;
-    --surface:   #16161a;
-    --surface2:  #1e1e24;
-    --border:    rgba(255,255,255,0.07);
-    --accent:    #f5a623;
-    --accent2:   #ff6b35;
-    --green:     #22c55e;
-    --red:       #ef4444;
-    --blue:      #3b82f6;
-    --text:      #f0f0f5;
-    --muted:     #6b6b7b;
-    --radius:    16px;
-    --radius-sm: 10px;
-    font-size: 15px;
-  }
+/* ━━━ TOKENS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --bg0:      #050810;
+  --bg1:      #080c18;
+  --glass:    rgba(255,255,255,0.055);
+  --glass2:   rgba(255,255,255,0.09);
+  --glassbdr: rgba(255,255,255,0.1);
+  --glassbdr2:rgba(255,255,255,0.18);
+  --blur:     blur(24px);
+  --blur2:    blur(40px);
+  --gold:     #f5a623;
+  --gold2:    #ff7730;
+  --goldglow: rgba(245,166,35,0.35);
+  --green:    #2dd480;
+  --red:      #ff5f70;
+  --blue:     #5b9cf6;
+  --violet:   #a78bfa;
+  --text:     #f0f2ff;
+  --muted:    rgba(240,242,255,0.45);
+  --muted2:   rgba(240,242,255,0.25);
+  --r:        18px;
+  --r2:       12px;
+  --r3:       8px;
+  font-size: 15px;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+html, body {
+  height:100%; font-family:'Outfit',sans-serif;
+  background:var(--bg0); color:var(--text);
+  overscroll-behavior:none; -webkit-tap-highlight-color:transparent;
+}
+::-webkit-scrollbar { width:0 }
 
-  /* ── RESET ──────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%;
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overscroll-behavior: none;
-    -webkit-tap-highlight-color: transparent;
-  }
+/* ━━━ AURORA BACKGROUND ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.aurora {
+  position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+}
+.orb {
+  position:absolute; border-radius:50%;
+  filter:blur(80px); opacity:.55; animation:drift 18s ease-in-out infinite alternate;
+}
+.orb1 { width:420px; height:420px; background:radial-gradient(circle,#1a3a8f 0%,transparent 70%); top:-100px; left:-80px; animation-duration:20s; }
+.orb2 { width:340px; height:340px; background:radial-gradient(circle,#6b21a8 0%,transparent 70%); top:30%; right:-80px; animation-duration:25s; animation-delay:-8s; }
+.orb3 { width:300px; height:300px; background:radial-gradient(circle,#0e4f3a 0%,transparent 70%); bottom:-80px; left:20%; animation-duration:22s; animation-delay:-14s; }
+.orb4 { width:200px; height:200px; background:radial-gradient(circle,rgba(245,166,35,.3) 0%,transparent 70%); top:60%; left:10%; animation-duration:16s; animation-delay:-5s; }
+@keyframes drift {
+  from { transform:translate(0,0) scale(1); }
+  to   { transform:translate(30px,20px) scale(1.1); }
+}
+.grain {
+  position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 
-  /* ── SCROLLBAR ──────────────────────────────────────── */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+/* ━━━ LAYOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#app { position:relative; z-index:2; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+.scroll { flex:1; overflow-y:auto; padding:0 14px 110px; }
 
-  /* ── LAYOUT ─────────────────────────────────────────── */
-  #app { display: flex; flex-direction: column; min-height: 100vh; }
+/* ━━━ TOPBAR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.topbar {
+  padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+  background:rgba(5,8,16,0.6); backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--glassbdr); flex-shrink:0;
+}
+.logo { font-size:22px; font-weight:800; letter-spacing:-1px; }
+.logo-x { color:var(--gold); }
+.logo-store { color:var(--text); }
+.cart-btn {
+  display:flex; align-items:center; gap:8px;
+  background:var(--glass2); backdrop-filter:var(--blur);
+  border:1px solid var(--glassbdr2); border-radius:100px;
+  padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;
+  color:var(--text); transition:all .2s; font-family:'Outfit',sans-serif;
+}
+.cart-btn:active { background:rgba(255,255,255,.14); transform:scale(.97); }
+.cart-count {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000; border-radius:100px; padding:1px 8px;
+  font-size:11px; font-weight:800; display:none;
+}
+.cart-count.on { display:block; }
 
-  /* ── HEADER ─────────────────────────────────────────── */
-  .header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(13,13,15,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 16px; color: #000;
-    letter-spacing: -1px;
-  }
-  .logo-name { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
-  .cart-btn {
-    position: relative;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 40px; height: 40px;
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; cursor: pointer;
-    transition: background 0.2s;
-  }
-  .cart-btn:active { background: var(--surface); }
-  .cart-badge {
-    position: absolute; top: -6px; right: -6px;
-    background: var(--accent); color: #000;
-    font-size: 10px; font-weight: 700;
-    width: 18px; height: 18px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    display: none;
-  }
-  .cart-badge.show { display: flex; }
+/* ━━━ SALE BANNER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sale-banner {
+  margin:12px 14px;
+  background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(255,119,48,.06));
+  backdrop-filter:var(--blur);
+  border:1px solid rgba(245,166,35,.2);
+  border-radius:var(--r); padding:16px;
+  position:relative; overflow:hidden;
+}
+.sale-banner::before {
+  content:''; position:absolute; top:-30px; right:-30px;
+  width:120px; height:120px; border-radius:50%;
+  background:radial-gradient(circle,rgba(245,166,35,.15) 0%,transparent 70%);
+}
+.sale-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.sale-left {}
+.sale-pill {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:1.5px;
+  background:rgba(245,166,35,.1); border:1px solid rgba(245,166,35,.2);
+  border-radius:100px; padding:3px 10px; margin-bottom:6px;
+}
+.sale-title { font-size:22px; font-weight:800; letter-spacing:-.5px; line-height:1.1; }
+.sale-title em { color:var(--gold); font-style:normal; }
+.timer { display:flex; gap:6px; margin-top:10px; }
+.tu {
+  background:rgba(255,255,255,.06); border:1px solid var(--glassbdr);
+  border-radius:var(--r3); padding:6px 10px; text-align:center; min-width:46px;
+}
+.tn { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:600; line-height:1; }
+.tl { font-size:9px; color:var(--muted); margin-top:2px; text-transform:uppercase; letter-spacing:.5px; }
 
-  /* ── BANNER ─────────────────────────────────────────── */
-  .banner {
-    margin: 12px 16px;
-    background: linear-gradient(135deg, #1a1208, #221509);
-    border: 1px solid rgba(245,166,35,0.2);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .banner-left { flex: 1; }
-  .banner-label {
-    font-size: 11px; font-weight: 600; color: var(--accent);
-    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;
-  }
-  .banner-title { font-size: 18px; font-weight: 700; }
-  .banner-title span { color: var(--accent); }
-  .timer {
-    display: flex; gap: 6px; margin-top: 8px;
-  }
-  .timer-unit {
-    background: rgba(245,166,35,0.1);
-    border: 1px solid rgba(245,166,35,0.2);
-    border-radius: 8px; padding: 4px 8px;
-    text-align: center; min-width: 44px;
-  }
-  .timer-num { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; line-height: 1; }
-  .timer-label { font-size: 9px; color: var(--muted); margin-top: 1px; text-transform: uppercase; }
+/* ━━━ SECTION LABEL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.section-label {
+  font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;
+  letter-spacing:2px; margin:20px 2px 12px;
+}
 
-  /* ── MAIN CONTENT ────────────────────────────────────── */
-  .content { flex: 1; padding: 0 16px 100px; }
+/* ━━━ PRODUCT CARD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.pcard {
+  background:var(--glass); backdrop-filter:var(--blur2);
+  border:1px solid var(--glassbdr); border-radius:var(--r);
+  margin-bottom:12px; overflow:hidden;
+  animation:fadeup .5s ease both; transition:border-color .25s;
+}
+.pcard:hover { border-color:var(--glassbdr2); }
+.pcard-body { padding:18px }
+.pcard-top { display:flex; gap:14px; align-items:flex-start; margin-bottom:14px; }
+.pcard-icon {
+  width:54px; height:54px; border-radius:var(--r2);
+  background:rgba(255,255,255,.07); border:1px solid var(--glassbdr);
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; flex-shrink:0;
+}
+.pcard-info { flex:1; min-width:0; }
+.pcard-name { font-size:17px; font-weight:700; letter-spacing:-.3px; margin-bottom:5px; }
+.badge {
+  display:inline-block; font-size:10px; font-weight:700;
+  padding:3px 9px; border-radius:100px; letter-spacing:.3px;
+}
+.pcard-tagline { font-size:12px; color:var(--muted); margin-top:5px; line-height:1.5; }
+.pcard-desc { font-size:13px; color:var(--muted); line-height:1.65; margin-bottom:14px; }
 
-  /* ── CATEGORY HEADER ─────────────────────────────────── */
-  .cat-header {
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1.5px;
-    margin: 20px 0 10px;
-  }
+/* chips */
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.chip {
+  background:rgba(255,255,255,.055); border:1px solid var(--glassbdr);
+  border-radius:100px; padding:4px 11px; font-size:11px; font-weight:500;
+  display:flex; align-items:center; gap:5px; color:var(--muted);
+}
+.chip i { color:var(--green); font-size:9px; }
 
-  /* ── PRODUCT CARD ────────────────────────────────────── */
-  .product-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    margin-bottom: 8px;
-    display: flex; align-items: center; gap: 12px;
-    transition: border-color 0.2s;
-    position: relative; overflow: hidden;
-  }
-  .product-card::before {
-    content: '';
-    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-    background: linear-gradient(var(--accent), var(--accent2));
-    border-radius: 3px 0 0 3px;
-    opacity: 0; transition: opacity 0.2s;
-  }
-  .product-card:active { border-color: rgba(245,166,35,0.3); }
-  .product-card:active::before { opacity: 1; }
-  .product-icon {
-    width: 42px; height: 42px; border-radius: 12px;
-    background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .product-info { flex: 1; min-width: 0; }
-  .product-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
-  .product-desc { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .product-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-  .price-old { font-size: 11px; color: var(--muted); text-decoration: line-through; }
-  .price-new { font-size: 16px; font-weight: 700; color: var(--accent); }
-  .add-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #000; border: none;
-    padding: 6px 14px; border-radius: 8px;
-    font-size: 12px; font-weight: 700;
-    cursor: pointer; font-family: 'DM Sans', sans-serif;
-    transition: opacity 0.15s, transform 0.1s;
-  }
-  .add-btn:active { opacity: 0.8; transform: scale(0.95); }
-  .add-btn.added { background: var(--green); color: #fff; }
+/* specs */
+.specs {
+  background:rgba(0,0,0,.25); border:1px solid var(--glassbdr);
+  border-radius:var(--r2); overflow:hidden; margin-bottom:14px;
+}
+.spec-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 14px; border-bottom:1px solid var(--glassbdr); font-size:12px;
+}
+.spec-row:last-child { border:none; }
+.sk { color:var(--muted); }
+.sv { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; }
 
-  /* ── BOTTOM NAV (cart summary) ───────────────────────── */
-  .bottom-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(13,13,15,0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    padding: 12px 16px;
-    display: none;
-  }
-  .bottom-bar.show { display: block; }
-  .checkout-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #000; border: none;
-    padding: 15px; border-radius: var(--radius-sm);
-    font-size: 15px; font-weight: 700;
-    cursor: pointer; font-family: 'DM Sans', sans-serif;
-    display: flex; align-items: center; justify-content: space-between;
-    transition: opacity 0.2s;
-  }
-  .checkout-btn:active { opacity: 0.85; }
-  .checkout-btn-label { display: flex; align-items: center; gap: 8px; }
-  .checkout-btn-total { font-family: 'DM Mono', monospace; }
+/* compare */
+.cmp-toggle {
+  display:flex; align-items:center; gap:8px; font-size:12px;
+  font-weight:600; color:var(--muted); cursor:pointer; padding:10px 0;
+  border-top:1px solid var(--glassbdr); user-select:none;
+}
+.cmp-toggle .icon { color:var(--gold); }
+.caret { margin-left:auto; font-size:10px; transition:transform .25s; }
+.cmp-body { display:none; padding-bottom:4px; }
+.cmp-body.open { display:block; }
+.cmp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; }
+.cmp-head { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:7px; }
+.cmp-item { font-size:11px; color:var(--muted); margin-bottom:4px; line-height:1.4; }
 
-  /* ── TOAST ───────────────────────────────────────────── */
-  #toast {
-    position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); padding: 10px 16px; border-radius: 100px;
-    font-size: 13px; font-weight: 500;
-    display: flex; align-items: center; gap: 8px;
-    opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap;
-    z-index: 9999;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  #toast i { color: var(--green); }
+/* card footer */
+.pcard-foot {
+  padding:14px 18px; background:rgba(0,0,0,.2);
+  border-top:1px solid var(--glassbdr);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.price-wrap {}
+.p-old { font-size:12px; color:var(--muted2); text-decoration:line-through; }
+.p-new { font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--gold); letter-spacing:-1px; line-height:1; }
+.p-off {
+  display:inline-block; font-size:10px; font-weight:700;
+  background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.2);
+  color:var(--gold); padding:2px 7px; border-radius:4px; margin-top:4px;
+}
+.card-btns { display:flex; gap:8px; align-items:center; }
+.btn-info {
+  background:rgba(255,255,255,.07); border:1px solid var(--glassbdr2);
+  color:var(--muted); padding:10px 13px; border-radius:var(--r2);
+  font-size:12px; font-weight:600; text-decoration:none;
+  font-family:'Outfit',sans-serif; display:flex; align-items:center; gap:6px;
+  white-space:nowrap; transition:color .2s, border-color .2s;
+}
+.btn-info:active { color:var(--text); }
+.btn-add {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000; border:none; padding:10px 18px; border-radius:var(--r2);
+  font-size:13px; font-weight:700; font-family:'Outfit',sans-serif;
+  cursor:pointer; display:flex; align-items:center; gap:7px;
+  white-space:nowrap; transition:all .15s; position:relative; overflow:hidden;
+}
+.btn-add::after {
+  content:''; position:absolute; inset:0;
+  background:rgba(255,255,255,0); transition:background .15s;
+}
+.btn-add:active::after { background:rgba(255,255,255,.2); }
+.btn-add:active { transform:scale(.95); }
+.btn-add.added { background:linear-gradient(135deg,var(--green),#16a869); color:#000; }
 
-  /* ── SHEET (bottom sheet modal) ──────────────────────── */
-  .sheet-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    z-index: 200; opacity: 0; transition: opacity 0.3s;
-    pointer-events: none;
-  }
-  .sheet-overlay.show { opacity: 1; pointer-events: all; }
-  .sheet {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-radius: 20px 20px 0 0;
-    border-top: 1px solid var(--border);
-    z-index: 201;
-    transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
-    max-height: 90vh; display: flex; flex-direction: column;
-  }
-  .sheet.show { transform: translateY(0); }
-  .sheet-handle {
-    width: 36px; height: 4px; background: var(--border);
-    border-radius: 2px; margin: 12px auto 0;
-  }
-  .sheet-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .sheet-title { font-size: 17px; font-weight: 700; }
-  .sheet-close {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--surface2); border: none; color: var(--muted);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 14px;
-  }
-  .sheet-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
-  .sheet-footer { padding: 12px 20px 24px; border-top: 1px solid var(--border); }
+/* ━━━ CART BAR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.cart-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:30;
+  padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+  background:rgba(5,8,16,.85); backdrop-filter:var(--blur2);
+  border-top:1px solid var(--glassbdr); display:none;
+}
+.cart-bar.on { display:block; }
+.cartbar-btn {
+  width:100%; padding:16px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000; border:none; border-radius:var(--r2);
+  font-size:15px; font-weight:800; font-family:'Outfit',sans-serif;
+  cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+  transition:opacity .2s;
+}
+.cartbar-btn:active { opacity:.85; }
+.cartbar-btn span { font-family:'JetBrains Mono',monospace; font-weight:600; }
 
-  /* ── CART ITEMS ──────────────────────────────────────── */
-  .cart-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .cart-item:last-child { border-bottom: none; }
-  .cart-item-icon {
-    width: 38px; height: 38px; border-radius: 10px;
-    background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-  }
-  .cart-item-info { flex: 1; min-width: 0; }
-  .cart-item-name { font-weight: 600; font-size: 13px; }
-  .cart-item-price { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .cart-item-controls { display: flex; align-items: center; gap: 8px; }
-  .qty-btn {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-  }
-  .qty-val { font-family: 'DM Mono', monospace; font-size: 14px; min-width: 20px; text-align: center; }
-  .remove-btn { color: var(--red); background: none; border: none; cursor: pointer; padding: 4px; font-size: 14px; }
+/* ━━━ OVERLAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.65);
+  backdrop-filter:blur(4px); z-index:40;
+  opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.overlay.on { opacity:1; pointer-events:all; }
 
-  /* ── CHECKOUT FORM ───────────────────────────────────── */
-  .form-group { margin-bottom: 12px; }
-  .form-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
-  .form-input {
-    width: 100%; padding: 12px 14px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .form-input:focus { border-color: rgba(245,166,35,0.5); }
-  .form-input.error { border-color: var(--red); }
-  .form-input::placeholder { color: var(--muted); }
+/* ━━━ BOTTOM SHEET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sheet {
+  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  background:rgba(8,12,24,.95); backdrop-filter:var(--blur2);
+  border:1px solid var(--glassbdr); border-bottom:none;
+  border-radius:24px 24px 0 0;
+  transform:translateY(100%);
+  transition:transform .38s cubic-bezier(.32,.72,0,1);
+  max-height:92vh; display:flex; flex-direction:column;
+}
+.sheet.on { transform:translateY(0); }
+.sheet-pill {
+  width:38px; height:4px; background:rgba(255,255,255,.15);
+  border-radius:2px; margin:12px auto 0;
+}
+.sheet-head {
+  padding:14px 20px; border-bottom:1px solid var(--glassbdr);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.sheet-title { font-size:18px; font-weight:700; }
+.sheet-close {
+  width:32px; height:32px; border-radius:50%;
+  background:rgba(255,255,255,.08); border:1px solid var(--glassbdr);
+  color:var(--muted); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:13px; transition:background .2s;
+}
+.sheet-close:active { background:rgba(255,255,255,.14); }
+.sheet-body { flex:1; overflow-y:auto; padding:18px 20px; }
+.sheet-foot {
+  padding:12px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--glassbdr);
+  background:rgba(0,0,0,.2);
+}
 
-  /* ── ORDER SUMMARY ───────────────────────────────────── */
-  .order-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0; font-size: 13px;
-  }
-  .order-row.total {
-    font-size: 17px; font-weight: 700;
-    border-top: 1px solid var(--border); margin-top: 6px; padding-top: 14px;
-  }
-  .order-row .label { color: var(--muted); }
-  .order-row.total .label { color: var(--text); }
-  .discount-val { color: var(--green); }
+/* ━━━ CART ITEMS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.ci {
+  display:flex; align-items:center; gap:12px;
+  padding:13px 0; border-bottom:1px solid var(--glassbdr);
+}
+.ci:last-child { border:none; }
+.ci-ico {
+  width:40px; height:40px; border-radius:var(--r3);
+  background:rgba(255,255,255,.07); display:flex; align-items:center;
+  justify-content:center; font-size:19px; flex-shrink:0;
+}
+.ci-info { flex:1; min-width:0; }
+.ci-name { font-size:13px; font-weight:600; }
+.ci-price { font-size:12px; color:var(--muted); margin-top:2px; }
+.ci-ctrl { display:flex; align-items:center; gap:8px; }
+.qb {
+  width:30px; height:30px; border-radius:var(--r3);
+  background:rgba(255,255,255,.07); border:1px solid var(--glassbdr);
+  color:var(--text); font-size:14px; display:flex; align-items:center;
+  justify-content:center; cursor:pointer; transition:background .15s;
+}
+.qb:active { background:rgba(255,255,255,.15); }
+.qv { font-family:'JetBrains Mono',monospace; font-size:14px; min-width:22px; text-align:center; }
+.rm-btn { background:none; border:none; color:rgba(255,87,112,.7); cursor:pointer; padding:4px; font-size:13px; }
 
-  /* ── PRIMARY BUTTON ──────────────────────────────────── */
-  .btn-primary {
-    width: 100%; padding: 15px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #000; border: none; border-radius: var(--radius-sm);
-    font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif;
-    cursor: pointer; transition: opacity 0.2s;
-  }
-  .btn-primary:active { opacity: 0.85; }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-secondary {
-    width: 100%; padding: 13px;
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-    cursor: pointer; margin-top: 8px;
-  }
+/* ━━━ ORDER SUMMARY ROWS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.orow { display:flex; justify-content:space-between; align-items:center; padding:7px 0; font-size:13px; }
+.orow .lbl { color:var(--muted); }
+.orow.total {
+  font-size:18px; font-weight:700; margin-top:8px;
+  border-top:1px solid var(--glassbdr); padding-top:14px;
+}
+.disc-val { color:var(--green); }
 
-  /* ── STATUS CARDS ────────────────────────────────────── */
-  .status-card {
-    border-radius: var(--radius-sm); padding: 16px;
-    display: flex; flex-direction: column; align-items: center;
-    text-align: center; gap: 8px; margin: 8px 0;
-  }
-  .status-card.pending { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); }
-  .status-card.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); }
-  .status-card.error   { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
-  .status-icon { font-size: 28px; }
-  .status-title { font-size: 16px; font-weight: 700; }
-  .status-msg { font-size: 13px; color: var(--muted); line-height: 1.5; }
-  .status-card.pending .status-icon { color: var(--blue); }
-  .status-card.success .status-icon { color: var(--green); }
-  .status-card.error   .status-icon { color: var(--red); }
+/* ━━━ FORM ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.flabel {
+  display:block; font-size:11px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1px; margin:16px 0 7px;
+}
+.finput {
+  width:100%; padding:14px 16px;
+  background:rgba(255,255,255,.06); backdrop-filter:var(--blur);
+  border:1px solid var(--glassbdr); border-radius:var(--r2);
+  color:var(--text); font-family:'Outfit',sans-serif; font-size:14px;
+  outline:none; transition:border-color .2s, background .2s;
+}
+.finput:focus { border-color:rgba(245,166,35,.5); background:rgba(255,255,255,.08); }
+.finput.err { border-color:rgba(255,95,112,.6); }
+.finput::placeholder { color:var(--muted2); }
+.f-err { color:var(--red); font-size:12px; margin-top:9px; display:none; }
 
-  /* ── PROGRESS BAR ────────────────────────────────────── */
-  .progress-bar {
-    width: 100%; height: 3px; background: var(--surface2);
-    border-radius: 3px; overflow: hidden; margin-top: 8px;
-  }
-  .progress-fill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 3px; transition: width 1s linear;
-  }
+/* ━━━ BUTTONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.btn-primary {
+  width:100%; padding:16px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000; border:none; border-radius:var(--r2);
+  font-size:15px; font-weight:800; font-family:'Outfit',sans-serif;
+  cursor:pointer; transition:opacity .2s, transform .1s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-primary:active { opacity:.85; transform:scale(.98); }
+.btn-primary:disabled { opacity:.3; cursor:not-allowed; }
+.btn-ghost {
+  width:100%; padding:14px; margin-top:9px;
+  background:rgba(255,255,255,.06); border:1px solid var(--glassbdr);
+  color:var(--text); border-radius:var(--r2);
+  font-size:14px; font-weight:600; font-family:'Outfit',sans-serif; cursor:pointer;
+  transition:background .2s;
+}
+.btn-ghost:active { background:rgba(255,255,255,.1); }
 
-  /* ── INVOICE ─────────────────────────────────────────── */
-  .invoice-header {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 16px;
-  }
-  .invoice-brand { font-size: 20px; font-weight: 700; color: var(--accent); }
-  .invoice-meta { text-align: right; font-size: 12px; color: var(--muted); line-height: 1.8; }
-  .invoice-section { margin: 14px 0; }
-  .invoice-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-  .invoice-val { font-size: 13px; line-height: 1.7; }
-  .invoice-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
-  .invoice-table th { text-align: left; padding: 8px; background: var(--surface2); color: var(--muted); font-weight: 600; }
-  .invoice-table th:last-child, .invoice-table td:last-child { text-align: right; }
-  .invoice-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
-  .invoice-totals { margin-top: 12px; }
-  .paid-badge {
-    display: inline-block; background: rgba(34,197,94,0.15);
-    border: 1px solid rgba(34,197,94,0.3); color: var(--green);
-    padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 700;
-    margin-top: 12px;
-  }
+/* ━━━ STATUS CARDS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.status {
+  border-radius:var(--r2); padding:22px; text-align:center; margin:8px 0;
+}
+.status.wait  { background:rgba(91,156,246,.08); border:1px solid rgba(91,156,246,.18); }
+.status.ok    { background:rgba(45,212,128,.08); border:1px solid rgba(45,212,128,.18); }
+.status.fail  { background:rgba(255,95,112,.08); border:1px solid rgba(255,95,112,.18); }
+.st-ico { font-size:34px; margin-bottom:12px; }
+.st-title { font-size:17px; font-weight:700; margin-bottom:7px; }
+.st-msg { font-size:13px; color:var(--muted); line-height:1.6; }
+.status.wait .st-ico { color:var(--blue); }
+.status.ok   .st-ico { color:var(--green); }
+.status.fail .st-ico { color:var(--red); }
+.prog { width:100%; height:3px; background:rgba(255,255,255,.07); border-radius:2px; overflow:hidden; margin-top:12px; }
+.prog-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--gold2)); transition:width 1s linear; }
 
-  /* ── LICENSE KEY BOX ─────────────────────────────────── */
-  .license-box {
-    background: var(--surface2); border: 1px dashed rgba(245,166,35,0.4);
-    border-radius: var(--radius-sm); padding: 14px;
-    margin: 10px 0;
-  }
-  .license-box-label { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-  .license-key { font-family: 'DM Mono', monospace; font-size: 13px; word-break: break-all; line-height: 1.6; }
-  .copy-btn {
-    margin-top: 8px; padding: 7px 14px;
-    background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.2);
-    color: var(--accent); border-radius: 8px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-  }
+/* ━━━ QR PAYMENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.amt-block { text-align:center; margin-bottom:18px; }
+.amt-lbl { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+.amt-val {
+  font-size:58px; font-weight:800; font-family:'JetBrains Mono',monospace;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; letter-spacing:-2px; line-height:1;
+}
+.amt-usd { font-size:14px; color:var(--muted); margin-top:5px; }
+.qr-frame {
+  background:#fff; border-radius:20px; padding:18px;
+  text-align:center; margin-bottom:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.4);
+}
+.qr-frame img { width:100%; max-width:220px; height:auto; display:block; margin:0 auto; border-radius:10px; }
+.qr-merchant { font-size:14px; font-weight:700; color:#111; margin-top:12px; }
+.qr-bank { font-size:12px; color:#666; margin-top:2px; }
+.pay-steps {
+  background:rgba(255,255,255,.04); border:1px solid var(--glassbdr);
+  border-radius:var(--r2); padding:16px; margin-bottom:14px;
+}
+.pay-steps-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px; }
+.step { display:flex; align-items:center; gap:12px; font-size:13px; margin-bottom:10px; }
+.step:last-child { margin:0; }
+.snum {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000; border-radius:50%; width:24px; height:24px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:800; flex-shrink:0;
+}
+.warn-box {
+  background:rgba(245,166,35,.07); border:1px solid rgba(245,166,35,.18);
+  border-radius:var(--r2); padding:12px 14px;
+  display:flex; gap:10px; align-items:center;
+  font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:14px;
+}
+.warn-box i { color:var(--gold); flex-shrink:0; font-size:14px; }
 
-  /* ── SPINNER ─────────────────────────────────────────── */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { animation: spin 0.8s linear infinite; display: inline-block; }
+/* ━━━ INVOICE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.inv-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.inv-brand { font-size:26px; font-weight:800; letter-spacing:-1px; }
+.inv-brand span { color:var(--gold); }
+.inv-contact { font-size:11px; color:var(--muted); margin-top:3px; line-height:1.7; }
+.inv-right { text-align:right; font-size:12px; color:var(--muted); line-height:1.8; }
+.inv-right strong { font-size:16px; color:var(--text); font-weight:700; }
+.inv-sec { margin:14px 0; }
+.inv-sec-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.inv-sec-val { font-size:13px; line-height:1.7; }
+.inv-table { width:100%; border-collapse:collapse; font-size:12px; margin:12px 0; }
+.inv-table th { text-align:left; padding:9px 10px; background:rgba(255,255,255,.05); color:var(--muted); font-weight:600; }
+.inv-table th:last-child, .inv-table td:last-child { text-align:right; }
+.inv-table td { padding:10px; border-bottom:1px solid var(--glassbdr); }
+.paid-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(45,212,128,.1); border:1px solid rgba(45,212,128,.25);
+  color:var(--green); padding:5px 14px; border-radius:100px;
+  font-size:12px; font-weight:700; margin-top:12px;
+}
 
-  /* ── ANIMATIONS ──────────────────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .product-card { animation: fadeUp 0.4s ease both; }
+/* ━━━ LICENSE KEY / SPOILER ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.key-box {
+  background:rgba(245,166,35,.06); border:1px dashed rgba(245,166,35,.25);
+  border-radius:var(--r2); padding:18px; margin:16px 0;
+}
+.key-box-label {
+  display:flex; align-items:center; gap:7px;
+  font-size:11px; font-weight:700; color:var(--gold); text-transform:uppercase;
+  letter-spacing:1px; margin-bottom:12px;
+}
+.spoiler-wrap { position:relative; cursor:pointer; user-select:none; border-radius:var(--r3); overflow:hidden; }
+.spoiler-text {
+  font-family:'JetBrains Mono',monospace; font-size:13px; word-break:break-all;
+  line-height:1.8; filter:blur(7px); transition:filter .4s cubic-bezier(.22,.68,0,1.2);
+  color:var(--text); padding:8px;
+}
+.spoiler-text.open { filter:none; }
+.spoiler-mask {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(8,12,24,.5); backdrop-filter:blur(2px);
+  border-radius:var(--r3); gap:7px; font-size:13px; font-weight:600; color:var(--gold);
+  transition:opacity .3s;
+}
+.spoiler-mask.gone { opacity:0; pointer-events:none; }
+.copy-key-btn {
+  display:none; margin-top:10px; padding:9px 16px;
+  background:rgba(245,166,35,.1); border:1px solid rgba(245,166,35,.2);
+  color:var(--gold); border-radius:var(--r3);
+  font-size:12px; font-weight:700; cursor:pointer; font-family:'Outfit',sans-serif;
+  transition:background .2s;
+}
+.copy-key-btn.on { display:inline-flex; align-items:center; gap:6px; }
+.copy-key-btn:active { background:rgba(245,166,35,.2); }
 
-  @media print {
-    body > *:not(#invoice-print) { display: none !important; }
-    #invoice-print { display: block !important; }
-  }
+/* ━━━ TOAST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#toast {
+  position:fixed; top:72px; left:50%; transform:translateX(-50%) translateY(-14px);
+  background:rgba(12,16,28,.95); backdrop-filter:var(--blur);
+  border:1px solid var(--glassbdr2); color:var(--text);
+  padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600;
+  display:flex; align-items:center; gap:8px;
+  opacity:0; transition:all .28s; pointer-events:none; white-space:nowrap; z-index:999;
+}
+#toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast i { color:var(--green); }
+
+/* ━━━ EMPTY STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.empty { text-align:center; padding:50px 0; color:var(--muted); }
+.empty i { font-size:46px; display:block; margin-bottom:12px; opacity:.3; }
+
+/* ━━━ ANIMATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes fadeup { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin    { to { transform:rotate(360deg); } }
+@keyframes pulse   { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+.spin    { animation:spin .75s linear infinite; display:inline-block; }
+.pulse   { animation:pulse 1.5s ease infinite; }
 </style>
 </head>
 <body>
+
+<!-- AURORA BACKGROUND -->
+<div class="aurora">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orb orb4"></div>
+</div>
+<div class="grain"></div>
+
+<!-- ═══════════════════════════════════════════ APP -->
 <div id="app">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo">
-      <div class="logo-icon">X</div>
-      <span class="logo-name">xstore</span>
-    </div>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo"><span class="logo-x">x</span><span class="logo-store">store</span></div>
     <button class="cart-btn" id="cartBtn">
-      <i class="fas fa-shopping-bag"></i>
-      <span class="cart-badge" id="cartBadge">0</span>
+      <i class="fas fa-bag-shopping" style="font-size:13px"></i>
+      Cart
+      <span class="cart-count" id="cartCount">0</span>
     </button>
-  </header>
-
-  <!-- BANNER -->
-  <div class="banner">
-    <div class="banner-left">
-      <div class="banner-label">⚡ Flash Promotion</div>
-      <div class="banner-title"><span>50% OFF</span> All Licenses</div>
-      <div class="timer">
-        <div class="timer-unit"><div class="timer-num" id="tDays">00</div><div class="timer-label">Days</div></div>
-        <div class="timer-unit"><div class="timer-num" id="tHours">00</div><div class="timer-label">Hrs</div></div>
-        <div class="timer-unit"><div class="timer-num" id="tMins">00</div><div class="timer-label">Min</div></div>
-        <div class="timer-unit"><div class="timer-num" id="tSecs">00</div><div class="timer-label">Sec</div></div>
-      </div>
-    </div>
   </div>
 
-  <!-- PRODUCTS -->
-  <div class="content" id="productGrid"></div>
+  <!-- SCROLL CONTENT -->
+  <div class="scroll">
 
-</div><!-- #app -->
+    <!-- Sale Banner -->
+    <div class="sale-banner">
+      <div class="sale-top">
+        <div class="sale-left">
+          <div class="sale-pill"><i class="fas fa-bolt"></i> Flash Sale</div>
+          <div class="sale-title">Save <em>50%</em><br>on all licenses</div>
+          <div class="timer">
+            <div class="tu"><div class="tn" id="tD">00</div><div class="tl">d</div></div>
+            <div class="tu"><div class="tn" id="tH">00</div><div class="tl">h</div></div>
+            <div class="tu"><div class="tn" id="tM">00</div><div class="tl">m</div></div>
+            <div class="tu"><div class="tn" id="tS">00</div><div class="tl">s</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- BOTTOM BAR -->
-<div class="bottom-bar" id="bottomBar">
-  <button class="checkout-btn" id="checkoutBarBtn">
-    <span class="checkout-btn-label"><i class="fas fa-shopping-bag"></i> View Cart</span>
-    <span class="checkout-btn-total" id="barTotal">$0.00</span>
-  </button>
-</div>
+    <div class="section-label">Available Licenses</div>
+    <div id="productList"></div>
 
-<!-- TOAST -->
-<div id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg"></span></div>
+  </div><!-- /scroll -->
 
-<!-- SHEET OVERLAY -->
-<div class="sheet-overlay" id="overlay"></div>
+  <!-- Cart Bar -->
+  <div class="cart-bar" id="cartBar">
+    <button class="cartbar-btn" id="cartBarBtn">
+      <span style="display:flex;align-items:center;gap:9px"><i class="fas fa-bag-shopping"></i>View Cart</span>
+      <span id="barTotal">$0.00</span>
+    </button>
+  </div>
 
-<!-- CART SHEET -->
-<div class="sheet" id="cartSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
+</div><!-- /app -->
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"></div>
+
+<!-- ═══ CART SHEET -->
+<div class="sheet" id="sheetCart">
+  <div class="sheet-pill"></div>
+  <div class="sheet-head">
     <span class="sheet-title">Your Cart</span>
     <button class="sheet-close" id="cartClose"><i class="fas fa-times"></i></button>
   </div>
   <div class="sheet-body" id="cartBody"></div>
-  <div class="sheet-footer">
+  <div class="sheet-foot">
     <div id="cartTotals"></div>
-    <button class="btn-primary" id="toCheckoutBtn" style="margin-top:14px">Proceed to Checkout</button>
-    <button class="btn-secondary" id="cartContinueBtn">Continue Shopping</button>
+    <button class="btn-primary" id="toCheckout" style="margin-top:16px"><i class="fas fa-arrow-right"></i>Checkout</button>
+    <button class="btn-ghost" id="cartContinue">Continue Shopping</button>
   </div>
 </div>
 
-<!-- CHECKOUT SHEET -->
-<div class="sheet" id="checkoutSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
+<!-- ═══ CHECKOUT SHEET -->
+<div class="sheet" id="sheetCheckout">
+  <div class="sheet-pill"></div>
+  <div class="sheet-head">
     <span class="sheet-title">Checkout</span>
-    <button class="sheet-close" id="checkoutClose"><i class="fas fa-times"></i></button>
+    <button class="sheet-close" id="coClose"><i class="fas fa-times"></i></button>
   </div>
   <div class="sheet-body">
-    <div id="checkoutSummary" style="margin-bottom:16px"></div>
-    <div class="form-group">
-      <label class="form-label">Full Name *</label>
-      <input class="form-input" id="fName" placeholder="e.g. Chamrong Vann" autocomplete="name">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Email (Optional)</label>
-      <input class="form-input" id="fEmail" type="email" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Phone Number *</label>
-      <input class="form-input" id="fPhone" type="tel" placeholder="012 345 678" autocomplete="tel">
-    </div>
-    <div id="checkoutError" style="color:var(--red);font-size:13px;margin-top:8px;display:none"></div>
+    <div id="coSummary"></div>
+    <label class="flabel">Full Name *</label>
+    <input class="finput" id="fName" placeholder="Chamrong Vann" autocomplete="name">
+    <label class="flabel">Phone Number *</label>
+    <input class="finput" id="fPhone" type="tel" placeholder="012 345 678" autocomplete="tel">
+    <label class="flabel">Email (Optional)</label>
+    <input class="finput" id="fEmail" type="email" placeholder="you@email.com" autocomplete="email">
+    <div class="f-err" id="fErr"></div>
   </div>
-  <div class="sheet-footer">
-    <button class="btn-primary" id="payBtn">
-      <i class="fas fa-lock" style="margin-right:6px"></i>Pay with ABA PayWay
-    </button>
-    <button class="btn-secondary" id="backToCartBtn">← Back to Cart</button>
+  <div class="sheet-foot">
+    <button class="btn-primary" id="payBtn"><i class="fas fa-lock"></i>Pay with ABA</button>
+    <button class="btn-ghost" id="backCart">&#x2190; Back to Cart</button>
   </div>
 </div>
 
-<!-- PAYMENT STATUS SHEET -->
-<div class="sheet" id="paymentSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <span class="sheet-title">Payment</span>
-  </div>
-  <div class="sheet-body" id="paymentBody"></div>
-  <div class="sheet-footer" id="paymentFooter"></div>
+<!-- ═══ PAYMENT SHEET -->
+<div class="sheet" id="sheetPay">
+  <div class="sheet-pill"></div>
+  <div class="sheet-head"><span class="sheet-title">Payment</span></div>
+  <div class="sheet-body" id="payBody"></div>
+  <div class="sheet-foot" id="payFoot"></div>
 </div>
 
-<!-- INVOICE SHEET -->
-<div class="sheet" id="invoiceSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
+<!-- ═══ INVOICE SHEET -->
+<div class="sheet" id="sheetInvoice">
+  <div class="sheet-pill"></div>
+  <div class="sheet-head">
     <span class="sheet-title">Invoice</span>
-    <button class="sheet-close" id="invoiceClose"><i class="fas fa-times"></i></button>
+    <button class="sheet-close" id="invClose"><i class="fas fa-times"></i></button>
   </div>
-  <div class="sheet-body" id="invoiceBody"></div>
-  <div class="sheet-footer">
-    <button class="btn-secondary" id="doneBtn">Done</button>
+  <div class="sheet-body" id="invBody"></div>
+  <div class="sheet-foot">
+    <button class="btn-ghost" id="doneBtn">Done</button>
   </div>
 </div>
+
+<!-- TOAST -->
+<div id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG — update these values
-// ═══════════════════════════════════════════════════════
-const WORKER_URL    = 'https://xstore-notify.chamrong.workers.dev';
-const PAYWAY_LINK   = 'https://link.payway.com.kh/ABAPAYRF3809168';
-const DISCOUNT_PCT  = 50;
-const MULTIPLIER    = 1 - DISCOUNT_PCT / 100;
-const SALE_DURATION = 24 * 60 * 60 * 1000; // 1 day
+/* ──────────────────────────────────────────────
+   CONFIG
+────────────────────────────────────────────── */
+const WORKER   = 'https://xstore-notify.chamrong.workers.dev';
+const DISC     = 50;
+const MULT     = 1 - DISC / 100;
+const SALE_DUR = 24 * 60 * 60 * 1000;
+const QR_IMG   = 'qr.png';
 
-// ═══════════════════════════════════════════════════════
-// TELEGRAM WEBAPP
-// ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────
+   TELEGRAM
+────────────────────────────────────────────── */
 const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.enableClosingConfirmation();
-}
+if (tg) { tg.ready(); tg.expand(); tg.enableClosingConfirmation(); }
+const buyerChatId = tg?.initDataUnsafe?.user?.id || null;
 
-// ═══════════════════════════════════════════════════════
-// PRODUCTS
-// ═══════════════════════════════════════════════════════
-const ICONS = {
-  Windows: '🪟', Office: '📊', Server: '🖥️',
-  'Developer Tools': '⚙️', 'Design Tools': '🎨'
-};
-
-const products = [
-  { id: 101, name: 'Windows 11 Pro',            price: 20,    cat: 'Windows',         desc: 'Enterprise security & features' },
-  { id: 201, name: 'Microsoft 365 Monthly',     price: 6,     cat: 'Office',          desc: 'Web & mobile Office apps' },
-  { id: 202, name: 'Project Professional',       price: 300,   cat: 'Office',          desc: 'Advanced project management' },
-  { id: 203, name: 'Visio Professional',         price: 300,   cat: 'Office',          desc: 'Professional diagrams & flowcharts' },
-  { id: 301, name: 'Windows Server 2025 Std',   price: 1000,  cat: 'Server',          desc: 'Next-gen Windows Server' },
-  { id: 302, name: 'SQL Server 2022 Std',       price: 1000,  cat: 'Server',          desc: 'Relational database solution' },
-  { id: 303, name: 'System Center 2022',        price: 1000,  cat: 'Server',          desc: 'Datacenter management' },
-  { id: 401, name: 'Visual Studio Professional',price: 1000,  cat: 'Developer Tools', desc: 'Build any application' },
-  { id: 501, name: 'Canva Pro (Yearly)',         price: 10,    cat: 'Design Tools',    desc: 'Full Canva Pro access' },
+/* ──────────────────────────────────────────────
+   PRODUCTS
+────────────────────────────────────────────── */
+const PRODUCTS = [
+  {
+    id: 101, ico: '&#x1FA9F;', name: 'Windows 11 Pro',
+    badge: 'Lifetime', badgeColor: '#5b9cf6',
+    tagline: 'The most secure & intelligent Windows ever',
+    desc: 'One-time license. BitLocker, Hyper-V, Remote Desktop, Windows Hello and AI Copilot+ features included.',
+    url: 'https://www.microsoft.com/en-us/windows/windows-11',
+    price: 20,
+    chips: ['BitLocker Encryption','Remote Desktop','Windows Hello','Hyper-V','Copilot+ AI','Quick Machine Recovery'],
+    specs: [{k:'Type',v:'Perpetual / Lifetime'},{k:'Devices',v:'1 PC'},{k:'Version',v:'Win 11 Pro 25H2'},{k:'Delivery',v:'Key via Bot'}],
+    compare: null,
+  },
+  {
+    id: 202, ico: '&#x1F4CA;', name: 'Office Pro Plus 2024',
+    badge: 'One-Time', badgeColor: '#f97316',
+    tagline: 'Full Office suite — pay once, own forever',
+    desc: 'Word, Excel, PowerPoint, Outlook, Access, Publisher & OneNote. Works 100% offline. No subscription needed.',
+    url: 'https://www.microsoft.com/en-us/microsoft-365/office/compare-office-products',
+    price: 30,
+    chips: ['Word & Excel','PowerPoint','Outlook','Access & Publisher','OneNote','Offline Ready'],
+    specs: [{k:'Type',v:'Perpetual / Lifetime'},{k:'Devices',v:'1 PC'},{k:'Version',v:'Office 2024 Pro+'},{k:'Delivery',v:'Key via Bot'}],
+    compare: { vs:'vs Microsoft 365', pros:['Pay once, no monthly fees','Works 100% offline','Full Access & Publisher','Data stays local'], cons:['No cloud storage','No auto feature updates','Single device only'] },
+  },
+  {
+    id: 203, ico: '&#x2601;&#xFE0F;', name: 'Microsoft 365',
+    badge: 'Monthly', badgeColor: '#2dd480',
+    tagline: 'Always up-to-date across all your devices',
+    desc: 'All Office apps + 1TB OneDrive + Teams + Copilot AI. Runs on Windows, Mac, iOS & Android.',
+    url: 'https://www.microsoft.com/en-us/microsoft-365/compare-microsoft-365-enterprise-plans',
+    price: 6,
+    chips: ['Word, Excel, PowerPoint','1TB OneDrive','Microsoft Teams','Copilot AI','Up to 5 Devices','Always Updated'],
+    specs: [{k:'Type',v:'Monthly Subscription'},{k:'Devices',v:'Up to 5'},{k:'Storage',v:'1TB OneDrive'},{k:'Delivery',v:'Account via Bot'}],
+    compare: { vs:'vs Office Pro Plus', pros:['All devices (Win/Mac/iOS)','1TB cloud storage','Latest features + Copilot','Teams collaboration'], cons:['Recurring monthly cost','Needs internet to activate','No Access on basic plan'] },
+  },
 ];
 
-// ═══════════════════════════════════════════════════════
-// CART STATE
-// ═══════════════════════════════════════════════════════
-let cart = [];
-let pendingOrder = null;
-let pollingTimer = null;
+/* ──────────────────────────────────────────────
+   STATE
+────────────────────────────────────────────── */
+let cart = [], order = null, pollTimer = null;
+const $ = id => document.getElementById(id);
 
-function cartTotal() {
-  return cart.reduce((s, i) => s + i.price * MULTIPLIER * i.qty, 0);
-}
-function cartCount() {
-  return cart.reduce((s, i) => s + i.qty, 0);
-}
+/* ──────────────────────────────────────────────
+   CART LOGIC
+────────────────────────────────────────────── */
+const cartTotal = () => cart.reduce((s,i) => s + i.price * MULT * i.qty, 0);
+const cartQty   = () => cart.reduce((s,i) => s + i.qty, 0);
 
-function addToCart(id, btnEl) {
-  const p = products.find(x => x.id === id);
-  const existing = cart.find(x => x.id === id);
-  if (existing) existing.qty++;
-  else cart.push({ ...p, qty: 1 });
-  updateCartUI();
-  showToast(`${p.name} added`);
-  if (btnEl) {
-    btnEl.classList.add('added');
-    btnEl.textContent = '✓ Added';
-    setTimeout(() => { btnEl.classList.remove('added'); btnEl.textContent = 'Add'; }, 1500);
+function addToCart(id, btn) {
+  const p = PRODUCTS.find(x => x.id === id);
+  const e = cart.find(x => x.id === id);
+  if (e) e.qty++; else cart.push({...p, qty:1});
+  syncCartUI();
+  showToast(p.name + ' added to cart');
+  if (btn) {
+    btn.classList.add('added');
+    btn.innerHTML = '<i class="fas fa-check"></i> Added';
+    setTimeout(() => { btn.classList.remove('added'); btn.innerHTML = '<i class="fas fa-cart-plus"></i> Add'; }, 1700);
   }
 }
 
-function updateCartUI() {
-  const count = cartCount();
-  const badge = document.getElementById('cartBadge');
-  badge.textContent = count;
-  badge.classList.toggle('show', count > 0);
-  document.getElementById('bottomBar').classList.toggle('show', count > 0);
-  document.getElementById('barTotal').textContent = `$${cartTotal().toFixed(2)}`;
+function syncCartUI() {
+  const q = cartQty(), t = cartTotal();
+  $('cartCount').textContent = q;
+  $('cartCount').classList.toggle('on', q > 0);
+  $('cartBar').classList.toggle('on', q > 0);
+  $('barTotal').textContent = '$' + t.toFixed(2);
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDER PRODUCTS
-// ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────
+   RENDER PRODUCTS
+────────────────────────────────────────────── */
 function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  const cats = [...new Set(products.map(p => p.cat))];
-  let html = '';
-  cats.forEach(cat => {
-    html += `<div class="cat-header">${ICONS[cat] || '📦'} ${cat}</div>`;
-    products.filter(p => p.cat === cat).forEach((p, i) => {
-      const discounted = (p.price * MULTIPLIER).toFixed(2);
-      html += `
-        <div class="product-card" style="animation-delay:${i * 0.05}s">
-          <div class="product-icon">${ICONS[p.cat] || '📦'}</div>
-          <div class="product-info">
-            <div class="product-name">${p.name}</div>
-            <div class="product-desc">${p.desc}</div>
-          </div>
-          <div class="product-right">
-            <div>
-              <div class="price-old">$${p.price.toFixed(2)}</div>
-              <div class="price-new">$${discounted}</div>
+  const list = $('productList');
+  PRODUCTS.forEach((p, i) => {
+    const disc = (p.price * MULT).toFixed(2);
+    const el = document.createElement('div');
+    el.className = 'pcard';
+    el.style.animationDelay = (i * 0.1) + 's';
+    el.innerHTML = `
+      <div class="pcard-body">
+        <div class="pcard-top">
+          <div class="pcard-icon">${p.ico}</div>
+          <div class="pcard-info">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+              <span class="pcard-name">${p.name}</span>
+              <span class="badge" style="background:${p.badgeColor}18;color:${p.badgeColor};border:1px solid ${p.badgeColor}35">${p.badge}</span>
             </div>
-            <button class="add-btn" data-id="${p.id}">Add</button>
+            <div class="pcard-tagline">${p.tagline}</div>
           </div>
-        </div>`;
-    });
+        </div>
+        <p class="pcard-desc">${p.desc}</p>
+        <div class="chips">${p.chips.map(c => `<span class="chip"><i class="fas fa-check"></i>${c}</span>`).join('')}</div>
+        <div class="specs">${p.specs.map(s => `<div class="spec-row"><span class="sk">${s.k}</span><span class="sv">${s.v}</span></div>`).join('')}</div>
+        ${p.compare ? `
+          <div class="cmp-toggle" data-id="${p.id}">
+            <i class="fas fa-scale-balanced icon"></i> Compare ${p.compare.vs}
+            <i class="fas fa-chevron-down caret" id="crt-${p.id}"></i>
+          </div>
+          <div class="cmp-body" id="cmp-${p.id}">
+            <div class="cmp-grid">
+              <div><div class="cmp-head" style="color:var(--green)">&#x2713; Pros</div>${p.compare.pros.map(x=>`<div class="cmp-item">&#x2022; ${x}</div>`).join('')}</div>
+              <div><div class="cmp-head" style="color:var(--red)">&#x2717; Cons</div>${p.compare.cons.map(x=>`<div class="cmp-item">&#x2022; ${x}</div>`).join('')}</div>
+            </div>
+          </div>` : ''}
+      </div>
+      <div class="pcard-foot">
+        <div class="price-wrap">
+          <div class="p-old">$${p.price.toFixed(2)}</div>
+          <div class="p-new">$${disc}</div>
+          <span class="p-off">50% OFF</span>
+        </div>
+        <div class="card-btns">
+          <a class="btn-info" href="${p.url}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Details</a>
+          <button class="btn-add" data-id="${p.id}"><i class="fas fa-cart-plus"></i> Add</button>
+        </div>
+      </div>`;
+    list.appendChild(el);
   });
-  grid.innerHTML = html;
-  grid.addEventListener('click', e => {
-    const btn = e.target.closest('.add-btn');
+
+  list.addEventListener('click', e => {
+    const tog = e.target.closest('.cmp-toggle');
+    if (tog) {
+      const id = tog.dataset.id;
+      const open = $('cmp-' + id).classList.toggle('open');
+      $('crt-' + id).style.transform = open ? 'rotate(180deg)' : '';
+      return;
+    }
+    const btn = e.target.closest('.btn-add');
     if (btn) addToCart(parseInt(btn.dataset.id), btn);
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// CART SHEET
-// ═══════════════════════════════════════════════════════
-function renderCartSheet() {
-  const body = document.getElementById('cartBody');
-  if (cart.length === 0) {
-    body.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted)">
-      <i class="fas fa-shopping-bag" style="font-size:40px;margin-bottom:12px;display:block"></i>
-      Your cart is empty
-    </div>`;
-    document.getElementById('toCheckoutBtn').disabled = true;
+/* ──────────────────────────────────────────────
+   CART SHEET
+────────────────────────────────────────────── */
+function renderCart() {
+  const body = $('cartBody');
+  if (!cart.length) {
+    body.innerHTML = '<div class="empty"><i class="fas fa-bag-shopping"></i>Your cart is empty</div>';
+    $('toCheckout').disabled = true;
   } else {
-    document.getElementById('toCheckoutBtn').disabled = false;
+    $('toCheckout').disabled = false;
     body.innerHTML = cart.map(item => `
-      <div class="cart-item">
-        <div class="cart-item-icon">${ICONS[item.cat] || '📦'}</div>
-        <div class="cart-item-info">
-          <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-price">$${(item.price * MULTIPLIER).toFixed(2)} each</div>
+      <div class="ci">
+        <div class="ci-ico">${item.ico}</div>
+        <div class="ci-info">
+          <div class="ci-name">${item.name}</div>
+          <div class="ci-price">$${(item.price * MULT).toFixed(2)} each</div>
         </div>
-        <div class="cart-item-controls">
-          <button class="qty-btn" data-id="${item.id}" data-action="dec">−</button>
-          <span class="qty-val">${item.qty}</span>
-          <button class="qty-btn" data-id="${item.id}" data-action="inc">+</button>
-          <button class="remove-btn" data-id="${item.id}" data-action="remove"><i class="fas fa-trash"></i></button>
+        <div class="ci-ctrl">
+          <button class="qb" data-id="${item.id}" data-a="dec">&#x2212;</button>
+          <span class="qv">${item.qty}</span>
+          <button class="qb" data-id="${item.id}" data-a="inc">+</button>
+          <button class="rm-btn" data-id="${item.id}" data-a="rm"><i class="fas fa-trash-can"></i></button>
         </div>
-      </div>
-    `).join('');
-
-    body.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = parseInt(btn.dataset.id);
-        const action = btn.dataset.action;
+      </div>`).join('');
+    body.querySelectorAll('[data-a]').forEach(b => {
+      b.onclick = () => {
+        const id = parseInt(b.dataset.id), a = b.dataset.a;
         const item = cart.find(x => x.id === id);
-        if (action === 'inc') item.qty++;
-        else if (action === 'dec') { item.qty--; if (item.qty <= 0) cart = cart.filter(x => x.id !== id); }
-        else if (action === 'remove') cart = cart.filter(x => x.id !== id);
-        updateCartUI();
-        renderCartSheet();
-      });
+        if (a === 'inc') item.qty++;
+        else if (a === 'dec') { item.qty--; if (item.qty <= 0) cart = cart.filter(x => x.id !== id); }
+        else cart = cart.filter(x => x.id !== id);
+        syncCartUI(); renderCart();
+      };
     });
   }
-
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const total = cartTotal();
-  document.getElementById('cartTotals').innerHTML = `
-    <div class="order-row"><span class="label">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
-    <div class="order-row"><span class="label">Flash Discount (${DISCOUNT_PCT}%)</span><span class="discount-val">−$${(subtotal - total).toFixed(2)}</span></div>
-    <div class="order-row total"><span class="label">Total</span><span>$${total.toFixed(2)}</span></div>
-  `;
+  const sub = cart.reduce((s,i) => s + i.price * i.qty, 0), tot = cartTotal();
+  $('cartTotals').innerHTML = `
+    <div class="orow"><span class="lbl">Subtotal</span><span>$${sub.toFixed(2)}</span></div>
+    <div class="orow"><span class="lbl">Flash Discount (${DISC}%)</span><span class="disc-val">&#x2212;$${(sub-tot).toFixed(2)}</span></div>
+    <div class="orow total"><span>Total</span><span>$${tot.toFixed(2)}</span></div>`;
 }
 
-// ═══════════════════════════════════════════════════════
-// CHECKOUT SHEET
-// ═══════════════════════════════════════════════════════
-function renderCheckoutSummary() {
-  const total = cartTotal();
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  document.getElementById('checkoutSummary').innerHTML = `
-    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px">
-      ${cart.map(i => `
-        <div class="order-row">
-          <span class="label">${i.name} ×${i.qty}</span>
-          <span>$${(i.price * MULTIPLIER * i.qty).toFixed(2)}</span>
-        </div>`).join('')}
-      <div class="order-row"><span class="label">Discount</span><span class="discount-val">−$${(subtotal - total).toFixed(2)}</span></div>
-      <div class="order-row total"><span class="label">Total</span><span>$${total.toFixed(2)}</span></div>
-    </div>
-  `;
+/* ──────────────────────────────────────────────
+   CHECKOUT
+────────────────────────────────────────────── */
+function renderCoSummary() {
+  const tot = cartTotal(), sub = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  $('coSummary').innerHTML = `
+    <div style="background:rgba(255,255,255,.05);border:1px solid var(--glassbdr);border-radius:var(--r2);padding:14px;margin-bottom:4px">
+      ${cart.map(i => `<div class="orow"><span class="lbl">${i.name} &#xD7;${i.qty}</span><span>$${(i.price*MULT*i.qty).toFixed(2)}</span></div>`).join('')}
+      <div class="orow"><span class="lbl">Discount (${DISC}%)</span><span class="disc-val">&#x2212;$${(sub-tot).toFixed(2)}</span></div>
+      <div class="orow total"><span>Total</span><span>$${tot.toFixed(2)}</span></div>
+    </div>`;
 }
 
-// ═══════════════════════════════════════════════════════
-// VALIDATION
-// ═══════════════════════════════════════════════════════
-function validatePhone(p) { return /^(?:\+855|0)[1-9]\d{7,8}$/.test(p.replace(/[\s\-().]/g, '')); }
-function validateEmail(e) {
-  if (!e.trim()) return true;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-}
+const validPhone = p => /^(?:\+855|0)[1-9]\d{7,8}$/.test(p.replace(/[\s\-().]/g,''));
+const validEmail = e => !e.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
-// ═══════════════════════════════════════════════════════
-// PAYMENT FLOW
-// ═══════════════════════════════════════════════════════
-async function startPayment() {
-  const name  = document.getElementById('fName').value.trim();
-  const email = document.getElementById('fEmail').value.trim();
-  const phone = document.getElementById('fPhone').value.trim();
-  const errEl = document.getElementById('checkoutError');
-
-  [document.getElementById('fName'), document.getElementById('fEmail'), document.getElementById('fPhone')]
-    .forEach(el => el.classList.remove('error'));
-  errEl.style.display = 'none';
-
-  if (!name) { document.getElementById('fName').classList.add('error'); errEl.textContent = 'Please enter your full name.'; errEl.style.display = 'block'; return; }
-  if (!phone || !validatePhone(phone)) { document.getElementById('fPhone').classList.add('error'); errEl.textContent = 'Please enter a valid Cambodian phone number.'; errEl.style.display = 'block'; return; }
-  if (!validateEmail(email)) { document.getElementById('fEmail').classList.add('error'); errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; return; }
-
-  const now = new Date();
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const total = cartTotal();
-  pendingOrder = {
-    invoiceNumber: Math.floor(Math.random() * 900000) + 100000,
-    issueDate: now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }),
-    issueTime: now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }),
-    subtotal, discountAmount: subtotal - total, total,
-    customerName: name, customerEmail: email, customerPhone: phone,
-    items: cart.map(i => ({ ...i })),
+function startPayment() {
+  const name = $('fName').value.trim(), phone = $('fPhone').value.trim(), email = $('fEmail').value.trim();
+  [$('fName'),$('fPhone'),$('fEmail')].forEach(el => el.classList.remove('err'));
+  $('fErr').style.display = 'none';
+  if (!name)              { $('fName').classList.add('err');  $('fErr').textContent='Please enter your full name.'; $('fErr').style.display='block'; return; }
+  if (!validPhone(phone)) { $('fPhone').classList.add('err'); $('fErr').textContent='Please enter a valid Cambodian phone number.'; $('fErr').style.display='block'; return; }
+  if (!validEmail(email)) { $('fEmail').classList.add('err'); $('fErr').textContent='Please enter a valid email address.'; $('fErr').style.display='block'; return; }
+  const now = new Date(), sub = cart.reduce((s,i)=>s+i.price*i.qty,0), tot = cartTotal();
+  order = {
+    invoiceNumber: Math.floor(Math.random()*900000)+100000,
+    issueDate: now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),
+    issueTime: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    subtotal:sub, discountAmount:sub-tot, total:tot,
+    customerName:name, customerPhone:phone, customerEmail:email,
+    items:cart.map(i=>({...i})), buyerChatId,
   };
-
-  closeSheet('checkoutSheet');
-  openSheet('paymentSheet');
-  renderPaymentInstructions(pendingOrder.total);
+  closeSheet('sheetCheckout'); openSheet('sheetPay'); renderQRScreen(tot);
 }
 
-// ═══════════════════════════════════════════════════════
-// PAYMENT STATUS UI
-// ═══════════════════════════════════════════════════════
-
-// Step 1 — Show amount clearly + Open PayWay button
-function renderPaymentInstructions(total) {
-  document.getElementById('paymentBody').innerHTML = `
-    <div style="text-align:center;padding:8px 0 16px">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Amount to enter on PayWay</div>
-      <div style="font-size:52px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent);line-height:1">
-        $${total.toFixed(2)}
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px">USD — enter this exact amount</div>
+/* ──────────────────────────────────────────────
+   QR PAYMENT SCREEN
+────────────────────────────────────────────── */
+function renderQRScreen(total) {
+  $('payBody').innerHTML = `
+    <div class="amt-block">
+      <div class="amt-lbl">Scan &amp; pay exactly</div>
+      <div class="amt-val">$${total.toFixed(2)}</div>
+      <div class="amt-usd">USD</div>
     </div>
-
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin:8px 0">
-      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Steps</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">1</div>
-          <span>Tap <strong>"Open ABA PayWay"</strong> button below</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">2</div>
-          <span>Enter <strong style="color:var(--accent);font-family:'DM Mono',monospace">$${total.toFixed(2)}</strong> as the amount</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">3</div>
-          <span>Scan QR with ABA Mobile &amp; complete payment</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
-          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">4</div>
-          <span>Return here and tap <strong>"Verify My Payment"</strong></span>
-        </div>
-      </div>
+    <div class="qr-frame">
+      <img src="${QR_IMG}" alt="ABA KHQR"
+        onerror="this.parentNode.innerHTML='<div style=\\'padding:30px;text-align:center;color:#aaa;font-size:13px;font-family:sans-serif\\'>Upload <strong>qr.png</strong><br>to your GitHub repo</div>'"
+      />
+      <div class="qr-merchant">VANN SOK SAM RONG</div>
+      <div class="qr-bank">ABA Bank &#xB7; KHQR</div>
     </div>
-
-    <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius-sm);padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
-      <i class="fas fa-triangle-exclamation" style="color:var(--accent);margin-top:2px;flex-shrink:0"></i>
-      <span style="font-size:12px;color:var(--muted);line-height:1.5">
-        Enter the amount <strong style="color:var(--text)">exactly</strong> as shown. Wrong amount will fail verification.
-      </span>
+    <div class="pay-steps">
+      <div class="pay-steps-label">How to pay</div>
+      <div class="step"><span class="snum">1</span>Open <strong>ABA Mobile</strong> app</div>
+      <div class="step"><span class="snum">2</span>Tap <strong>Scan QR</strong> &#x2192; scan code above</div>
+      <div class="step"><span class="snum">3</span>Enter <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace">$${total.toFixed(2)}</strong> and confirm</div>
+      <div class="step"><span class="snum">4</span>Return here &#x2192; tap <strong>I've Paid</strong></div>
     </div>
-  `;
-
-  document.getElementById('paymentFooter').innerHTML = `
-    <button class="btn-primary" id="openPaywayBtn">
-      <i class="fas fa-arrow-up-right-from-square" style="margin-right:8px"></i>Open ABA PayWay — $${total.toFixed(2)}
-    </button>
-    <button class="btn-secondary" id="alreadyPaidBtn" style="margin-top:8px">
-      I already paid — Verify now
-    </button>
-  `;
-
-  document.getElementById('openPaywayBtn').addEventListener('click', () => {
-    if (tg) tg.openLink(PAYWAY_LINK);
-    else window.open(PAYWAY_LINK, '_blank');
-    setTimeout(() => renderPaymentPending(total), 800);
-  });
-  document.getElementById('alreadyPaidBtn').addEventListener('click', startPolling);
+    <div class="warn-box">
+      <i class="fas fa-triangle-exclamation"></i>
+      Enter <strong style="color:var(--text)">exactly $${total.toFixed(2)}</strong> &#x2014; wrong amount fails verification.
+    </div>`;
+  $('payFoot').innerHTML = `<button class="btn-primary" id="iPaidBtn"><i class="fas fa-shield-halved"></i>I've Paid &#x2014; Verify Now</button>`;
+  $('iPaidBtn').onclick = () => startPolling(total);
 }
 
-// Step 2 — Waiting state after PayWay opened
-function renderPaymentPending(total) {
-  const amt = total || pendingOrder?.total || 0;
-  document.getElementById('paymentBody').innerHTML = `
-    <div style="text-align:center;padding:8px 0 16px">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Expected payment</div>
-      <div style="font-size:52px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent);line-height:1">
-        $${amt.toFixed(2)}
-      </div>
-    </div>
-    <div class="status-card pending">
-      <div class="status-icon"><i class="fas fa-clock"></i></div>
-      <div class="status-title">Waiting for Payment</div>
-      <div class="status-msg">Complete payment on ABA PayWay, then tap verify below.</div>
-    </div>
-  `;
-  document.getElementById('paymentFooter').innerHTML = `
-    <button class="btn-primary" id="verifyBtn">
-      <i class="fas fa-shield-halved" style="margin-right:6px"></i>Verify My Payment
-    </button>
-    <button class="btn-secondary" id="reopenPaywayBtn" style="margin-top:8px">
-      ↗ Re-open ABA PayWay
-    </button>
-  `;
-  document.getElementById('verifyBtn').addEventListener('click', startPolling);
-  document.getElementById('reopenPaywayBtn').addEventListener('click', () => {
-    if (tg) tg.openLink(PAYWAY_LINK);
-    else window.open(PAYWAY_LINK, '_blank');
-  });
-}
-
-let pollStartTime = 0;
+/* ──────────────────────────────────────────────
+   POLLING
+────────────────────────────────────────────── */
 const POLL_MAX = 10 * 60 * 1000;
+let pollStart = 0;
 
-function startPolling() {
-  pollStartTime = Date.now();
-  document.getElementById('paymentBody').innerHTML = `
-    <div class="status-card pending">
-      <div class="status-icon"><i class="fas fa-circle-notch spinner"></i></div>
-      <div class="status-title">Checking Payment</div>
-      <div class="status-msg">Waiting for PayWay to confirm<span id="dots">.</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="pollBar"></div></div>
-    </div>
-  `;
-  document.getElementById('paymentFooter').innerHTML = `
-    <button class="btn-secondary" id="cancelPollBtn">Cancel</button>
-  `;
-  document.getElementById('cancelPollBtn').addEventListener('click', () => {
-    stopPolling(); renderPaymentInstructions(pendingOrder?.total || 0);
-  });
-
+function startPolling(total) {
+  pollStart = Date.now();
   let dots = 0;
-  const dotsEl = () => document.getElementById('dots');
-  const dotsTimer = setInterval(() => { if (dotsEl()) dotsEl().textContent = '.'.repeat((dots++ % 3) + 1); }, 500);
+  $('payBody').innerHTML = `
+    <div class="amt-block">
+      <div class="amt-lbl">Verifying payment</div>
+      <div class="amt-val">$${(total||order?.total||0).toFixed(2)}</div>
+    </div>
+    <div class="status wait">
+      <div class="st-ico"><i class="fas fa-circle-notch spin"></i></div>
+      <div class="st-title">Checking Payment</div>
+      <div class="st-msg">Waiting for ABA to confirm<span id="dots">.</span><br><span style="font-size:11px;opacity:.6">Polls every 4 seconds</span></div>
+      <div class="prog"><div class="prog-fill" id="pb"></div></div>
+    </div>`;
+  $('payFoot').innerHTML = `<button class="btn-ghost" id="cancelPoll">Cancel</button>`;
+  $('cancelPoll').onclick = () => { stopPolling(); renderQRScreen(order?.total||0); };
 
-  pollingTimer = setInterval(async () => {
-    const elapsed = Date.now() - pollStartTime;
-    const bar = document.getElementById('pollBar');
-    if (bar) bar.style.width = Math.min(100, (elapsed / POLL_MAX) * 100) + '%';
-
+  const dt = setInterval(() => { const el = $('dots'); if(el) el.textContent = '.'.repeat((dots++%3)+1); }, 500);
+  pollTimer = setInterval(async () => {
+    const elapsed = Date.now() - pollStart;
+    const pb = $('pb'); if (pb) pb.style.width = Math.min(100, elapsed/POLL_MAX*100) + '%';
     if (elapsed >= POLL_MAX) {
-      stopPolling(); clearInterval(dotsTimer);
-      renderPaymentError('Verification timed out. Please contact support if you have paid.');
+      stopPolling(); clearInterval(dt);
+      $('payBody').innerHTML = `<div class="status fail"><div class="st-ico"><i class="fas fa-clock"></i></div><div class="st-title">Timed Out</div><div class="st-msg">10 minutes passed. If you paid, please contact support at @chamrong_vann</div></div>`;
+      $('payFoot').innerHTML = `<button class="btn-primary" id="retryBtn"><i class="fas fa-rotate-right"></i>Try Again</button>`;
+      $('retryBtn').onclick = () => renderQRScreen(order?.total||0);
       return;
     }
-
     try {
-      const res = await fetch(`${WORKER_URL}/verify?invoice=${pendingOrder.invoiceNumber}&amount=${pendingOrder.total.toFixed(2)}`);
+      const res = await fetch(`${WORKER}/verify?invoice=${order.invoiceNumber}&amount=${order.total.toFixed(2)}`);
       const data = await res.json();
-      if (data.verified) {
-        stopPolling(); clearInterval(dotsTimer);
-        await onPaymentSuccess(data);
-      }
+      if (data.verified) { stopPolling(); clearInterval(dt); await onVerified(data); }
     } catch(e) { /* retry silently */ }
   }, 4000);
 }
 
-function stopPolling() { if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; } }
+function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
 
-async function onPaymentSuccess(verifyData) {
-  document.getElementById('paymentBody').innerHTML = `
-    <div class="status-card success">
-      <div class="status-icon"><i class="fas fa-check-circle"></i></div>
-      <div class="status-title">Payment Confirmed!</div>
-      <div class="status-msg">Transaction: ${verifyData.transaction_id}<br>Method: ${verifyData.payment_type}<br>Generating your invoice…</div>
-    </div>
-  `;
-  document.getElementById('paymentFooter').innerHTML = '';
-
-  // Send Telegram notification
-  const text = buildTelegramMessage(pendingOrder, verifyData);
-  try { await fetch(`${WORKER_URL}/notify`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text, order: pendingOrder, verifyData }) }); } catch(e) {}
-
+/* ──────────────────────────────────────────────
+   PAYMENT VERIFIED
+────────────────────────────────────────────── */
+async function onVerified(vData) {
+  $('payBody').innerHTML = `
+    <div class="status ok">
+      <div class="st-ico"><i class="fas fa-circle-check"></i></div>
+      <div class="st-title">Payment Confirmed!</div>
+      <div class="st-msg">Transaction: ${vData.transaction_id}<br>Method: ${vData.payment_type}<br><br>Generating invoice &amp; delivering your license&hellip;</div>
+    </div>`;
+  $('payFoot').innerHTML = '';
+  try {
+    await fetch(`${WORKER}/notify`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text: buildAdminMsg(order, vData), order, verifyData: vData })
+    });
+  } catch(e) {}
   setTimeout(() => {
-    closeSheet('paymentSheet');
-    showInvoice(pendingOrder, verifyData);
-    // Reset cart
-    cart = [];
-    updateCartUI();
-  }, 2000);
+    closeSheet('sheetPay'); showInvoice(order, vData);
+    cart = []; syncCartUI(); order = null;
+  }, 2200);
 }
 
-function renderPaymentError(msg) {
-  document.getElementById('paymentBody').innerHTML = `
-    <div class="status-card error">
-      <div class="status-icon"><i class="fas fa-times-circle"></i></div>
-      <div class="status-title">Verification Failed</div>
-      <div class="status-msg">${msg}</div>
-    </div>
-  `;
-  document.getElementById('paymentFooter').innerHTML = `
-    <button class="btn-primary" id="retryBtn">Try Again</button>
-  `;
-  document.getElementById('retryBtn').addEventListener('click', startPolling);
-}
-
-// ═══════════════════════════════════════════════════════
-// INVOICE
-// ═══════════════════════════════════════════════════════
-function showInvoice(order, verifyData) {
-  const itemsHtml = order.items.map(i => `
+/* ──────────────────────────────────────────────
+   INVOICE
+────────────────────────────────────────────── */
+function showInvoice(o, vData) {
+  const rows = o.items.map(i => `
     <tr>
-      <td>${i.name}</td>
-      <td style="text-align:center">${i.qty}</td>
-      <td style="text-align:right">$${(i.price * MULTIPLIER).toFixed(2)}</td>
-      <td style="text-align:right">$${(i.price * MULTIPLIER * i.qty).toFixed(2)}</td>
-    </tr>
-  `).join('');
-
-  document.getElementById('invoiceBody').innerHTML = `
-    <div class="invoice-header">
+      <td>${i.name}</td><td style="text-align:center">${i.qty}</td>
+      <td style="text-align:right">$${(i.price*MULT).toFixed(2)}</td>
+      <td style="text-align:right">$${(i.price*MULT*i.qty).toFixed(2)}</td>
+    </tr>`).join('');
+  $('invBody').innerHTML = `
+    <div class="inv-header">
       <div>
-        <div class="invoice-brand">xstore</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">#60E0, St108, Phnom Penh</div>
+        <div class="inv-brand">x<span>store</span></div>
+        <div class="inv-contact">Phnom Penh, Cambodia<br>@chamrong_vann</div>
       </div>
-      <div class="invoice-meta">
-        <div style="font-size:16px;font-weight:700">INVOICE</div>
-        <div>#${order.invoiceNumber}</div>
-        <div>${order.issueDate}</div>
-        <div>${order.issueTime}</div>
-      </div>
-    </div>
-
-    <div class="invoice-section">
-      <div class="invoice-label">Bill To</div>
-      <div class="invoice-val">
-        ${order.customerName}<br>
-        ${order.customerEmail || '—'}<br>
-        ${order.customerPhone}
+      <div class="inv-right">
+        <strong>INVOICE</strong>
+        <div>#${o.invoiceNumber}</div>
+        <div>${o.issueDate}</div>
+        <div>${o.issueTime}</div>
       </div>
     </div>
-
-    <table class="invoice-table">
-      <thead><tr><th>Item</th><th style="text-align:center">Qty</th><th>Price</th><th>Total</th></tr></thead>
-      <tbody>${itemsHtml}</tbody>
+    <div class="inv-sec">
+      <div class="inv-sec-label">Bill To</div>
+      <div class="inv-sec-val">${o.customerName}<br>${o.customerPhone}<br>${o.customerEmail||'&#x2014;'}</div>
+    </div>
+    <table class="inv-table">
+      <thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>${rows}</tbody>
     </table>
+    <div class="orow"><span class="lbl">Subtotal</span><span>$${o.subtotal.toFixed(2)}</span></div>
+    <div class="orow"><span class="lbl">Discount (${DISC}%)</span><span class="disc-val">&#x2212;$${o.discountAmount.toFixed(2)}</span></div>
+    <div class="orow total"><span>Total Paid</span><span>$${o.total.toFixed(2)}</span></div>
+    <div><span class="paid-pill"><i class="fas fa-circle-check"></i>PAID &#xB7; ${vData.payment_type}</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:7px">Tx: ${vData.transaction_id}</div>
 
-    <div class="invoice-totals">
-      <div class="order-row"><span class="label">Subtotal</span><span>$${order.subtotal.toFixed(2)}</span></div>
-      <div class="order-row"><span class="label">Discount (${DISCOUNT_PCT}%)</span><span class="discount-val">−$${order.discountAmount.toFixed(2)}</span></div>
-      <div class="order-row total"><span class="label">Total Paid</span><span>$${order.total.toFixed(2)}</span></div>
+    <div class="key-box">
+      <div class="key-box-label"><i class="fas fa-key"></i>Your License Key</div>
+      <div class="spoiler-wrap" id="spoilerWrap">
+        <div class="spoiler-text" id="keyText">License key being delivered to your Telegram&hellip;<br>Check messages in a moment.</div>
+        <div class="spoiler-mask" id="spoilerMask"><i class="fas fa-eye"></i>Tap to reveal</div>
+      </div>
+      <button class="copy-key-btn" id="copyKeyBtn"><i class="fas fa-copy"></i>Copy Key</button>
     </div>
 
-    <div style="margin-top:12px">
-      <span class="paid-badge">✓ PAID — ${verifyData.payment_type || 'ABA PayWay'}</span>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-top:6px">Transaction ID: ${verifyData.transaction_id}</div>
-    <div style="font-size:12px;color:var(--muted);margin-top:4px">Your license key will be delivered via Telegram bot shortly.</div>
-  `;
-  openSheet('invoiceSheet');
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-top:8px">
+      Your license key is being sent to your Telegram bot.<br>
+      Not received within 5 min? Contact <strong style="color:var(--text)">@chamrong_vann</strong>
+    </div>`;
+
+  let revealed = false;
+  $('spoilerWrap').onclick = () => {
+    revealed = !revealed;
+    $('keyText').classList.toggle('open', revealed);
+    $('spoilerMask').classList.toggle('gone', revealed);
+  };
+  $('copyKeyBtn').onclick = () => {
+    const t = $('keyText')?.textContent;
+    if (t) navigator.clipboard?.writeText(t).then(() => showToast('License key copied!'));
+  };
+
+  openSheet('sheetInvoice');
 }
 
-// ═══════════════════════════════════════════════════════
-// TELEGRAM MESSAGE BUILDER
-// ═══════════════════════════════════════════════════════
-function buildTelegramMessage(order, verifyData) {
-  const items = order.items.map(i => `• ${i.name} ×${i.qty} — $${(i.price * MULTIPLIER * i.qty).toFixed(2)}`).join('\n');
-  return `✅ *New Order — xstore*\n\n*Invoice:* #${order.invoiceNumber}\n*Date:* ${order.issueDate} ${order.issueTime}\n\n*Customer:*\n${order.customerName}\n${order.customerEmail || 'N/A'}\n${order.customerPhone}\n\n*Items:*\n${items}\n\n*Total Paid:* $${order.total.toFixed(2)}\n*Method:* ${verifyData.payment_type}\n*Transaction:* \`${verifyData.transaction_id}\`\n\n_Reply with /deliver ${order.invoiceNumber} to send license keys_`;
+window.setLicenseKey = key => {
+  const kt = $('keyText');
+  if (kt) { kt.textContent = key; $('copyKeyBtn').classList.add('on'); }
+};
+
+/* ──────────────────────────────────────────────
+   TELEGRAM MESSAGE
+────────────────────────────────────────────── */
+function buildAdminMsg(o, vData) {
+  const items = o.items.map(i => `\u2022 ${i.name} \xD7${i.qty} \u2014 $${(i.price*MULT*i.qty).toFixed(2)}`).join('\n');
+  return `\u2705 *New Order \u2014 xstore*\n\n\uD83D\uDCCB *Invoice:* #${o.invoiceNumber}\n\uD83D\uDCC5 *Date:* ${o.issueDate} ${o.issueTime}\n\n\uD83D\uDC64 *Customer:*\n${o.customerName} / ${o.customerPhone}${o.customerEmail ? '\n'+o.customerEmail : ''}\n\n\uD83D\uDED2 *Items:*\n${items}\n\n\uD83D\uDCB0 *Total:* $${o.total.toFixed(2)}\n\uD83D\uDCB3 *Method:* ${vData.payment_type}\n\uD83D\uDD17 *Tx:* \`${vData.transaction_id}\`\n\n_Use /deliver ${o.invoiceNumber} to send license key_`;
 }
 
-// ═══════════════════════════════════════════════════════
-// SHEET SYSTEM
-// ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────
+   SHEET SYSTEM
+────────────────────────────────────────────── */
+const ALL_SHEETS = ['sheetCart','sheetCheckout','sheetPay','sheetInvoice'];
 function openSheet(id) {
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById(id).classList.add('show');
+  $('overlay').classList.add('on');
+  $(id).classList.add('on');
   if (tg) tg.BackButton.show();
 }
 function closeSheet(id) {
-  document.getElementById(id).classList.remove('show');
-  const anyOpen = ['cartSheet','checkoutSheet','paymentSheet','invoiceSheet'].some(s => document.getElementById(s).classList.contains('show'));
-  if (!anyOpen) { document.getElementById('overlay').classList.remove('show'); if (tg) tg.BackButton.hide(); }
+  $(id).classList.remove('on');
+  if (!ALL_SHEETS.some(s => $(s).classList.contains('on'))) {
+    $('overlay').classList.remove('on');
+    if (tg) tg.BackButton.hide();
+  }
 }
-function closeAllSheets() {
-  ['cartSheet','checkoutSheet','paymentSheet','invoiceSheet'].forEach(closeSheet);
-  document.getElementById('overlay').classList.remove('show');
+function closeAll() {
+  ALL_SHEETS.forEach(s => $(s).classList.remove('on'));
+  $('overlay').classList.remove('on');
   if (tg) tg.BackButton.hide();
 }
 
-// ═══════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────
+   TOAST
+────────────────────────────────────────────── */
 let toastTimer;
 function showToast(msg) {
-  document.getElementById('toastMsg').textContent = msg;
-  document.getElementById('toast').classList.add('show');
+  $('toastMsg').textContent = msg;
+  $('toast').classList.add('on');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2000);
+  toastTimer = setTimeout(() => $('toast').classList.remove('on'), 2200);
 }
 
-// ═══════════════════════════════════════════════════════
-// COUNTDOWN
-// ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────
+   COUNTDOWN
+────────────────────────────────────────────── */
 function startCountdown() {
-  let end = parseInt(localStorage.getItem('xSaleEnd') || '0');
-  if (!end || Date.now() > end) {
-    end = Date.now() + SALE_DURATION;
-    localStorage.setItem('xSaleEnd', end);
-  }
+  let end = parseInt(localStorage.getItem('xSaleEnd')||'0');
+  if (!end || Date.now() > end) { end = Date.now() + SALE_DUR; localStorage.setItem('xSaleEnd', end); }
   const tick = () => {
     const d = end - Date.now();
     if (d < 0) { localStorage.removeItem('xSaleEnd'); startCountdown(); return; }
-    document.getElementById('tDays').textContent  = String(Math.floor(d/86400000)).padStart(2,'0');
-    document.getElementById('tHours').textContent = String(Math.floor(d%86400000/3600000)).padStart(2,'0');
-    document.getElementById('tMins').textContent  = String(Math.floor(d%3600000/60000)).padStart(2,'0');
-    document.getElementById('tSecs').textContent  = String(Math.floor(d%60000/1000)).padStart(2,'0');
+    $('tD').textContent = String(Math.floor(d/86400000)).padStart(2,'0');
+    $('tH').textContent = String(Math.floor(d%86400000/3600000)).padStart(2,'0');
+    $('tM').textContent = String(Math.floor(d%3600000/60000)).padStart(2,'0');
+    $('tS').textContent = String(Math.floor(d%60000/1000)).padStart(2,'0');
   };
-  tick();
-  setInterval(tick, 1000);
+  tick(); setInterval(tick, 1000);
 }
 
-// ═══════════════════════════════════════════════════════
-// EVENT LISTENERS
-// ═══════════════════════════════════════════════════════
-document.getElementById('cartBtn').addEventListener('click', () => { renderCartSheet(); openSheet('cartSheet'); });
-document.getElementById('checkoutBarBtn').addEventListener('click', () => { renderCartSheet(); openSheet('cartSheet'); });
-document.getElementById('cartClose').addEventListener('click', () => closeSheet('cartSheet'));
-document.getElementById('cartContinueBtn').addEventListener('click', () => closeSheet('cartSheet'));
-document.getElementById('checkoutClose').addEventListener('click', () => closeSheet('checkoutSheet'));
-document.getElementById('invoiceClose').addEventListener('click', () => closeSheet('invoiceSheet'));
-document.getElementById('doneBtn').addEventListener('click', closeAllSheets);
-
-document.getElementById('toCheckoutBtn').addEventListener('click', () => {
-  renderCheckoutSummary();
-  closeSheet('cartSheet');
-  openSheet('checkoutSheet');
-});
-document.getElementById('backToCartBtn').addEventListener('click', () => {
-  closeSheet('checkoutSheet');
-  renderCartSheet();
-  openSheet('cartSheet');
-});
-document.getElementById('payBtn').addEventListener('click', startPayment);
-
-document.getElementById('overlay').addEventListener('click', () => {
-  // Don't close payment sheet (user might lose progress)
-  if (!document.getElementById('paymentSheet').classList.contains('show')) closeAllSheets();
-});
-
-// Telegram Back Button
+/* ──────────────────────────────────────────────
+   EVENTS
+────────────────────────────────────────────── */
+$('cartBtn').onclick    = () => { renderCart(); openSheet('sheetCart'); };
+$('cartBarBtn').onclick = () => { renderCart(); openSheet('sheetCart'); };
+$('cartClose').onclick  = () => closeSheet('sheetCart');
+$('cartContinue').onclick = () => closeSheet('sheetCart');
+$('coClose').onclick    = () => closeSheet('sheetCheckout');
+$('invClose').onclick   = () => closeSheet('sheetInvoice');
+$('doneBtn').onclick    = closeAll;
+$('toCheckout').onclick = () => { renderCoSummary(); closeSheet('sheetCart'); openSheet('sheetCheckout'); };
+$('backCart').onclick   = () => { closeSheet('sheetCheckout'); renderCart(); openSheet('sheetCart'); };
+$('payBtn').onclick     = startPayment;
+$('overlay').onclick    = e => { if (e.target === $('overlay') && !$('sheetPay').classList.contains('on')) closeAll(); };
 if (tg) {
   tg.BackButton.onClick(() => {
-    const sheets = ['invoiceSheet','paymentSheet','checkoutSheet','cartSheet'];
-    for (const s of sheets) {
-      if (document.getElementById(s).classList.contains('show')) { closeSheet(s); return; }
+    for (const s of [...ALL_SHEETS].reverse()) {
+      if ($(s).classList.contains('on')) { closeSheet(s); return; }
     }
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────
+   INIT
+────────────────────────────────────────────── */
 renderProducts();
 startCountdown();
 </script>
