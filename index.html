@@ -892,22 +892,8 @@ async function renderQRScreen(total) {
   } catch (e) { qr = { error: 'Network error: ' + e.message }; }
 
   if (!qr || qr.error || !qr.qrImage) {
-    $('payBody').innerHTML = `
-      <div class="amt-block"><div class="amt-lbl">Amount</div><div class="amt-val">$${total.toFixed(2)}</div></div>
-      <div class="status fail" style="text-align:left">
-        <div class="st-ico" style="text-align:center"><i class="fas fa-plug-circle-exclamation"></i></div>
-        <div class="st-title" style="text-align:center">PayWay API Not Configured</div>
-        <div class="st-msg" style="text-align:left;font-size:12px;line-height:2">
-          Add to Cloudflare Worker secrets:<br>
-          <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px">PAYWAY_MERCHANT_ID</code><br>
-          <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px">PAYWAY_API_KEY</code><br>
-          <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px">PAYWAY_ENV</code> &rarr; sandbox or production<br><br>
-          Register: <strong style="color:var(--text)">developer.payway.com.kh</strong><br>
-          Email: <strong style="color:var(--text)">paywaysales@ababank.com</strong><br>
-          Your MID: <strong style="color:var(--text)">125092910240277</strong><br><br>
-          <span style="color:rgba(255,255,255,.4);font-size:11px">Error: ${qr?.error||'No QR returned'}</span>
-        </div>
-      </div>`;
+    /* Fallback: show static KHQR — customer enters amount manually */
+    showStaticQR(total);
     return;
   }
 
@@ -942,6 +928,48 @@ async function renderQRScreen(total) {
   startPolling(total);
 }
 
+
+/* ──────────────────────────────────────────────
+   STATIC QR FALLBACK
+   Used when PayWay API credentials not yet set
+────────────────────────────────────────────── */
+function showStaticQR(total) {
+  $('payBody').innerHTML = `
+    <div class="amt-block">
+      <div class="amt-lbl">Scan &amp; enter amount manually</div>
+      <div class="amt-val">$${total.toFixed(2)}</div>
+      <div class="amt-usd">USD</div>
+    </div>
+    <div class="qr-frame">
+      <img src="qr.png" alt="ABA KHQR"
+        onerror="this.parentNode.innerHTML='<div style=\'padding:24px;text-align:center;color:#aaa;font-size:12px\'>Upload <strong>qr.png</strong> to GitHub repo</div>'"
+      />
+      <div class="qr-merchant">VANN SOK SAM RONG</div>
+      <div class="qr-bank">ABA Bank &middot; KHQR</div>
+    </div>
+    <div class="pay-steps">
+      <div class="pay-steps-label">Steps</div>
+      <div class="step"><span class="snum">1</span>Open <strong>ABA Mobile</strong> on your phone</div>
+      <div class="step"><span class="snum">2</span>Tap <strong>Scan QR</strong> &rarr; scan the code above</div>
+      <div class="step"><span class="snum">3</span>Enter <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace">$${total.toFixed(2)}</strong> and confirm</div>
+      <div class="step"><span class="snum">4</span>Invoice &amp; license key appear <strong>automatically</strong></div>
+    </div>
+    <div class="warn-box">
+      <i class="fas fa-triangle-exclamation"></i>
+      Enter <strong style="color:var(--text)">exactly $${total.toFixed(2)}</strong> &mdash; wrong amount will fail verification.
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(91,156,246,.08);border:1px solid rgba(91,156,246,.18);border-radius:var(--r2);padding:12px 14px">
+      <i class="fas fa-circle-notch spin" style="color:var(--blue);font-size:15px;flex-shrink:0"></i>
+      <div>
+        <div style="font-size:13px;font-weight:600">Waiting for payment<span id="autodots">.</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Verifying automatically every 4 seconds</div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted)" id="pollCountEl">0s</div>
+    </div>`;
+  $('payFoot').innerHTML = `<button class="btn-ghost" id="cancelPayBtn">Cancel Payment</button>`;
+  $('cancelPayBtn').onclick = () => { stopPolling(); closeSheet('sheetPay'); };
+  startPolling(total);
+}
 
 /* ──────────────────────────────────────────────
    POLLING
