@@ -2,6 +2,7 @@ const WORKER_URL = 'https://xstore-notify.chamrong.workers.dev';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xstore - Microsoft License Reseller</title>
@@ -857,7 +858,13 @@ Thank you for your purchase!
                 customerPhone,
             };
 
+           
+            // Works in both browser and Telegram Mini App
+            if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.openLink('https://link.payway.com.kh/ABAPAYRF3809168');
+            } else {
             window.open('https://link.payway.com.kh/ABAPAYRF3809168', '_blank');
+            }
 
             paymentMessage.classList.add('hidden');
             checkoutButtons.classList.add('hidden');
