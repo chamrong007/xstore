@@ -731,32 +731,102 @@ async function startPayment() {
     items: cart.map(i => ({ ...i })),
   };
 
-  // Open PayWay
-  if (tg) tg.openLink(PAYWAY_LINK);
-  else window.open(PAYWAY_LINK, '_blank');
-
   closeSheet('checkoutSheet');
   openSheet('paymentSheet');
-  renderPaymentPending();
+  renderPaymentInstructions(pendingOrder.total);
 }
 
 // ═══════════════════════════════════════════════════════
 // PAYMENT STATUS UI
 // ═══════════════════════════════════════════════════════
-function renderPaymentPending() {
+
+// Step 1 — Show amount clearly + Open PayWay button
+function renderPaymentInstructions(total) {
   document.getElementById('paymentBody').innerHTML = `
+    <div style="text-align:center;padding:8px 0 16px">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Amount to enter on PayWay</div>
+      <div style="font-size:52px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent);line-height:1">
+        $${total.toFixed(2)}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">USD — enter this exact amount</div>
+    </div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin:8px 0">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Steps</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">1</div>
+          <span>Tap <strong>"Open ABA PayWay"</strong> button below</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">2</div>
+          <span>Enter <strong style="color:var(--accent);font-family:'DM Mono',monospace">$${total.toFixed(2)}</strong> as the amount</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">3</div>
+          <span>Scan QR with ABA Mobile &amp; complete payment</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px">
+          <div style="background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px">4</div>
+          <span>Return here and tap <strong>"Verify My Payment"</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius-sm);padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+      <i class="fas fa-triangle-exclamation" style="color:var(--accent);margin-top:2px;flex-shrink:0"></i>
+      <span style="font-size:12px;color:var(--muted);line-height:1.5">
+        Enter the amount <strong style="color:var(--text)">exactly</strong> as shown. Wrong amount will fail verification.
+      </span>
+    </div>
+  `;
+
+  document.getElementById('paymentFooter').innerHTML = `
+    <button class="btn-primary" id="openPaywayBtn">
+      <i class="fas fa-arrow-up-right-from-square" style="margin-right:8px"></i>Open ABA PayWay — $${total.toFixed(2)}
+    </button>
+    <button class="btn-secondary" id="alreadyPaidBtn" style="margin-top:8px">
+      I already paid — Verify now
+    </button>
+  `;
+
+  document.getElementById('openPaywayBtn').addEventListener('click', () => {
+    if (tg) tg.openLink(PAYWAY_LINK);
+    else window.open(PAYWAY_LINK, '_blank');
+    setTimeout(() => renderPaymentPending(total), 800);
+  });
+  document.getElementById('alreadyPaidBtn').addEventListener('click', startPolling);
+}
+
+// Step 2 — Waiting state after PayWay opened
+function renderPaymentPending(total) {
+  const amt = total || pendingOrder?.total || 0;
+  document.getElementById('paymentBody').innerHTML = `
+    <div style="text-align:center;padding:8px 0 16px">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Expected payment</div>
+      <div style="font-size:52px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent);line-height:1">
+        $${amt.toFixed(2)}
+      </div>
+    </div>
     <div class="status-card pending">
       <div class="status-icon"><i class="fas fa-clock"></i></div>
-      <div class="status-title">Awaiting Payment</div>
-      <div class="status-msg">Complete the payment in ABA PayWay.<br>Then tap the button below to verify.</div>
+      <div class="status-title">Waiting for Payment</div>
+      <div class="status-msg">Complete payment on ABA PayWay, then tap verify below.</div>
     </div>
   `;
   document.getElementById('paymentFooter').innerHTML = `
     <button class="btn-primary" id="verifyBtn">
-      <i class="fas fa-shield-check" style="margin-right:6px"></i>Verify My Payment
+      <i class="fas fa-shield-halved" style="margin-right:6px"></i>Verify My Payment
+    </button>
+    <button class="btn-secondary" id="reopenPaywayBtn" style="margin-top:8px">
+      ↗ Re-open ABA PayWay
     </button>
   `;
   document.getElementById('verifyBtn').addEventListener('click', startPolling);
+  document.getElementById('reopenPaywayBtn').addEventListener('click', () => {
+    if (tg) tg.openLink(PAYWAY_LINK);
+    else window.open(PAYWAY_LINK, '_blank');
+  });
 }
 
 let pollStartTime = 0;
@@ -776,7 +846,7 @@ function startPolling() {
     <button class="btn-secondary" id="cancelPollBtn">Cancel</button>
   `;
   document.getElementById('cancelPollBtn').addEventListener('click', () => {
-    stopPolling(); renderPaymentPending();
+    stopPolling(); renderPaymentInstructions(pendingOrder?.total || 0);
   });
 
   let dots = 0;
