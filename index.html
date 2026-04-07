@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>xstore</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -63,8 +63,17 @@ html, body {
 }
 
 /* ━━━ LAYOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-#app { position:relative; z-index:2; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+#app { position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; }
 .scroll { flex:1; overflow-y:auto; padding:0 14px 110px; }
+/* ── PC layout ─────────────────────────── */
+@media (min-width: 640px) {
+  body { background-attachment: fixed; }
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 80px rgba(0,0,0,.6); }
+  .aurora .orb { position: fixed; }
+  .cart-bar { max-width: 480px; left: 50%; transform: translateX(-50%); }
+  .sheet { max-width: 480px; left: 50%; transform: translateX(-50%) translateY(100%); border-radius: 24px 24px 0 0; }
+  .sheet.on { transform: translateX(-50%) translateY(0); }
+}
 
 /* ━━━ TOPBAR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .topbar {
@@ -230,7 +239,7 @@ html, body {
 /* ━━━ CART BAR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .cart-bar {
   position:fixed; bottom:0; left:0; right:0; z-index:30;
-  padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+  padding:12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   background:rgba(5,8,16,.85); backdrop-filter:var(--blur2);
   border-top:1px solid var(--glassbdr); display:none;
 }
@@ -283,7 +292,7 @@ html, body {
 .sheet-close:active { background:rgba(255,255,255,.14); }
 .sheet-body { flex:1; overflow-y:auto; padding:18px 20px; }
 .sheet-foot {
-  padding:12px 20px calc(16px + env(safe-area-inset-bottom));
+  padding:12px 20px calc(16px + env(safe-area-inset-bottom, 0px));
   border-top:1px solid var(--glassbdr);
   background:rgba(0,0,0,.2);
 }
@@ -520,6 +529,16 @@ html, body {
   <!-- SCROLL CONTENT -->
   <div class="scroll">
 
+    <!-- PC Access Notice (hidden on mobile) -->
+    <div id="pcBanner" style="display:none;margin:10px 14px 0;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.18);border-radius:var(--r2);padding:11px 14px;font-size:12px;color:var(--muted);line-height:1.6;align-items:flex-start;gap:10px">
+      <i class="fas fa-desktop" style="color:var(--violet);font-size:15px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <strong style="color:var(--text)">You are on PC.</strong>
+        Browse and checkout here &#x2014; when payment screen appears, scan the QR with your <strong style="color:var(--text)">ABA Mobile app</strong> on your phone.
+        Verification is fully automatic.
+      </div>
+    </div>
+
     <!-- Sale Banner -->
     <div class="sale-banner">
       <div class="sale-top">
@@ -624,13 +643,15 @@ const WORKER   = 'https://xstore-notify.chamrong.workers.dev';
 const DISC     = 50;
 const MULT     = 1 - DISC / 100;
 const SALE_DUR = 24 * 60 * 60 * 1000;
-const QR_IMG   = 'qr.png';
+// QR generated dynamically via PayWay API (/create-payment)
 
 /* ──────────────────────────────────────────────
    TELEGRAM
 ────────────────────────────────────────────── */
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); tg.enableClosingConfirmation(); }
+if (tg) {
+  try { tg.ready(); tg.expand(); tg.enableClosingConfirmation(); } catch(e) {}
+}
 const buyerChatId = tg?.initDataUnsafe?.user?.id || null;
 
 /* ──────────────────────────────────────────────
@@ -843,51 +864,93 @@ function startPayment() {
     customerName:name, customerPhone:phone, customerEmail:email,
     items:cart.map(i=>({...i})), buyerChatId,
   };
-  closeSheet('sheetCheckout'); openSheet('sheetPay'); renderQRScreen(tot);
+  closeSheet('sheetCheckout'); openSheet('sheetPay'); renderQRScreen(tot);  // async — no await needed at top level
 }
 
 /* ──────────────────────────────────────────────
-   QR PAYMENT SCREEN
+   QR PAYMENT SCREEN — Full PayWay API
+   Dynamic QR with exact amount pre-filled
 ────────────────────────────────────────────── */
-function renderQRScreen(total) {
+async function renderQRScreen(total) {
   $('payBody').innerHTML = `
     <div class="amt-block">
-      <div class="amt-lbl">Scan &amp; pay exactly</div>
+      <div class="amt-lbl">Preparing your payment</div>
       <div class="amt-val">$${total.toFixed(2)}</div>
       <div class="amt-usd">USD</div>
     </div>
+    <div style="text-align:center;padding:48px 0">
+      <i class="fas fa-circle-notch spin" style="font-size:36px;color:var(--blue)"></i>
+      <div style="font-size:13px;color:var(--muted);margin-top:16px;line-height:1.7">
+        Generating QR with<br><strong style="color:var(--text)">$${total.toFixed(2)} pre-filled</strong>&hellip;
+      </div>
+    </div>`;
+  $('payFoot').innerHTML = `<button class="btn-ghost" id="cancelPayBtn">Cancel</button>`;
+  $('cancelPayBtn').onclick = () => { stopPolling(); closeSheet('sheetPay'); };
+
+  let qr = null;
+  try {
+    const res = await fetch(`${WORKER}/create-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        invoiceNumber: order.invoiceNumber,
+        amount: total,
+        items: order.items.map(i => ({ name: i.name, qty: i.qty, price: parseFloat((i.price * MULT).toFixed(2)) })),
+      }),
+    });
+    qr = await res.json();
+  } catch (e) { qr = { error: 'Network error: ' + e.message }; }
+
+  if (!qr || qr.error || !qr.qrImage) {
+    $('payBody').innerHTML = `
+      <div class="amt-block"><div class="amt-lbl">Amount</div><div class="amt-val">$${total.toFixed(2)}</div></div>
+      <div class="status fail" style="text-align:left">
+        <div class="st-ico" style="text-align:center"><i class="fas fa-plug-circle-exclamation"></i></div>
+        <div class="st-title" style="text-align:center">PayWay API Not Configured</div>
+        <div class="st-msg" style="text-align:left;font-size:12px;line-height:2">
+          Add to Cloudflare Worker secrets:<br>
+          <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px">PAYWAY_MERCHANT_ID</code><br>
+          <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px">PAYWAY_API_KEY</code><br>
+          <code style="background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px">PAYWAY_ENV</code> &rarr; sandbox or production<br><br>
+          Register: <strong style="color:var(--text)">developer.payway.com.kh</strong><br>
+          Email: <strong style="color:var(--text)">paywaysales@ababank.com</strong><br>
+          Your MID: <strong style="color:var(--text)">125092910240277</strong><br><br>
+          <span style="color:rgba(255,255,255,.4);font-size:11px">Error: ${qr?.error||'No QR returned'}</span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  $('payBody').innerHTML = `
+    <div class="amt-block">
+      <div class="amt-lbl">Amount pre-filled &mdash; scan &amp; confirm</div>
+      <div class="amt-val">$${total.toFixed(2)}</div>
+      <div class="amt-usd">USD &mdash; <span style="color:var(--green);font-weight:600">No manual entry needed</span></div>
+    </div>
     <div class="qr-frame">
-      <img src="${QR_IMG}" alt="ABA KHQR"
-        onerror="this.parentNode.innerHTML='<div style=\\'padding:30px;text-align:center;color:#aaa;font-size:13px;font-family:sans-serif\\'>Upload <strong>qr.png</strong><br>to your GitHub repo</div>'"
-      />
+      <img src="${qr.qrImage}" alt="ABA PayWay QR" style="width:100%;max-width:240px;height:auto;display:block;margin:0 auto;border-radius:10px"/>
       <div class="qr-merchant">VANN SOK SAM RONG</div>
-      <div class="qr-bank">ABA Bank &#xB7; KHQR</div>
+      <div class="qr-bank">ABA Bank &middot; KHQR &middot; Valid 30 min</div>
     </div>
     <div class="pay-steps">
-      <div class="pay-steps-label">How to pay</div>
-      <div class="step"><span class="snum">1</span>Open <strong>ABA Mobile</strong> app</div>
-      <div class="step"><span class="snum">2</span>Tap <strong>Scan QR</strong> &#x2192; scan code above</div>
-      <div class="step"><span class="snum">3</span>Enter <strong style="color:var(--gold);font-family:'JetBrains Mono',monospace">$${total.toFixed(2)}</strong> and confirm</div>
+      <div class="pay-steps-label">Steps</div>
+      <div class="step"><span class="snum">1</span>Open <strong>ABA Mobile</strong> on your phone</div>
+      <div class="step"><span class="snum">2</span>Tap <strong>Scan QR</strong> &rarr; scan the code above</div>
+      <div class="step"><span class="snum">3</span><span style="color:var(--green);font-weight:600">Amount already set</span> &mdash; just confirm</div>
       <div class="step"><span class="snum">4</span>Invoice &amp; license key appear <strong>automatically</strong></div>
     </div>
-    <div class="warn-box">
-      <i class="fas fa-triangle-exclamation"></i>
-      Enter <strong style="color:var(--text)">exactly $${total.toFixed(2)}</strong> &#x2014; wrong amount fails verification.
-    </div>`;
-  /* Auto-detect status strip */
-  $('payBody').innerHTML += `
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(91,156,246,.08);border:1px solid rgba(91,156,246,.18);border-radius:var(--r2);padding:12px 14px;margin-top:4px">
-      <i class="fas fa-circle-notch spin" style="color:var(--blue);font-size:16px;flex-shrink:0"></i>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(91,156,246,.08);border:1px solid rgba(91,156,246,.18);border-radius:var(--r2);padding:12px 14px">
+      <i class="fas fa-circle-notch spin" style="color:var(--blue);font-size:15px;flex-shrink:0"></i>
       <div>
         <div style="font-size:13px;font-weight:600">Waiting for payment<span id="autodots">.</span></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Checking automatically every 4 seconds</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Verifying automatically every 4 seconds</div>
       </div>
       <div style="margin-left:auto;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted)" id="pollCountEl">0s</div>
     </div>`;
-
-  /* Cancel is the only button — no manual verify needed */
   $('payFoot').innerHTML = `<button class="btn-ghost" id="cancelPayBtn">Cancel Payment</button>`;
   $('cancelPayBtn').onclick = () => { stopPolling(); closeSheet('sheetPay'); };
+  startPolling(total);
+}
 
   /* Auto-start polling immediately */
   startPolling(total);
@@ -1145,6 +1208,12 @@ if (tg) {
 /* ──────────────────────────────────────────────
    INIT
 ────────────────────────────────────────────── */
+/* Show PC banner on wide/non-touch screens */
+if (window.innerWidth >= 640 || !('ontouchstart' in window)) {
+  const b = $('pcBanner');
+  if (b) b.style.display = 'flex';
+}
+
 renderProducts();
 startCountdown();
 </script>
