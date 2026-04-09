@@ -831,13 +831,17 @@ function showInvoice(o,v){
 window.setLicenseKey=function(key){var k=$('keyTxt');if(k){k.textContent=key;$('copyKey').classList.add('on');}};
 
 function adminMsg(o,v){
-  return '\u2705 *New Order \u2014 xstore*\n\n'+
-    '\uD83D\uDCCB Invoice: #'+o.invoiceNumber+'\n'+
-    '\uD83D\uDCC5 '+o.issueDate+' '+o.issueTime+'\n\n'+
-    '\uD83D\uDC64 '+o.customerName+' / '+o.customerPhone+(o.customerEmail?'\n'+o.customerEmail:'')+'\n\n'+
-    '\uD83D\uDED2 '+o.items.map(function(i){return i.name+' \xD7'+i.qty;}).join(', ')+'\n'+
-    '\uD83D\uDCB0 $'+o.total.toFixed(2)+' USD\n'+
-    (v.transaction_hash?'\uD83D\uDD17 Tx: `'+v.transaction_hash+'`':'');
+  return '✅ *New Order — xstore*\n' +
+    '━━━━━━━━━━━━━━━━━━━━\n' +
+    '📋 Invoice: *#'+o.invoiceNumber+'*\n' +
+    '📅 '+o.issueDate+' · '+o.issueTime+'\n' +
+    '━━━━━━━━━━━━━━━━━━━━\n' +
+    '👤 '+o.customerName+'\n' +
+    '📞 '+o.customerPhone+(o.customerEmail?'\n📧 '+o.customerEmail:'')+'\n' +
+    '━━━━━━━━━━━━━━━━━━━━\n' +
+    '🛒 '+o.items.map(function(i){return i.name+' ×'+i.qty;}).join(', ')+'\n' +
+    '💰 $'+o.total.toFixed(2)+' USD\n' +
+    (v.transaction_hash?'🔗 Tx: `'+v.transaction_hash+'`':'');
 }
 
 /* ── SHEETS ────────────────────────────────────── */
