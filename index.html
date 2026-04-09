@@ -36,9 +36,43 @@ body::before{
 
 /* topbar */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:transparent;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:20}
-.brand{font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1}
-.brand-x{color:#eef0ff}
-.brand-store{background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.brand{display:inline-flex;align-items:center;gap:0px;line-height:1;text-decoration:none;position:relative}
+
+/* The "x" — bold, animated gradient shimmer */
+.brand-x{
+  font-family:'Ubuntu',sans-serif;
+  font-size:27px;font-weight:700;letter-spacing:-1px;
+  background:linear-gradient(120deg,#f0abfc,#c084fc,#818cf8,#c084fc,#f0abfc);
+  background-size:300% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:xShimmer 3.5s ease-in-out infinite;
+}
+
+/* "store" — light weight, white, slightly muted */
+.brand-store{
+  font-family:'Ubuntu',sans-serif;
+  font-size:27px;font-weight:300;letter-spacing:-.5px;
+  color:rgba(238,240,255,.75);
+}
+
+/* Animated underline accent */
+.brand::after{
+  content:'';
+  position:absolute;bottom:-3px;left:0;
+  height:2px;width:0;border-radius:2px;
+  background:linear-gradient(90deg,#c084fc,#818cf8);
+  animation:brandLine 3.5s ease-in-out infinite;
+}
+
+@keyframes xShimmer{
+  0%,100%{background-position:0% 50%}
+  50%     {background-position:100% 50%}
+}
+@keyframes brandLine{
+  0%,100%{width:0;opacity:0}
+  30%,70% {width:100%;opacity:1}
+  50%     {width:100%;opacity:.7}
+}
 .cart-pill{display:flex;align-items:center;gap:7px;background:var(--g2);backdrop-filter:var(--blur);border:1px solid var(--b2);border-radius:100px;padding:8px 16px;font-size:13px;font-weight:600;color:#eef0ff;border:none;transition:background .2s}
 .cart-pill:active{background:var(--g3)}
 .cart-n{background:var(--gg);color:#fff;border-radius:100px;padding:1px 8px;font-size:11px;font-weight:800;display:none}
@@ -226,6 +260,37 @@ body::before{
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast i{color:var(--green)}
 
+/* footer */
+.footer{
+  padding:28px 20px 32px;text-align:center;
+  background:linear-gradient(180deg,transparent,rgba(129,140,248,.03));
+  border-top:1px solid var(--b);margin-top:4px;
+}
+.footer-head{
+  font-size:13px;font-weight:600;color:rgba(238,240,255,.6);
+  margin-bottom:4px;
+}
+.footer-sub{
+  font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;
+}
+.footer-tg{
+  display:inline-flex;align-items:center;gap:9px;
+  background:linear-gradient(135deg,rgba(38,120,219,.15),rgba(96,165,250,.08));
+  border:1px solid rgba(96,165,250,.22);
+  color:#93c5fd;border-radius:100px;
+  padding:11px 22px;font-size:14px;font-weight:600;
+  text-decoration:none;letter-spacing:-.2px;
+  transition:background .25s,border-color .25s,transform .12s,box-shadow .25s;
+  box-shadow:0 0 0 0 rgba(96,165,250,0);
+}
+.footer-tg:hover{
+  background:linear-gradient(135deg,rgba(38,120,219,.25),rgba(96,165,250,.14));
+  border-color:rgba(96,165,250,.45);
+  box-shadow:0 4px 24px rgba(96,165,250,.15);
+}
+.footer-tg:active{transform:scale(.96)}
+.footer-note{font-size:11px;color:var(--muted2);margin-top:12px;letter-spacing:.1px}
+
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
@@ -237,7 +302,7 @@ body::before{
 <div id="app">
 
   <header class="topbar">
-    <div class="brand"><span class="brand-x">x</span><span class="brand-store">store</span></div>
+    <a class="brand" href="#"><span class="brand-x">x</span><span class="brand-store">store</span></a>
     <button class="cart-pill" id="cartBtn">
       <i class="fas fa-bag-shopping" style="font-size:13px"></i>Cart
       <span class="cart-n" id="cartN">0</span>
@@ -258,6 +323,21 @@ body::before{
     </div>
     <div class="sec"><span class="sec-lbl">Licenses</span><div class="sec-rule"></div></div>
     <div id="prodList"></div>
+
+    <!-- Footer contact -->
+    <div class="footer">
+      <div class="footer-head">Questions before you buy?</div>
+      <div class="footer-sub">Our team is happy to help — get in touch on Telegram.</div>
+      <a class="footer-tg" href="https://t.me/chamrong_vann" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" fill="#2563eb" opacity=".18"/>
+          <path d="M17.5 7.2L15.3 17c-.15.65-.57.8-1.15.5l-3.2-2.36-1.54 1.49c-.17.17-.32.32-.65.32l.23-3.25 5.9-5.33c.26-.23-.06-.36-.4-.13L5.8 12.9 2.7 11.9c-.66-.21-.67-.66.14-.98l12-4.63c.55-.2 1.03.13.66 1.9z" fill="#93c5fd"/>
+        </svg>
+        @chamrong_vann
+      </a>
+      <div class="footer-note">Typically replies within a few hours &nbsp;&#x1F1F0;&#x1F1ED;</div>
+    </div>
+
   </div>
 
   <div class="cartbar" id="cartBar">
