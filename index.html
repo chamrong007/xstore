@@ -616,24 +616,87 @@ function startPolling(total){
   var dots=0,secs=0;
   var dT=setInterval(function(){var el=$('adots');if(el)el.textContent='.'.repeat((dots++%3)+1);},500);
   var sT=setInterval(function(){var el=$('psecs');if(el)el.textContent=(++secs)+'s';},1000);
+
   pollTimer=setInterval(function(){
+    /* ── Timeout ── */
     if(Date.now()-pollStart>=POLL_MAX){
       stopPolling();clearInterval(dT);clearInterval(sT);
-      $('payBody').innerHTML=
-        '<div class="amt-hero"><div class="amt-lbl">Timed out</div><div class="amt-big">$'+(total||order.total).toFixed(2)+'</div></div>'+
-        '<div class="status s-err"><div class="s-ico"><i class="fas fa-clock"></i></div><div class="s-ttl">No Payment Detected</div>'+
-        '<div class="s-msg">10 minutes passed. If you paid, contact <strong>@chamrong_vann</strong>.</div></div>';
-      $('payFoot').innerHTML='<button class="btn-p" id="retryBtn"><i class="fas fa-rotate-right"></i>Try Again</button>';
-      $('retryBtn').onclick=function(){renderPayScreen(order.total);};
+      showPayError(
+        '<i class="fas fa-clock"></i>',
+        'Timed Out',
+        'No payment detected in 10 minutes.<br>If you already paid, contact <strong>@chamrong_vann</strong> with your receipt.',
+        true /* show retry */
+      );
       return;
     }
+
     fetch(WORKER+'/verify?invoice='+order.invoiceNumber+'&amount='+order.total.toFixed(2))
       .then(function(r){return r.json();})
-      .then(function(d){if(d.verified){stopPolling();clearInterval(dT);clearInterval(sT);onVerified(d);}})
-      .catch(function(){});
+      .then(function(d){
+        /* ✅ Paid and verified */
+        if(d.verified){
+          stopPolling();clearInterval(dT);clearInterval(sT);
+          onVerified(d);
+          return;
+        }
+
+        /* ❌ Hard failures — stop immediately on failed flag or known reason keywords */
+        if(d.failed){ stopPolling();clearInterval(dT);clearInterval(sT); }
+        var reason = d.reason || '';
+        if(reason.indexOf('mismatch') !== -1){
+          stopPolling();clearInterval(dT);clearInterval(sT);
+          showPayError(
+            '<i class="fas fa-triangle-exclamation"></i>',
+            'Wrong Amount Paid',
+            reason + '<br><br>Please contact <strong>@chamrong_vann</strong> to resolve.',
+            false
+          );
+          return;
+        }
+        if(reason.indexOf('failed') !== -1 || reason.indexOf('cancelled') !== -1){
+          stopPolling();clearInterval(dT);clearInterval(sT);
+          showPayError(
+            '<i class="fas fa-circle-xmark"></i>',
+            'Payment Failed',
+            'Your bank reported the payment as failed or cancelled.<br>Please try again.',
+            true
+          );
+          return;
+        }
+        if(reason.indexOf('expired') !== -1 || reason.indexOf('token') !== -1){
+          stopPolling();clearInterval(dT);clearInterval(sT);
+          showPayError(
+            '<i class="fas fa-key"></i>',
+            'Service Temporarily Unavailable',
+            'Please contact <strong>@chamrong_vann</strong> to complete your order.',
+            false
+          );
+          return;
+        }
+        /* ⏳ Still waiting — keep polling silently */
+      })
+      .catch(function(){/* network error — retry next tick silently */});
   },4000);
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
+
+function showPayError(icon, title, msg, canRetry){
+  $('payBody').innerHTML=
+    '<div style="text-align:center;padding:20px 4px 8px">'+
+      '<div style="font-size:40px;margin-bottom:12px;color:var(--red)">'+icon+'</div>'+
+      '<div style="font-size:17px;font-weight:800;margin-bottom:9px;letter-spacing:-.3px">'+title+'</div>'+
+      '<div style="font-size:13px;color:var(--muted);line-height:1.7">'+msg+'</div>'+
+    '</div>';
+  if(canRetry){
+    $('payFoot').innerHTML=
+      '<button class="btn-p" id="retryBtn"><i class="fas fa-rotate-right"></i>Try Again</button>';
+    $('retryBtn').onclick=function(){renderPayScreen(order.total);};
+  } else {
+    $('payFoot').innerHTML=
+      '<button class="btn-s" style="margin-top:0" id="closeErr">Close</button>';
+    $('closeErr').onclick=function(){closeSheet('shPay');};
+  }
+}
 
 /* ── ON VERIFIED ───────────────────────────────── */
 function onVerified(v){
