@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>xstore</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#08090f;color:#eef0ff;min-height:100vh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+body{font-family:'Ubuntu',sans-serif;background:#08090f;color:#eef0ff;min-height:100vh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
 ::-webkit-scrollbar{width:0}
 button,a{font-family:inherit;cursor:pointer}
 :root{
@@ -36,8 +36,9 @@ body::before{
 
 /* topbar */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:transparent;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:20}
-.brand{font-size:22px;font-weight:800;letter-spacing:-.8px;background:linear-gradient(135deg,#fff,rgba(255,255,255,.7));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.brand-dot{background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.brand{font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1}
+.brand-x{color:#eef0ff}
+.brand-store{background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .cart-pill{display:flex;align-items:center;gap:7px;background:var(--g2);backdrop-filter:var(--blur);border:1px solid var(--b2);border-radius:100px;padding:8px 16px;font-size:13px;font-weight:600;color:#eef0ff;border:none;transition:background .2s}
 .cart-pill:active{background:var(--g3)}
 .cart-n{background:var(--gg);color:#fff;border-radius:100px;padding:1px 8px;font-size:11px;font-weight:800;display:none}
@@ -52,7 +53,7 @@ body::before{
 .hero-sub{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .timer{display:flex;gap:6px}
 .tu{background:rgba(0,0,0,.3);border:1px solid var(--b);border-radius:var(--r3);padding:7px 10px;min-width:50px;text-align:center}
-.tn{font-family:JetBrains Mono,monospace;font-size:20px;font-weight:600;color:var(--gold);line-height:1}
+.tn{font-family:Ubuntu Mono,monospace;font-size:20px;font-weight:600;color:var(--gold);line-height:1}
 .tl{font-size:9px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
 
 /* section */
@@ -79,10 +80,10 @@ body::before{
 .sp{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid var(--b);font-size:12px}
 .sp:last-child{border:none}
 .sk{color:var(--muted)}
-.sv{font-family:JetBrains Mono,monospace;font-size:11px}
+.sv{font-family:Ubuntu Mono,monospace;font-size:11px}
 .card-foot{padding:14px 18px;background:rgba(0,0,0,.2);border-top:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:12px}
 .p-was{font-size:11px;color:var(--muted2);text-decoration:line-through}
-.p-now{font-size:26px;font-weight:800;font-family:JetBrains Mono,monospace;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1.5px;line-height:1}
+.p-now{font-size:26px;font-weight:800;font-family:Ubuntu Mono,monospace;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1.5px;line-height:1}
 .p-off{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);background:rgba(245,165,36,.1);border:1px solid rgba(245,165,36,.18);padding:2px 7px;border-radius:4px;margin-top:3px}
 .card-actions{display:flex;gap:8px;flex-shrink:0}
 .btn-ghost{background:var(--g2);border:1px solid var(--b2);color:var(--muted);padding:10px 12px;border-radius:var(--r2);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;transition:color .2s}
@@ -96,7 +97,7 @@ body::before{
 .cartbar.on{display:block}
 .cartbar-btn{width:100%;padding:15px 20px;background:var(--gg);color:#fff;border:none;border-radius:var(--r2);font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:space-between;transition:opacity .2s}
 .cartbar-btn:active{opacity:.85}
-.cartbar-btn .total{font-family:JetBrains Mono,monospace;font-weight:600}
+.cartbar-btn .total{font-family:Ubuntu Mono,monospace;font-weight:600}
 
 /* overlay */
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -122,7 +123,7 @@ body::before{
 .ci-ctrl{display:flex;align-items:center;gap:8px;margin-left:auto}
 .qb{width:30px;height:30px;border-radius:var(--r3);background:var(--g2);border:none;color:#eef0ff;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .15s}
 .qb:active{background:var(--g3)}
-.qv{font-family:JetBrains Mono,monospace;font-size:14px;min-width:22px;text-align:center}
+.qv{font-family:Ubuntu Mono,monospace;font-size:14px;min-width:22px;text-align:center}
 .rm{background:none;border:none;color:rgba(240,62,77,.65);padding:4px;font-size:13px}
 .row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px}
 .lbl{color:var(--muted)}
@@ -159,7 +160,7 @@ body::before{
 /* payment QR */
 .amt-hero{text-align:center;margin-bottom:18px}
 .amt-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
-.amt-big{font-size:56px;font-weight:800;font-family:JetBrains Mono,monospace;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-3px;line-height:1}
+.amt-big{font-size:56px;font-weight:800;font-family:Ubuntu Mono,monospace;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-3px;line-height:1}
 .amt-cur{font-size:13px;color:var(--muted);margin-top:5px}
 .qr-box{background:#fff;border-radius:18px;padding:18px;text-align:center;margin-bottom:16px;box-shadow:0 16px 64px rgba(0,0,0,.5)}
 .qr-box img{width:100%;max-width:220px;height:auto;margin:0 auto;border-radius:10px;display:block}
@@ -174,11 +175,11 @@ body::before{
 .ab-text{flex:1}
 .ab-title{font-size:13px;font-weight:700}
 .ab-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.ab-secs{font-family:JetBrains Mono,monospace;font-size:12px;color:var(--muted)}
+.ab-secs{font-family:Ubuntu Mono,monospace;font-size:12px;color:var(--muted)}
 /* modern payment card */
 .pay-card{background:var(--g1);border:1px solid var(--b);border-radius:20px;overflow:hidden;margin-bottom:14px}
 .pay-card-top{padding:20px;text-align:center;background:linear-gradient(160deg,rgba(245,165,36,.08),rgba(232,56,13,.04))}
-.pay-amount{font-size:48px;font-weight:800;font-family:JetBrains Mono,monospace;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-2px;line-height:1}
+.pay-amount{font-size:48px;font-weight:800;font-family:Ubuntu Mono,monospace;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-2px;line-height:1}
 .pay-amount-sub{font-size:12px;color:var(--muted);margin-top:4px}
 .pay-qr-wrap{background:#fff;margin:0 16px 16px;border-radius:14px;padding:14px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .pay-qr-wrap img{width:160px;height:160px;border-radius:8px;display:block;margin:0 auto}
@@ -193,12 +194,12 @@ body::before{
 .pay-watching{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--b);font-size:12px}
 .pay-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);animation:pulse 1.5s ease infinite;flex-shrink:0}
 .pay-watching-txt{flex:1;color:var(--muted)}
-.pay-watching-secs{font-family:JetBrains Mono,monospace;font-size:11px;color:var(--muted2)}
+.pay-watching-secs{font-family:Ubuntu Mono,monospace;font-size:11px;color:var(--muted2)}
 
 /* invoice */
 .inv-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
-.inv-brand{font-size:22px;font-weight:800;letter-spacing:-.8px}
-.inv-brand span{background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.inv-brand{font-size:20px;font-weight:700;letter-spacing:-1px;color:#eef0ff}
+.inv-brand em{background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal}
 .inv-contact{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.7}
 .inv-r{text-align:right;font-size:12px;color:var(--muted);line-height:1.9}
 .inv-r strong{font-size:15px;color:#eef0ff;font-weight:800;display:block}
@@ -212,7 +213,7 @@ body::before{
 .key-card{background:rgba(88,101,242,.05);border:1px dashed rgba(88,101,242,.25);border-radius:var(--r2);padding:18px;margin:16px 0}
 .key-lbl{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px}
 .spoiler{position:relative;cursor:pointer;user-select:none;border-radius:var(--r3);overflow:hidden}
-.spoiler-txt{font-family:JetBrains Mono,monospace;font-size:13px;word-break:break-all;line-height:1.8;padding:8px;filter:blur(7px);transition:filter .4s}
+.spoiler-txt{font-family:Ubuntu Mono,monospace;font-size:13px;word-break:break-all;line-height:1.8;padding:8px;filter:blur(7px);transition:filter .4s}
 .spoiler-txt.show{filter:none}
 .spoiler-mask{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(9,10,18,.5);backdrop-filter:blur(2px);border-radius:var(--r3);gap:7px;font-size:13px;font-weight:700;color:#818cf8;transition:opacity .3s}
 .spoiler-mask.gone{opacity:0;pointer-events:none}
@@ -236,7 +237,7 @@ body::before{
 <div id="app">
 
   <header class="topbar">
-    <div class="brand">x<span class="brand-dot">store</span></div>
+    <div class="brand"><span class="brand-x">x</span><span class="brand-store">store</span></div>
     <button class="cart-pill" id="cartBtn">
       <i class="fas fa-bag-shopping" style="font-size:13px"></i>Cart
       <span class="cart-n" id="cartN">0</span>
@@ -537,7 +538,7 @@ function showQR(total, qr) {
       'background:linear-gradient(160deg,rgba(245,165,36,.12) 0%,rgba(232,56,13,.06) 100%);' +
       'border-radius:18px 18px 0 0">' +
       '<div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Total to Pay</div>' +
-      '<div style="font-size:52px;font-weight:800;font-family:JetBrains Mono,monospace;' +
+      '<div style="font-size:52px;font-weight:800;font-family:Ubuntu Mono,monospace;' +
         'background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;' +
         'background-clip:text;letter-spacing:-2px;line-height:1">$' + total.toFixed(2) + '</div>' +
       '<div style="font-size:12px;color:var(--muted);margin-top:6px">USD &nbsp;&bull;&nbsp; Bakong KHQR &nbsp;&bull;&nbsp; All banks</div>' +
@@ -563,7 +564,7 @@ function showQR(total, qr) {
     '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px 18px">' +
       '<div style="width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;animation:pulse 1.5s ease infinite"></div>' +
       '<span style="flex:1;font-size:12px;color:var(--muted)">Watching for payment<span id="adots">.</span></span>' +
-      '<span style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--muted2)" id="psecs">0s</span>' +
+      '<span style="font-family:Ubuntu Mono,monospace;font-size:11px;color:var(--muted2)" id="psecs">0s</span>' +
     '</div>';
 
   /* ── Save QR — Web Share API → native Save to Photos on iOS/Android ── */
@@ -717,7 +718,7 @@ function onVerified(v){
 function showInvoice(o,v){
   $('invBody').innerHTML=
     '<div class="inv-hd">'+
-      '<div><div class="inv-brand">x<span>store</span></div><div class="inv-contact">Phnom Penh, Cambodia<br>@chamrong_vann</div></div>'+
+      '<div><div class="inv-brand"><svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="9" fill="url(#bp2)"/><line x1="9" y1="9" x2="23" y2="23" stroke="white" stroke-width="3.2" stroke-linecap="round"/><line x1="23" y1="9" x2="9" y2="23" stroke="white" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="bp2" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#5b21b6"/></linearGradient></defs></svg>x<em>store</em></div><div class="inv-contact">Phnom Penh, Cambodia<br>@chamrong_vann</div></div>'+
       '<div class="inv-r"><strong>INVOICE</strong>#'+o.invoiceNumber+'<br>'+o.issueDate+'<br>'+o.issueTime+'</div>'+
     '</div>'+
     '<div style="margin:12px 0"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px">Bill To</div>'+
