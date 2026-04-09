@@ -1071,13 +1071,13 @@ function showPayWayQR(total, qr) {
         '<div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">' +
           'You are on your phone.<br>Tap the button below to open ABA Mobile.' +
         '</div>' +
-        '<a href="' + deeplink + '" style="display:inline-flex;align-items:center;gap:10px;' +
-          'background:linear-gradient(135deg,#D32F2F,#B71C1C);color:#fff;text-decoration:none;' +
+        '<button id="abaBtn" data-link="' + encodeURIComponent(deeplink) + '" style="display:inline-flex;align-items:center;gap:10px;' +
+          'background:linear-gradient(135deg,#D32F2F,#B71C1C);color:#fff;border:none;' +
           'padding:14px 28px;border-radius:14px;font-size:16px;font-weight:800;' +
-          'box-shadow:0 4px 20px rgba(211,47,47,.4)">' +
+          'box-shadow:0 4px 20px rgba(211,47,47,.4);font-family:inherit;cursor:pointer">' +
           '<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>' +
           'Open ABA Mobile' +
-        '</a>' +
+        '</button>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:12px">Or scroll down to scan QR with another device</div>' +
       '</div>' +
       '<div class="qr-box" style="margin-top:14px;opacity:.7">' +
@@ -1116,6 +1116,22 @@ function showPayWayQR(total, qr) {
 
   $('payFoot').innerHTML = '<button class="btn-secondary" style="margin-top:0" id="cancelPay">Cancel Payment</button>';
   $('cancelPay').onclick = function() { stopPolling(); closeSheet('shPay'); };
+
+  /* Wire up ABA Mobile button after DOM is ready */
+  var abaBtn = $('abaBtn');
+  if (abaBtn) {
+    abaBtn.onclick = function() {
+      var link = decodeURIComponent(abaBtn.getAttribute('data-link') || '');
+      if (!link) return;
+      /* Telegram WebApp: use openLink for custom schemes */
+      if (tg && tg.openLink) {
+        try { tg.openLink(link); return; } catch(e) {}
+      }
+      /* Fallback: direct navigation */
+      window.location.href = link;
+    };
+  }
+
   startPolling(total);
 }
 
@@ -1411,6 +1427,21 @@ if (tg) {
       }
     });
   } catch(e) {}
+}
+
+/* ══════════════════════════════════════════
+   OPEN ABA MOBILE DEEPLINK
+   Telegram WebApp blocks <a href> for custom
+   URL schemes — must use these methods instead
+══════════════════════════════════════════ */
+function openABA(deeplink) {
+  if (!deeplink) return;
+  // Method 1: Telegram WebApp openLink (works in Telegram)
+  if (tg && tg.openLink) {
+    try { tg.openLink(deeplink); return; } catch(e) {}
+  }
+  // Method 2: window.location for native scheme
+  try { window.location.href = deeplink; } catch(e) {}
 }
 
 /* ══════════════════════════════════════════
