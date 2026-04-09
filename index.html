@@ -1061,25 +1061,51 @@ function renderPayScreen(total) {
 }
 
 function showPayWayQR(total, qr) {
+  /* On mobile: show "Open ABA Mobile" deeplink button (can't scan same-device QR).
+     On desktop: show QR code for scanning with phone. */
+  var isMobile = ('ontouchstart' in window) || (window.innerWidth < 640);
+  var deeplink = qr.abapay_deeplink || '';
+
+  var qrSection = isMobile && deeplink
+    ? '<div style="text-align:center;padding:10px 0 4px">' +
+        '<div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">' +
+          'You are on your phone.<br>Tap the button below to open ABA Mobile.' +
+        '</div>' +
+        '<a href="' + deeplink + '" style="display:inline-flex;align-items:center;gap:10px;' +
+          'background:linear-gradient(135deg,#D32F2F,#B71C1C);color:#fff;text-decoration:none;' +
+          'padding:14px 28px;border-radius:14px;font-size:16px;font-weight:800;' +
+          'box-shadow:0 4px 20px rgba(211,47,47,.4)">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>' +
+          'Open ABA Mobile' +
+        '</a>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:12px">Or scroll down to scan QR with another device</div>' +
+      '</div>' +
+      '<div class="qr-box" style="margin-top:14px;opacity:.7">' +
+        '<img src="' + qr.qrImage + '" alt="ABA PayWay QR">' +
+        '<div class="qr-merchant">VANN SOK SAM RONG</div>' +
+        '<div class="qr-bank">ABA Bank &middot; KHQR &middot; Valid 30 min</div>' +
+      '</div>'
+    : '<div class="qr-box">' +
+        '<img src="' + qr.qrImage + '" alt="ABA PayWay QR">' +
+        '<div class="qr-merchant">VANN SOK SAM RONG</div>' +
+        '<div class="qr-bank">ABA Bank &middot; KHQR &middot; Valid 30 min</div>' +
+      '</div>' +
+      '<div class="steps-box">' +
+        '<div class="steps-lbl">How to pay</div>' +
+        '<div class="step"><span class="sn">1</span>Open <strong>ABA Mobile</strong> on your phone</div>' +
+        '<div class="step"><span class="sn">2</span>Tap <strong>Scan QR</strong> &rarr; scan the code</div>' +
+        '<div class="step"><span class="sn">3</span><span style="color:var(--green);font-weight:700">Amount already set</span> &mdash; just confirm</div>' +
+        '<div class="step"><span class="sn">4</span>Invoice &amp; license key delivered <strong>automatically</strong></div>' +
+      '</div>';
+
   $('payBody').innerHTML =
     '<div class="amt-hero">' +
-      '<div class="amt-lbl">Amount pre-filled &#8212; just scan &amp; confirm</div>' +
+      '<div class="amt-lbl">Amount pre-filled &#8212; just confirm &amp; pay</div>' +
       '<div class="amt-big">$' + total.toFixed(2) + '</div>' +
       '<div class="amt-cur">USD &bull; <span style="color:var(--green);font-weight:700">No manual entry</span></div>' +
     '</div>' +
-    '<div class="qr-box">' +
-      '<img src="' + qr.qrImage + '" alt="ABA PayWay QR">' +
-      '<div class="qr-merchant">VANN SOK SAM RONG</div>' +
-      '<div class="qr-bank">ABA Bank &middot; KHQR &middot; Valid 30 min</div>' +
-    '</div>' +
-    '<div class="steps-box">' +
-      '<div class="steps-lbl">How to pay</div>' +
-      '<div class="step"><span class="sn">1</span>Open <strong>ABA Mobile</strong> on your phone</div>' +
-      '<div class="step"><span class="sn">2</span>Tap <strong>Scan QR</strong> &rarr; scan the code above</div>' +
-      '<div class="step"><span class="sn">3</span><span style="color:var(--green);font-weight:700">Amount is pre-filled</span> &mdash; just confirm &amp; pay</div>' +
-      '<div class="step"><span class="sn">4</span>Invoice &amp; license key delivered <strong>automatically</strong></div>' +
-    '</div>' +
-    '<div class="auto-bar">' +
+    qrSection +
+    '<div class="auto-bar" style="margin-top:14px">' +
       '<i class="fas fa-circle-notch spin" style="color:var(--blue);font-size:14px;flex-shrink:0"></i>' +
       '<div class="ab-text">' +
         '<div class="ab-title">Waiting for payment<span id="adots">.</span></div>' +
@@ -1090,8 +1116,6 @@ function showPayWayQR(total, qr) {
 
   $('payFoot').innerHTML = '<button class="btn-secondary" style="margin-top:0" id="cancelPay">Cancel Payment</button>';
   $('cancelPay').onclick = function() { stopPolling(); closeSheet('shPay'); };
-
-  /* Auto-start polling immediately — no button needed */
   startPolling(total);
 }
 
