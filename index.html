@@ -648,7 +648,9 @@ function showQR(total, qr) {
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
 
   /* Bakong deeplink — opens any KHQR-enabled app on mobile */
-  var bakongDeep = 'bakong://payment?qr=' + encodeURIComponent(qrString);
+  /* Bakong deeplink: bakong.nbc.org.kh redirects to the right app on each phone.
+     All KHQR-member bank apps (ABA, ACLEDA, Wing, etc.) handle this URL. */
+  var bakongDeep = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
 
   /* Progress ring math: 5 min = 300s */
   var TOTAL_SECS = 300;
@@ -745,15 +747,20 @@ function showQR(total, qr) {
   /* ── Open bank app handler (mobile only) ── */
   if (isMobile && $('openAppBtn')) {
     $('openAppBtn').onclick = function() {
-      toast('Opening bank app...');
-      /* Try Bakong deeplink via tg.openLink (works in Telegram Mini App) */
+      /* Telegram Mini App: must use tg.openLink for external URLs */
       if (tg && tg.openLink) {
-        try { tg.openLink(bakongDeep); return; } catch(e) {}
+        try {
+          tg.openLink(bakongDeep);
+          return;
+        } catch(e) {}
       }
-      /* Direct location change */
-      window.location.href = bakongDeep;
-      /* Fallback hint after 1.5s if still on page */
-      setTimeout(function() { toast('Open your bank app and tap Scan QR'); }, 1500);
+      /* Standard browser: open Bakong payment page in new tab.
+         The browser/OS handles the redirect to the installed bank app. */
+      var w = window.open(bakongDeep, '_blank');
+      if (!w) {
+        /* Popup blocked — navigate directly */
+        window.location.href = bakongDeep;
+      }
     };
   }
 
@@ -835,14 +842,20 @@ function startPolling(total, totalSecs, circ){
           return;
         }
         if(reason.indexOf('expired') !== -1 || reason.indexOf('token') !== -1){
-          stopPolling();clearInterval(dT);clearInterval(sT);
-          showPayError(
-            '<i class="fas fa-key"></i>',
-            'Service Temporarily Unavailable',
-            'Please contact <strong>@chamrong_vann</strong> to complete your order.',
-            false
-          );
-          return;
+          /* Token issue — don't kill the QR. Show a soft warning, keep polling.
+             User can still scan and pay; admin can manually verify. */
+          var banner=$('tokenBanner');
+          if(!banner){
+            var strip=document.createElement('div');
+            strip.id='tokenBanner';
+            strip.style.cssText='background:rgba(245,165,36,.08);border:1px solid rgba(245,165,36,.2);border-radius:10px;padding:10px 14px;margin:0 18px;font-size:12px;color:var(--gold);line-height:1.6;text-align:center';
+            strip.innerHTML='⚠️ Bakong token not configured.<br>Scan the QR and pay — contact <strong>@chamrong_vann</strong> with your receipt.';
+            var watching=$('adots');
+            if(watching&&watching.parentNode&&watching.parentNode.parentNode){
+              watching.parentNode.parentNode.before(strip);
+            }
+          }
+          return; /* keep polling */
         }
         /* ⏳ Still waiting — keep polling silently */
       })
