@@ -501,27 +501,16 @@ function delivBadge(type){
   return '<span class="delivery-badge"><i class="fas fa-key" style="font-size:9px"></i>Key delivery</span>';
 }
 function fetchStock(){
-  fetch(WORKER+'/stock').then(function(r){return r.json();}).then(function(d){
-    if(d.stock){
-      STOCK=d.stock;
-      // Re-render stock badges if products are already rendered
-      PRODUCTS.forEach(function(p){
-        var btn=$('addBtn'+p.id);
-        if(!btn)return;
-        // Find and update stock pill in footer
-        var foot=btn.closest('.card-foot');
-        if(!foot)return;
-        var sb=foot.querySelector('.stock-pill');
-        var newBadge=document.createElement('span');
-        newBadge.outerHTML=stockBadge(p.id);
-        if(sb){
-          var tmp=document.createElement('div');
-          tmp.innerHTML=stockBadge(p.id);
-          if(tmp.firstChild)sb.replaceWith(tmp.firstChild);
-        }
-      });
-    }
-  }).catch(function(){});
+  fetch(WORKER+'/stock')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      STOCK = d.stock || {};
+    })
+    .catch(function(){ STOCK = {}; })
+    .finally(function(){
+      // Re-render products now that stock is known
+      renderProducts();
+    });
 }
 
 /* ── SYNC UI ───────────────────────────────────── */
@@ -1128,8 +1117,7 @@ $('payBtn').onclick     =startPayment;
 $('overlay').onclick    =function(e){if(e.target===$('overlay')&&!$('shPay').classList.contains('on'))closeAll();};
 if(tg){try{tg.BackButton.onClick(function(){var r=SHEETS.slice().reverse();for(var i=0;i<r.length;i++){if($(r[i]).classList.contains('on')){closeSheet(r[i]);return;}}});}catch(e){}}
 
-renderProducts();
-fetchStock();
+fetchStock(); /* renders products after stock loads */
 startCountdown();
 </script>
 </body>
