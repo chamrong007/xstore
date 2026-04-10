@@ -235,8 +235,9 @@ body::before{
 /* ── Invoice redesign ── */
 .inv-card{background:var(--g1);border:1px solid var(--b);border-radius:18px;overflow:hidden;margin-bottom:14px}
 .inv-top{background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(99,102,241,.06));padding:20px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--b)}
-.inv-logo{font-size:22px;font-weight:700;letter-spacing:-1px;color:#eef0ff}
-.inv-logo em{color:#a78bfa;font-style:normal;-webkit-text-fill-color:initial}
+.inv-logo{font-size:22px;font-weight:700;letter-spacing:-1px;display:inline-flex;align-items:baseline;gap:1px}
+.inv-logo-x{background:linear-gradient(120deg,#f0abfc,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.inv-logo-store{color:rgba(238,240,255,.75);font-weight:300;font-size:22px}
 .inv-meta{text-align:right}
 .inv-num{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
 .inv-num strong{font-size:18px;font-weight:800;color:#eef0ff;letter-spacing:-1px;display:block;margin-top:2px}
@@ -258,7 +259,6 @@ body::before{
 .inv-paid{display:flex;align-items:center;gap:7px;background:rgba(32,199,90,.07);border:1px solid rgba(32,199,90,.18);border-radius:10px;padding:10px 14px;margin:14px 20px 0}
 .inv-paid i{color:var(--green);font-size:14px}
 .inv-paid-txt{font-size:12px;font-weight:600;color:var(--green);flex:1}
-.inv-paid-hash{font-size:10px;color:var(--muted);font-family:Ubuntu Mono,monospace;word-break:break-all;margin-top:1px}
 /* key card redesign */
 .key-card{margin:12px 20px 20px;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(99,102,241,.05));border:1px solid rgba(139,92,246,.2);border-radius:14px;overflow:hidden}
 .key-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(139,92,246,.12)}
@@ -640,8 +640,9 @@ function showQR(total, qr) {
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
 
   /* Bakong deeplink — opens any KHQR-enabled app on mobile */
-  /* Bakong deeplink: bakong.nbc.org.kh redirects to the right app on each phone.
-     All KHQR-member bank apps (ABA, ACLEDA, Wing, etc.) handle this URL. */
+  /* ABA Pay deeplink — direct deep link into ABA Mobile app QR scanner */
+  var abaDeep = 'aba://pay?qr=' + encodeURIComponent(qrString);
+  /* Bakong universal fallback — all KHQR banks */
   var bakongDeep = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
 
   /* Progress ring math: 5 min = 300s */
@@ -663,25 +664,25 @@ function showQR(total, qr) {
         '<img src="' + imgUrl + '" alt="KHQR" id="qrImg" style="width:196px;height:196px;border-radius:8px;display:block">' +
       '</div>' +
     '</div>' +
-    /* ── Action buttons: 2 on mobile, 1 on desktop ── */
-    '<div style="display:grid;grid-template-columns:' + (isMobile ? '1fr 1fr' : '1fr') + ';gap:8px;padding:10px 18px 8px">' +
-      /* Save QR — both platforms */
-      '<button id="saveQrBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;' +
-        'background:var(--g2);border:1px solid var(--b2);color:rgba(238,240,255,.7);' +
-        'border-radius:var(--r2);padding:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s">' +
-        '<i class="fas fa-download" style="font-size:13px"></i>' +
-        (isMobile ? 'Save QR' : 'Save QR to Computer') +
-      '</button>' +
-      /* Open app — mobile only */
+    /* ── Action buttons ── */
+    '<div style="display:flex;flex-direction:column;gap:8px;padding:10px 18px 8px">' +
+      /* ABA Pay — mobile primary CTA */
       (isMobile
-        ? '<button id="openAppBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;' +
-            'background:linear-gradient(135deg,rgba(32,199,90,.15),rgba(32,199,90,.08));' +
-            'border:1px solid rgba(32,199,90,.3);color:var(--green);' +
-            'border-radius:var(--r2);padding:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s">' +
-            '<i class="fas fa-mobile-screen-button" style="font-size:13px"></i>Open Bank App' +
+        ? '<button id="openAppBtn" style="display:flex;align-items:center;justify-content:center;gap:10px;' +
+            'background:linear-gradient(135deg,#e8380d,#c0230a);color:#fff;border:none;' +
+            'border-radius:var(--r2);padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;' +
+            'box-shadow:0 4px 16px rgba(232,56,13,.3);transition:opacity .15s,transform .1s">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>' +
+            'Pay with ABA' +
           '</button>'
         : ''
       ) +
+      /* Save QR */
+      '<button id="saveQrBtn" style="display:flex;align-items:center;justify-content:center;gap:8px;' +
+        'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(238,240,255,.6);' +
+        'border-radius:var(--r2);padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s">' +
+        '<i class="fas fa-qrcode" style="font-size:13px"></i>Save QR Code' +
+      '</button>' +
     '</div>' +
     /* ── Progress ring + countdown ── */
     '<div style="display:flex;align-items:center;gap:14px;padding:10px 18px 18px">' +
@@ -739,19 +740,25 @@ function showQR(total, qr) {
   /* ── Open bank app handler (mobile only) ── */
   if (isMobile && $('openAppBtn')) {
     $('openAppBtn').onclick = function() {
-      /* Telegram Mini App: must use tg.openLink for external URLs */
+      // Try ABA deep link first (aba://pay?qr=...)
+      var openedABA = false;
       if (tg && tg.openLink) {
-        try {
-          tg.openLink(bakongDeep);
-          return;
-        } catch(e) {}
-      }
-      /* Standard browser: open Bakong payment page in new tab.
-         The browser/OS handles the redirect to the installed bank app. */
-      var w = window.open(bakongDeep, '_blank');
-      if (!w) {
-        /* Popup blocked — navigate directly */
-        window.location.href = bakongDeep;
+        try { tg.openLink(abaDeep); openedABA = true; } catch(e) {}
+      } else {
+        // Non-Telegram browser: try aba:// scheme
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = abaDeep;
+        document.body.appendChild(iframe);
+        openedABA = true;
+        // If ABA not installed, fallback to Bakong web after 1.5s
+        setTimeout(function() {
+          document.body.removeChild(iframe);
+          if (document.hidden) return; // ABA opened OK
+          // ABA not installed — open Bakong universal link
+          var w = window.open(bakongDeep, '_blank');
+          if (!w) window.location.href = bakongDeep;
+        }, 1500);
       }
     };
   }
@@ -899,9 +906,15 @@ function onVerified(v){
     cart=[];syncCart();order=null;
     /* Inject actual key into the invoice spoiler */
     if(res.results&&res.results.length){
-      var first=res.results.find(function(r){return r.key;});
-      if(first&&first.key){
-        setTimeout(function(){window.setLicenseKey(first.key);},400);
+      var first=res.results.find(function(r){return r.status==='delivered';});
+      if(first){
+        setTimeout(function(){
+          if(first.type==='account'&&first.username){
+            window.setAccountCredentials(first.username,first.password);
+          } else if(first.key){
+            window.setLicenseKey(first.key);
+          }
+        },400);
       }
     }
   })
@@ -934,7 +947,7 @@ function showInvoice(o,v){
       /* Header */
       '<div class="inv-top">'+
         '<div>'+
-          '<div class="inv-logo">x<em>store</em></div>'+
+          '<div class="inv-logo"><span class="inv-logo-x">x</span><span class="inv-logo-store">store</span></div>'+
           '<div style="font-size:11px;color:var(--muted);margin-top:3px">Phnom Penh, Cambodia</div>'+
         '</div>'+
         '<div class="inv-meta">'+
@@ -957,31 +970,30 @@ function showInvoice(o,v){
         '<div class="inv-row"><span>Discount ('+DISC+'%)</span><span class="disc">&#8722;$'+disc.toFixed(2)+'</span></div>'+
         '<div class="inv-row total"><span>Total Paid</span><span>$'+tot.toFixed(2)+'</span></div>'+
       '</div>'+
-      /* Paid badge */
+      /* Paid badge — no hash shown */
       '<div class="inv-paid">'+
         '<i class="fas fa-circle-check"></i>'+
-        '<div>'+
-          '<div class="inv-paid-txt">PAID &nbsp;·&nbsp; Bakong KHQR</div>'+
-          (v.transaction_hash?'<div class="inv-paid-hash">'+v.transaction_hash+'</div>':'')+
-        '</div>'+
+        '<div class="inv-paid-txt">PAID &nbsp;·&nbsp; Bakong KHQR</div>'+
       '</div>'+
-      /* License key card */
+      /* License / Account delivery card */
       '<div class="key-card">'+
         '<div class="key-head">'+
           '<i class="fas fa-key"></i>'+
-          '<span class="key-head-txt">License Key</span>'+
+          '<span class="key-head-txt" id="keyCardTitle">Your License</span>'+
         '</div>'+
         '<div class="key-body">'+
           '<div class="spoiler" id="spWrap">'+
-            '<div class="spoiler-txt" id="keyTxt">Sending to your Telegram…</div>'+
+            '<div class="spoiler-txt" id="keyTxt">Delivering…</div>'+
             '<div class="spoiler-mask" id="spMask"><i class="fas fa-eye-slash"></i>&nbsp;Tap to reveal</div>'+
           '</div>'+
         '</div>'+
         '<div class="key-foot">'+
-          '<button class="copy-key" id="copyKey"><i class="fas fa-copy"></i>Copy Key</button>'+
+          '<button class="copy-key" id="copyKey"><i class="fas fa-copy"></i>Copy</button>'+
         '</div>'+
       '</div>'+
-      '<div class="inv-hint">Your key was also sent to your Telegram.<br>Need help? <strong style="color:#eef0ff">@chamrong_vann</strong></div>'+
+      '<div class="inv-hint">Also sent to your Telegram. Need help?&nbsp;'+
+        '<a href="https://t.me/chamrong_vann" id="tgLink" style="color:#818cf8;text-decoration:none;font-weight:600" target="_blank">@chamrong_vann</a>'+
+      '</div>'+
     '</div>';
 
   var revealed=false;
@@ -996,27 +1008,43 @@ function showInvoice(o,v){
     navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){toast('Key copied!');});
   };
   openSheet('shInv');
+  // Wire Telegram link — open in Telegram if inside Mini App
+  setTimeout(function(){
+    var a=$('tgLink');
+    if(a&&tg&&tg.openLink){
+      a.onclick=function(e){e.preventDefault();tg.openLink('https://t.me/chamrong_vann');};
+    }
+  },100);
 }
 
 /* Called by worker response to inject the actual key into the invoice */
 window.setLicenseKey=function(key){
-  var k=$('keyTxt');
+  var k=$('keyTxt'),t=$('keyCardTitle');
+  if(t)t.textContent='License Key';
   if(k){k.textContent=key;$('copyKey').classList.add('on');}
 };
+window.setAccountCredentials=function(username,password){
+  var k=$('keyTxt'),t=$('keyCardTitle');
+  if(t)t.textContent='Account Login';
+  if(k){
+    k.innerHTML=
+      '<div style="margin-bottom:8px">'+
+        '<div style="font-size:10px;font-weight:700;color:rgba(238,240,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Username</div>'+
+        '<div>'+username+'</div>'+
+      '</div>'+
+      '<div>'+
+        '<div style="font-size:10px;font-weight:700;color:rgba(238,240,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Password</div>'+
+        '<div>'+password+'</div>'+
+      '</div>';
+    $('copyKey').classList.add('on');
+    $('copyKey').onclick=function(){
+      navigator.clipboard&&navigator.clipboard.writeText(username+' / '+password)
+        .then(function(){toast('Credentials copied!');});
+    };
+  }
+};
 
-function adminMsg(o,v){
-  return '✅ *New Order — xstore*\n' +
-    '━━━━━━━━━━━━━━━━━━━━\n' +
-    '📋 Invoice: *#'+o.invoiceNumber+'*\n' +
-    '📅 '+o.issueDate+' · '+o.issueTime+'\n' +
-    '━━━━━━━━━━━━━━━━━━━━\n' +
-    '👤 '+o.customerName+'\n' +
-    '📞 '+o.customerPhone+(o.customerEmail?'\n📧 '+o.customerEmail:'')+'\n' +
-    '━━━━━━━━━━━━━━━━━━━━\n' +
-    '🛒 '+o.items.map(function(i){return i.name+' ×'+i.qty;}).join(', ')+'\n' +
-    '💰 $'+o.total.toFixed(2)+' USD\n' +
-    (v.transaction_hash?'🔗 Tx: `'+v.transaction_hash+'`':'');
-}
+/* adminMsg removed — handled by worker */
 
 /* ── SHEETS ────────────────────────────────────── */
 var SHEETS=['shCart','shCheckout','shPay','shInv'];
