@@ -640,9 +640,10 @@ function showQR(total, qr) {
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
 
   /* Bakong deeplink — opens any KHQR-enabled app on mobile */
-  /* ABA Pay deeplink — direct deep link into ABA Mobile app QR scanner */
-  var abaDeep = 'aba://pay?qr=' + encodeURIComponent(qrString);
-  /* Bakong universal fallback — all KHQR banks */
+  /* ABA Mobile deep link — official scheme from ABA/PayWay SDK
+     Opens ABA Mobile app directly to the payment screen */
+  var abaDeep = 'abamobilebank://ababank.com?type=payway&qrcode=' + encodeURIComponent(qrString);
+  /* Bakong universal fallback — works with all KHQR banks */
   var bakongDeep = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
 
   /* Progress ring math: 5 min = 300s */
@@ -664,24 +665,29 @@ function showQR(total, qr) {
         '<img src="' + imgUrl + '" alt="KHQR" id="qrImg" style="width:196px;height:196px;border-radius:8px;display:block">' +
       '</div>' +
     '</div>' +
-    /* ── Action buttons — single compact row ── */
-    '<div style="display:flex;gap:8px;padding:10px 18px 8px">' +
-      /* ABA Pay — mobile only, takes remaining space */
+    /* ── Action buttons: equal half-width, same height ── */
+    '<div style="display:grid;grid-template-columns:' + (isMobile ? '1fr 1fr' : '1fr') + ';gap:8px;padding:10px 18px 8px">' +
+      /* ABA Pay — mobile only */
       (isMobile
-        ? '<button id="openAppBtn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;' +
-            'background:linear-gradient(135deg,#e8380d,#c0230a);color:#fff;border:none;' +
-            'border-radius:var(--r2);padding:10px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;' +
-            'transition:opacity .15s,transform .1s">' +
+        ? '<button id="openAppBtn" style="' +
+            'display:flex;align-items:center;justify-content:center;gap:7px;' +
+            'background:linear-gradient(135deg,#cc2200,#a81a00);' +
+            'border:1px solid rgba(204,34,0,.4);color:#fff;' +
+            'border-radius:var(--r2);padding:11px 8px;' +
+            'font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;' +
+            'transition:opacity .15s">' +
             '<i class="fas fa-mobile-screen" style="font-size:13px"></i>ABA Pay' +
           '</button>'
         : ''
       ) +
-      /* Save QR — fixed width icon+label */
-      '<button id="saveQrBtn" style="display:flex;align-items:center;justify-content:center;gap:6px;' +
-        'background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:rgba(238,240,255,.5);' +
-        'border-radius:var(--r2);padding:10px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;' +
-        'white-space:nowrap;transition:background .2s">' +
-        '<i class="fas fa-download" style="font-size:12px"></i>Save QR' +
+      /* Save QR */
+      '<button id="saveQrBtn" style="' +
+        'display:flex;align-items:center;justify-content:center;gap:7px;' +
+        'background:var(--g2);border:1px solid var(--b2);color:var(--muted);' +
+        'border-radius:var(--r2);padding:11px 8px;' +
+        'font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;' +
+        'transition:background .2s">' +
+        '<i class="fas fa-download" style="font-size:13px"></i>Save QR' +
       '</button>' +
     '</div>' +
     /* ── Progress ring + countdown ── */
@@ -708,7 +714,7 @@ function showQR(total, qr) {
   /* ── Save QR handler ── */
   $('saveQrBtn').onclick = function() {
     var btn = $('saveQrBtn');
-    btn.innerHTML = '<i class="fas fa-circle-notch spin" style="font-size:12px"></i>';
+    btn.innerHTML = '<i class="fas fa-circle-notch spin" style="font-size:13px"></i>';
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function() {
@@ -741,13 +747,25 @@ function showQR(total, qr) {
   if (isMobile && $('openAppBtn')) {
     $('openAppBtn').onclick = function() {
       if (tg && tg.openLink) {
-        // Inside Telegram Mini App — open in external browser
-        // The OS will intercept aba:// and launch ABA Mobile
-        try { tg.openLink(abaDeep); return; } catch(e) {}
+        // Telegram Mini App: openLink opens in external browser,
+        // OS intercepts abamobilebank:// and launches ABA Mobile
+        try { tg.openLink(abaDeep); } catch(e) {
+          // openLink failed — try Bakong web link as fallback
+          try { tg.openLink(bakongDeep); } catch(e2) {}
+        }
+        return;
       }
-      // Standard browser — navigate directly to ABA deep link
-      // If ABA is installed, OS opens it; if not, nothing happens (no crash)
+      // Standard browser: attempt ABA deep link
+      // If app is installed OS will open it; otherwise fall through to Bakong
+      var opened = false;
       window.location.href = abaDeep;
+      // Fallback after 2s: if still on page, ABA not installed — open Bakong
+      setTimeout(function() {
+        if (!document.hidden) {
+          var w = window.open(bakongDeep, '_blank');
+          if (!w) window.location.href = bakongDeep;
+        }
+      }, 2000);
     };
   }
 
