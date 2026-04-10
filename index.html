@@ -648,14 +648,10 @@ function showQR(total, qr) {
   /* Detect mobile vs desktop */
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
 
-  /* Payment via app:
-     Opens /aba-redirect in real Safari (try_instant_view:false).
-     The redirect page navigates to bakong.nbc.org.kh/qrpayment which is a universal
-     KHQR payment page — iOS/Android routes to the user's installed bank app.
-     NOTE: abamobilebank://type=payway only works with ABA PayWay merchant QRs,
-     NOT with Bakong KHQR strings → causes "Invalid QR Merchant Data". */
-  var abaRedirect = WORKER + '/aba-redirect?qr=' + encodeURIComponent(qrString);
-  var bakongFall  = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
+  /* Pay via bank app: open Bakong universal payment URL.
+     Bakong's payment page shows the KHQR and lets users open their bank app.
+     We open it directly with tg.openLink — simple and reliable. */
+  var bakongPayUrl = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
 
   /* Progress ring math: 5 min = 300s */
   var TOTAL_SECS = 300;
@@ -689,7 +685,7 @@ function showQR(total, qr) {
               'border-radius:10px;padding:10px 0;font-size:12px;font-weight:700;' +
               'font-family:inherit;cursor:pointer;letter-spacing:.1px;' +
               'box-shadow:0 2px 12px rgba(26,86,219,.35);transition:opacity .15s,transform .1s">' +
-              '<i class="fas fa-mobile-screen" style="font-size:12px"></i>ABA Pay' +
+              '<i class="fas fa-globe" style="font-size:12px"></i>Pay via App' +
             '</button>'
           : ''
         ) +
@@ -762,24 +758,17 @@ function showQR(total, qr) {
     img.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
   };
 
-  /* ── Pay via App handler ─────────────────────────────────────────────────────
-   * Opens /aba-redirect in real Safari via tg.openLink({try_instant_view:false}).
-   * The redirect page navigates to bakong.nbc.org.kh/qrpayment (Bakong universal
-   * payment URL) → iOS/Android routes to the installed bank app via Universal Links.
-   *
-   * NOTE: abamobilebank://type=payway only works with ABA PayWay merchant QRs,
-   * not Bakong KHQR strings — causes "Invalid QR Merchant Data" error in ABA app.
+  /* ── Pay via Bank App handler ───────────────────────────────────────────────
+   * Opens the Bakong universal KHQR payment page. The page shows the QR code
+   * and links to open ABA Mobile, ACLEDA, Wing, or any KHQR-compatible bank app.
    * ─────────────────────────────────────────────────────────────────────────── */
   if (isMobile && $('openAppBtn')) {
     $('openAppBtn').onclick = function() {
       if (tg && tg.openLink) {
-        // Telegram Mini App: open /aba-redirect in real Safari (not in-app browser)
-        // The redirect page loads Bakong payment URL → bank app opens via Universal Links
-        try { tg.openLink(abaRedirect, {try_instant_view: false}); return; } catch(e) {}
+        try { tg.openLink(bakongPayUrl); return; } catch(e) {}
       }
-      // Standard browser: open Bakong payment page directly
-      var pop = window.open(bakongFall, '_blank');
-      if (!pop) window.location.href = bakongFall;
+      var pop = window.open(bakongPayUrl, '_blank');
+      if (!pop) window.location.href = bakongPayUrl;
     };
   }
 
