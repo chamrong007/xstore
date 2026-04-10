@@ -648,14 +648,14 @@ function showQR(total, qr) {
   /* Detect mobile vs desktop */
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
 
-  /* ABA Pay approach:
-     tg.openLink() rejects abamobilebank:// (https only).
-     Solution: worker /aba-redirect returns an HTML page that meta-refreshes to
-     abamobilebank://, opened in the real Safari browser via try_instant_view:false.
-     Safari CAN handle custom URL schemes → ABA Mobile opens. */
-  var abaDeep    = 'abamobilebank://ababank.com?type=payway&qrcode=' + encodeURIComponent(qrString);
-  var abaRedirect= WORKER + '/aba-redirect?qr=' + encodeURIComponent(qrString);
-  var bakongFall = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
+  /* Payment via app:
+     Opens /aba-redirect in real Safari (try_instant_view:false).
+     The redirect page navigates to bakong.nbc.org.kh/qrpayment which is a universal
+     KHQR payment page — iOS/Android routes to the user's installed bank app.
+     NOTE: abamobilebank://type=payway only works with ABA PayWay merchant QRs,
+     NOT with Bakong KHQR strings → causes "Invalid QR Merchant Data". */
+  var abaRedirect = WORKER + '/aba-redirect?qr=' + encodeURIComponent(qrString);
+  var bakongFall  = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
 
   /* Progress ring math: 5 min = 300s */
   var TOTAL_SECS = 300;
@@ -762,36 +762,24 @@ function showQR(total, qr) {
     img.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
   };
 
-  /* ── ABA Pay handler ────────────────────────────────────────────────────────
-   * Strategy: open /aba-redirect via tg.openLink({try_instant_view:false}).
-   * This forces real Safari (not Telegram's in-app browser).
-   * The /aba-redirect page does meta refresh → abamobilebank:// → ABA opens.
-   * Safari handles custom URL schemes; Telegram's in-app browser does not.
+  /* ── Pay via App handler ─────────────────────────────────────────────────────
+   * Opens /aba-redirect in real Safari via tg.openLink({try_instant_view:false}).
+   * The redirect page navigates to bakong.nbc.org.kh/qrpayment (Bakong universal
+   * payment URL) → iOS/Android routes to the installed bank app via Universal Links.
    *
-   * Fallback chain:
-   *   1. tg.openLink(/aba-redirect)   — Telegram Mini App (Safari route)
-   *   2. window.location.href abaDeep — standard browser (direct custom scheme)
-   *   3. window.open(bakongFall)       — ABA not installed → Bakong web
+   * NOTE: abamobilebank://type=payway only works with ABA PayWay merchant QRs,
+   * not Bakong KHQR strings — causes "Invalid QR Merchant Data" error in ABA app.
    * ─────────────────────────────────────────────────────────────────────────── */
   if (isMobile && $('openAppBtn')) {
     $('openAppBtn').onclick = function() {
       if (tg && tg.openLink) {
-        // Telegram Mini App: open redirect page in real Safari browser
-        // Safari will meta-refresh to abamobilebank:// → ABA opens
-        try {
-          tg.openLink(abaRedirect, {try_instant_view: false});
-          return;
-        } catch(e) {}
+        // Telegram Mini App: open /aba-redirect in real Safari (not in-app browser)
+        // The redirect page loads Bakong payment URL → bank app opens via Universal Links
+        try { tg.openLink(abaRedirect, {try_instant_view: false}); return; } catch(e) {}
       }
-      // Standard browser (non-Telegram): try direct ABA deep link
-      window.location.href = abaDeep;
-      // If ABA not installed, open Bakong after 2s
-      setTimeout(function() {
-        if (!document.hidden) {
-          var pop = window.open(bakongFall, '_blank');
-          if (!pop) window.location.href = bakongFall;
-        }
-      }, 2000);
+      // Standard browser: open Bakong payment page directly
+      var pop = window.open(bakongFall, '_blank');
+      if (!pop) window.location.href = bakongFall;
     };
   }
 
