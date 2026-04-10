@@ -470,15 +470,12 @@ function fetchStock(){
     .then(function(r){return r.json();})
     .then(function(d){
       STOCK=d.stock||{};
-      // Ensure every product in PRODUCTS has an entry (0 if absent)
-      PRODUCTS.forEach(function(p){
-        if(STOCK[String(p.id)]===undefined) STOCK[String(p.id)]=0;
-      });
+      // Products with no KV entry yet stay as undefined → no badge (not "Out of stock")
+      // Only confirmed 0 from server shows "Out of stock"
     })
     .catch(function(){
-      // On error: set 0 for all products so badges show "Out of stock"
+      // On network error: keep STOCK empty — badges show nothing (not incorrect "Out of stock")
       STOCK={};
-      PRODUCTS.forEach(function(p){ STOCK[String(p.id)]=0; });
     })
     .finally(function(){renderProducts();});
 }
@@ -651,12 +648,13 @@ function showQR(total, qr) {
   /* Detect mobile vs desktop */
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
 
-  /* ABA Mobile deep link — official scheme (abamobilebank://ababank.com?type=payway&qrcode=)
-     tg.openLink() only accepts https:// so we use window.location.href directly.
-     The WebView (WKWebView on iOS, WebView on Android) passes unknown URL schemes
-     to the OS, which intercepts abamobilebank:// and launches ABA Mobile app.
-     Bakong URL is kept as fallback if ABA is not installed. */
+  /* ABA Pay approach:
+     tg.openLink() rejects abamobilebank:// (https only).
+     Solution: worker /aba-redirect returns an HTML page that meta-refreshes to
+     abamobilebank://, opened in the real Safari browser via try_instant_view:false.
+     Safari CAN handle custom URL schemes → ABA Mobile opens. */
   var abaDeep    = 'abamobilebank://ababank.com?type=payway&qrcode=' + encodeURIComponent(qrString);
+  var abaRedirect= WORKER + '/aba-redirect?qr=' + encodeURIComponent(qrString);
   var bakongFall = 'https://bakong.nbc.org.kh/qrpayment?qr=' + encodeURIComponent(qrString);
 
   /* Progress ring math: 5 min = 300s */
@@ -765,39 +763,35 @@ function showQR(total, qr) {
   };
 
   /* ── ABA Pay handler ────────────────────────────────────────────────────────
-   * KEY INSIGHT: tg.openLink() only accepts https:// and rejects abamobilebank://.
-   * Solution: window.location.href bypasses Telegram's URL validation and goes
-   * directly to the WebView (WKWebView on iOS / WebView on Android).
-   * The WebView passes unknown schemes to the OS → OS opens ABA Mobile.
+   * Strategy: open /aba-redirect via tg.openLink({try_instant_view:false}).
+   * This forces real Safari (not Telegram's in-app browser).
+   * The /aba-redirect page does meta refresh → abamobilebank:// → ABA opens.
+   * Safari handles custom URL schemes; Telegram's in-app browser does not.
    *
-   * Fallback pattern using visibilitychange:
-   * When ABA opens, Telegram goes to background → document.hidden = true.
-   * If document stays visible after 2.5s, ABA is not installed → open Bakong.
+   * Fallback chain:
+   *   1. tg.openLink(/aba-redirect)   — Telegram Mini App (Safari route)
+   *   2. window.location.href abaDeep — standard browser (direct custom scheme)
+   *   3. window.open(bakongFall)       — ABA not installed → Bakong web
    * ─────────────────────────────────────────────────────────────────────────── */
   if (isMobile && $('openAppBtn')) {
     $('openAppBtn').onclick = function() {
-      var appOpened = false;
-
-      // Listen for page going to background (means ABA launched successfully)
-      var onHide = function() { appOpened = true; };
-      document.addEventListener('visibilitychange', onHide, {once: true});
-      window.addEventListener('pagehide', onHide, {once: true});
-      window.addEventListener('blur', onHide, {once: true});
-
-      // Navigate to ABA deep link — WebView passes to OS → ABA opens
+      if (tg && tg.openLink) {
+        // Telegram Mini App: open redirect page in real Safari browser
+        // Safari will meta-refresh to abamobilebank:// → ABA opens
+        try {
+          tg.openLink(abaRedirect, {try_instant_view: false});
+          return;
+        } catch(e) {}
+      }
+      // Standard browser (non-Telegram): try direct ABA deep link
       window.location.href = abaDeep;
-
-      // Fallback: if still visible after 2.5s, ABA not installed → Bakong web
+      // If ABA not installed, open Bakong after 2s
       setTimeout(function() {
-        document.removeEventListener('visibilitychange', onHide);
-        window.removeEventListener('pagehide', onHide);
-        window.removeEventListener('blur', onHide);
-        if (!appOpened && !document.hidden) {
-          // ABA not installed — open Bakong payment page in browser
-          var w = window.open(bakongFall, '_blank');
-          if (!w) window.location.href = bakongFall;
+        if (!document.hidden) {
+          var pop = window.open(bakongFall, '_blank');
+          if (!pop) window.location.href = bakongFall;
         }
-      }, 2500);
+      }, 2000);
     };
   }
 
