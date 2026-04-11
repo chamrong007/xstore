@@ -470,16 +470,9 @@ function stockBadge(id){
 function fetchStock(){
   fetch(WORKER+'/stock')
     .then(function(r){return r.json();})
-    .then(function(d){
-      STOCK=d.stock||{};
-      // Products with no KV entry yet stay as undefined → no badge (not "Out of stock")
-      // Only confirmed 0 from server shows "Out of stock"
-    })
-    .catch(function(){
-      // On network error: keep STOCK empty — badges show nothing (not incorrect "Out of stock")
-      STOCK={};
-    })
-    .finally(function(){renderProducts();});
+    .then(function(d){ STOCK=d.stock||{}; })
+    .catch(function(){ STOCK={}; })
+    .finally(function(){ renderProducts(); });
 }
 /* ── SYNC UI ───────────────────────────────────── */
 function syncCart(){
@@ -915,18 +908,9 @@ function onVerified(v){
     closeSheet('shPay');
     showInvoice(savedOrder,savedV);
     cart=[];syncCart();order=null;
-    /* Inject actual key into the invoice spoiler */
+    /* Inject keys/credentials into per-item spoilers */
     if(res.results&&res.results.length){
-      var first=res.results.find(function(r){return r.status==='delivered';});
-      if(first){
-        setTimeout(function(){
-          if(first.type==='account'&&first.username){
-            window.setAccountCredentials(first.username,first.password);
-          } else if(first.key){
-            window.setLicenseKey(first.key);
-          }
-        },400);
-      }
+      setTimeout(function(){ window.setDeliveryResults(res.results); },300);
     }
   })
   .catch(function(){
@@ -953,73 +937,79 @@ function showInvoice(o,v){
     '</div>';
   }).join('');
 
+  // Build one key section per ordered item (filled after notify response)
+  var keySections = o.items.map(function(it, idx) {
+    var sid = 'sp'+idx, mid = 'sm'+idx, kid = 'ck'+idx;
+    return '<div class="inv-key-section" id="ks'+idx+'">'+
+      '<div class="inv-key-label">License / Access</div>'+
+      '<div class="inv-key-product">'+it.name+'</div>'+
+      '<div class="spoiler" id="'+sid+'">'+
+        '<div class="spoiler-txt" id="kt'+idx+'">Delivering…</div>'+
+        '<div class="spoiler-mask" id="'+mid+'"><i class="fas fa-eye-slash"></i>&nbsp;Tap to reveal</div>'+
+      '</div>'+
+      '<button class="copy-key" id="'+kid+'"><i class="fas fa-copy"></i>Copy</button>'+
+    '</div>';
+  }).join('');
+
   $('invBody').innerHTML=
     '<div class="inv-card">'+
-      /* Header */
+      /* ── Header ── */
       '<div class="inv-top">'+
         '<div>'+
           '<div class="inv-logo"><span class="inv-logo-x">x</span><span class="inv-logo-store">store</span></div>'+
-          '<div style="font-size:11px;color:var(--muted);margin-top:3px">Phnom Penh, Cambodia</div>'+
+          '<div style="font-size:10px;color:#888;margin-top:3px">Phnom Penh, Cambodia</div>'+
         '</div>'+
         '<div class="inv-meta">'+
           '<div class="inv-num">Invoice<strong>#'+o.invoiceNumber+'</strong></div>'+
-          '<div class="inv-date">'+o.issueDate+'</div>'+
-          '<div class="inv-date">'+o.issueTime+'</div>'+
+          '<div class="inv-date">'+o.issueDate+' &nbsp;'+o.issueTime+'</div>'+
         '</div>'+
       '</div>'+
-      /* Bill to */
+      /* ── Bill to ── */
       '<div class="inv-bill">'+
         '<div class="inv-bill-lbl">Bill To</div>'+
         '<div class="inv-bill-name">'+o.customerName+'</div>'+
-        '<div class="inv-bill-sub">'+o.customerPhone+(o.customerEmail?'<br>'+o.customerEmail:'')+'</div>'+
+        '<div class="inv-bill-sub">'+o.customerPhone+(o.customerEmail?' &nbsp;·&nbsp; '+o.customerEmail:'')+'</div>'+
       '</div>'+
-      /* Items */
-      '<div class="inv-items">'+itemRows+'</div>'+
-      /* Totals */
+      /* ── Items table ── */
+      '<div class="inv-items">'+
+        '<div class="inv-item-hdr"><span>Description</span><span>Amount</span></div>'+
+        itemRows+
+      '</div>'+
+      /* ── Totals ── */
       '<div class="inv-totals">'+
         '<div class="inv-row"><span>Subtotal</span><span>$'+sub.toFixed(2)+'</span></div>'+
         '<div class="inv-row"><span>Discount ('+DISC+'%)</span><span class="disc">&#8722;$'+disc.toFixed(2)+'</span></div>'+
         '<div class="inv-row total"><span>Total Paid</span><span>$'+tot.toFixed(2)+'</span></div>'+
       '</div>'+
-      /* Paid badge — no hash shown */
-      '<div class="inv-paid">'+
-        '<i class="fas fa-circle-check"></i>'+
-        '<div class="inv-paid-txt">PAID &nbsp;·&nbsp; Bakong KHQR</div>'+
-      '</div>'+
-      /* License / Account delivery card */
-      '<div class="key-card">'+
-        '<div class="key-head">'+
-          '<i class="fas fa-key"></i>'+
-          '<span class="key-head-txt" id="keyCardTitle">Your License</span>'+
-        '</div>'+
-        '<div class="key-body">'+
-          '<div class="spoiler" id="spWrap">'+
-            '<div class="spoiler-txt" id="keyTxt">Delivering…</div>'+
-            '<div class="spoiler-mask" id="spMask"><i class="fas fa-eye-slash"></i>&nbsp;Tap to reveal</div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="key-foot">'+
-          '<button class="copy-key" id="copyKey"><i class="fas fa-copy"></i>Copy</button>'+
-        '</div>'+
-      '</div>'+
-      '<div class="inv-hint">Also sent to your Telegram. Need help?&nbsp;'+
-        '<a href="https://t.me/chamrong_vann" id="tgLink" style="color:#818cf8;text-decoration:none;font-weight:600" target="_blank">@chamrong_vann</a>'+
+      /* ── Paid badge ── */
+      '<div class="inv-paid"><i class="fas fa-circle-check"></i>PAID &nbsp;·&nbsp; Bakong KHQR</div>'+
+      /* ── Key sections — one per item ── */
+      keySections+
+      '<div class="inv-hint">Also sent to Telegram.&nbsp;'+
+        '<a href="https://t.me/chamrong_vann" id="tgLink" style="color:#7c3aed;font-weight:600;text-decoration:none">@chamrong_vann</a>'+
       '</div>'+
     '</div>';
 
-  var revealed=false;
-  $('spWrap').onclick=function(){
-    revealed=!revealed;
-    $('keyTxt').classList.toggle('show',revealed);
-    $('spMask').classList.toggle('gone',revealed);
-  };
-  $('copyKey').onclick=function(){
-    var t=$('keyTxt').textContent;
-    if(!t||t.indexOf('Sending')!==-1)return;
-    navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){toast('Key copied!');});
-  };
+  // Wire spoilers for each item
+  o.items.forEach(function(_, idx) {
+    var sp=$('sp'+idx), kt=$('kt'+idx), sm=$('sm'+idx), ck=$('ck'+idx);
+    if(!sp)return;
+    var revealed=false;
+    sp.onclick=function(){
+      revealed=!revealed;
+      kt.classList.toggle('show',revealed);
+      sm.classList.toggle('gone',revealed);
+    };
+    if(ck){
+      ck.onclick=function(){
+        var t=kt.textContent;
+        if(!t||t==='Delivering…')return;
+        navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){toast('Copied!');});
+      };
+    }
+  });
+
   openSheet('shInv');
-  // Wire Telegram link — open in Telegram if inside Mini App
   setTimeout(function(){
     var a=$('tgLink');
     if(a&&tg&&tg.openLink){
@@ -1028,31 +1018,38 @@ function showInvoice(o,v){
   },100);
 }
 
-/* Called by worker response to inject the actual key into the invoice */
+/* Called by worker response — inject key/credentials into per-item spoilers.
+   Results array matches order.items index order. */
+window.setDeliveryResults=function(results){
+  results.forEach(function(r,idx){
+    var kt=$('kt'+idx), ck=$('ck'+idx), sm=$('sm'+idx);
+    if(!kt)return;
+    if(r.type==='account'&&r.username){
+      kt.textContent=r.username+' / '+r.password;
+      if(ck){ck.classList.add('on');ck.onclick=function(){
+        navigator.clipboard&&navigator.clipboard.writeText(r.username+' / '+r.password)
+          .then(function(){toast('Copied!');});
+      };}
+    } else if(r.key){
+      kt.textContent=r.key;
+      if(ck)ck.classList.add('on');
+    } else {
+      kt.textContent='Out of stock — contact @chamrong_vann';
+      kt.classList.add('show');
+      if(sm)sm.classList.add('gone');
+    }
+  });
+};
+/* Legacy single-item setters — kept for backward compat */
 window.setLicenseKey=function(key){
-  var k=$('keyTxt'),t=$('keyCardTitle');
-  if(t)t.textContent='License Key';
-  if(k){k.textContent=key;$('copyKey').classList.add('on');}
+  var kt=$('kt0'),ck=$('ck0');
+  if(kt){kt.textContent=key;if(ck)ck.classList.add('on');}
 };
 window.setAccountCredentials=function(username,password){
-  var k=$('keyTxt'),t=$('keyCardTitle');
-  if(t)t.textContent='Account Login';
-  if(k){
-    k.innerHTML=
-      '<div style="margin-bottom:8px">'+
-        '<div style="font-size:10px;font-weight:700;color:rgba(238,240,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Username</div>'+
-        '<div>'+username+'</div>'+
-      '</div>'+
-      '<div>'+
-        '<div style="font-size:10px;font-weight:700;color:rgba(238,240,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Password</div>'+
-        '<div>'+password+'</div>'+
-      '</div>';
-    $('copyKey').classList.add('on');
-    $('copyKey').onclick=function(){
-      navigator.clipboard&&navigator.clipboard.writeText(username+' / '+password)
-        .then(function(){toast('Credentials copied!');});
-    };
-  }
+  var kt=$('kt0'),ck=$('ck0');
+  if(kt){kt.textContent=username+' / '+password;if(ck){ck.classList.add('on');ck.onclick=function(){
+    navigator.clipboard&&navigator.clipboard.writeText(username+' / '+password).then(function(){toast('Copied!');});
+  };}}
 };
 
 /* adminMsg removed — handled by worker */
